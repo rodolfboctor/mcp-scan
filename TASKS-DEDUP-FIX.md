@@ -109,22 +109,43 @@ export function detectTools(): DetectedTool[] {
 
 The existing tests in `tests/config/detector.test.ts` must still pass.
 
-Add a new test that verifies deduplication:
+Add new imports and a new test to verify deduplication. The full updated file should be:
 ```typescript
-it('should not detect same config path under multiple tool names', () => {
-  // When a project-local path resolves to same file as a global tool,
-  // only the global tool entry should be kept
-  const tools = detectTools();
-  const pathCounts = new Map<string, number>();
-  for (const tool of tools) {
-    const resolved = path.resolve(tool.configPath);
-    pathCounts.set(resolved, (pathCounts.get(resolved) || 0) + 1);
-  }
-  for (const [filePath, count] of pathCounts) {
-    expect(count, `${filePath} detected ${count} times`).toBe(1);
-  }
+import { describe, it, expect } from 'vitest';
+import path from 'path';
+import { getConfigPaths } from '../../src/config/paths.js';
+import { detectTools } from '../../src/config/detector.js';
+
+describe('Detector Paths', () => {
+  it('should return a list of paths for different tools', () => {
+    const paths = getConfigPaths();
+    expect(paths).toHaveProperty('Claude Desktop');
+    expect(paths).toHaveProperty('Cursor');
+    expect(paths).toHaveProperty('VS Code');
+    expect(paths).toHaveProperty('Claude Code');
+    expect(paths).toHaveProperty('Windsurf');
+  });
+
+  it('should format paths correctly based on string type', () => {
+    const paths = getConfigPaths();
+    expect(typeof paths['Cursor']).toBe('string');
+  });
+
+  it('should not detect same config path under multiple tool names', () => {
+    const tools = detectTools();
+    const pathCounts = new Map<string, number>();
+    for (const tool of tools) {
+      const resolved = path.resolve(tool.configPath);
+      pathCounts.set(resolved, (pathCounts.get(resolved) || 0) + 1);
+    }
+    for (const [filePath, count] of pathCounts) {
+      expect(count, `${filePath} detected ${count} times`).toBe(1);
+    }
+  });
 });
 ```
+
+Note: This test verifies the dedup logic works for the current cwd. The real bug manifests when cwd is ~ (home dir), so also verify manually from ~ as described in the Verification section below.
 
 ## Verification
 
@@ -138,6 +159,12 @@ node dist/index.js --json  # JSON output should not have duplicate entries for s
 
 **Before fix (from ~):** 1 HIGH + 5 MEDIUM (4 false duplicate-server findings)
 **After fix (from ~):** 1 HIGH + 1 MEDIUM (only real findings)
+
+**CRITICAL: The home-dir test is the most important one. The bug ONLY manifests when cwd is ~.**
+
+## Version Bump
+
+Bump `version` in `package.json` from `1.0.3` to `1.0.4`. This is a bugfix release.
 
 ## Commit
 

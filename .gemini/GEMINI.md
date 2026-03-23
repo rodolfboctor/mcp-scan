@@ -56,11 +56,16 @@ Follow its `<process>` steps with these inputs:
 - In the project-local loop, skip paths already in `seenPaths`
 - The exact before/after code is in `TASKS-DEDUP-FIX.md`
 
-**Step 4: Add the dedup test to `tests/config/detector.test.ts`**
-- Add test that verifies no config path appears more than once in `detectTools()` output
-- The exact test code is in `TASKS-DEDUP-FIX.md`
+**Step 4: Replace `tests/config/detector.test.ts` entirely**
+- The full updated test file (with new imports and dedup test) is in `TASKS-DEDUP-FIX.md`
+- Add `import path from 'path'` and `import { detectTools } from '../../src/config/detector.js'`
+- Add the `'should not detect same config path under multiple tool names'` test
+- Keep the two existing tests
 
-**Step 5: Verify**
+**Step 5: Bump version**
+- Change `version` in `package.json` from `1.0.3` to `1.0.4`
+
+**Step 6: Verify**
 ```bash
 npm run build
 npm test
@@ -68,13 +73,24 @@ node dist/index.js
 node dist/index.js --json
 ```
 
+Then the CRITICAL test — run from home dir to prove the bug is fixed:
+```bash
+cd ~ && node $(pwd)/../Documents/Code/mcp-scan/dist/index.js 2>&1 | head -40
+```
+The output should NOT have any "Project Local" entries that duplicate global tool entries.
+
 **Expected after fix:**
 - Build: clean
 - Tests: 47+ passed (46 existing + 1 new dedup test)
-- `node dist/index.js` from project dir: no "Project Local" duplicates of global tool configs
+- `node dist/index.js` from project dir: no "Project Local" duplicates
+- `node dist/index.js` from `~`: no false duplicate-server findings
 - No false `duplicate-server` findings for configs detected under multiple tool names
 
-**Step 6: Commit**
+**Step 7: Set git author and commit**
+```bash
+git config user.name "Abanoub Rodolf Boctor"
+git config user.email "abanoub.rodolf@gmail.com"
+```
 ```
 fix(detector): deduplicate configs that resolve to the same file path
 
@@ -83,12 +99,12 @@ tool configs under "Project Local", causing false duplicate-server
 findings. Resolve all paths before comparison and skip already-seen files.
 ```
 
-**Step 7: Push**
+**Step 8: Push**
 ```bash
 git push origin main
 ```
 
-**Step 8: Report results**
+**Step 9: Report results**
 After pushing, print a summary showing:
 - Files changed
 - Test results
@@ -96,7 +112,7 @@ After pushing, print a summary showing:
 
 ### TLDR for this task
 
-One file to change (`src/config/detector.ts`), one test to add. The fix resolves all config paths and skips duplicates. Everything you need is in `TASKS-DEDUP-FIX.md`. Do not ask questions. Execute, verify, commit, push.
+One file to change (`src/config/detector.ts`), one test file to update (`tests/config/detector.test.ts`), one version bump (`package.json`). The fix resolves all config paths and skips duplicates. The full updated test file and code are in `TASKS-DEDUP-FIX.md`. Do not ask questions. Execute, verify from both project dir AND home dir, commit, push.
 
 ---
 
