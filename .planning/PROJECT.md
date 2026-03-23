@@ -19,11 +19,12 @@ Provides developers and AI users with a high-fidelity, trusted tool to audit and
 - ✓ **SCAN-02**: 7 parallel scanners (secrets, typosquat, etc.) — existing
 - ✓ **UI-01**: Premium visual output (rounded boxes, cards, structured summary) — existing
 - ✓ **UI-02**: Brand-blue spinner — existing
+- ✓ **MKT-01**: ugig.net marketplace nudge on clean scans — Phase 2
+- ✓ **MKT-02**: Optional `--ugig` flag for marketplace link — Phase 2
+- ✓ **DOC-01**: Updated README with CLI reference and integrations table — Phase 2
 
 ### Active
-- [ ] **MKT-01**: ugig.net marketplace nudge on clean scans
-- [ ] **MKT-02**: Optional `--ugig` flag for marketplace link
-- [ ] **DOC-01**: Updated README with CLI reference and integrations table
+(None)
 
 ### Out of Scope
 - External API integrations for server submission (Phase 2+)
@@ -35,7 +36,7 @@ Provides developers and AI users with a high-fidelity, trusted tool to audit and
 - Upgrade reporter visuals
 - Refine footer and spinner
 
-### Phase 2: Marketplace Integration
+### Phase 2: Marketplace Integration (Complete)
 - Implement ugig.net nudge
 - Add CLI flag and README updates
 
@@ -43,4 +44,4 @@ Provides developers and AI users with a high-fidelity, trusted tool to audit and
 This document evolves at phase transitions.
 
 ---
-*Last updated: 2026-03-23 after initialization*
+*Last updated: 2026-03-23 after Phase 2*
