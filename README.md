@@ -33,28 +33,38 @@ Here's what a scan looks like when it finds some common issues:
 ```bash
 $ mcp-scan
 
-╔════════════════════════════════════════════╗
-║              mcp-scan results              ║
-╚════════════════════════════════════════════╝
+  ╭──────────────────────────────────────────────╮
+  │                                              │
+  │   🛡️  mcp-scan  v1.0.3                        │
+  │   Security scanner for MCP server configs    │
+  │                                              │
+  ╰──────────────────────────────────────────────╯
 
-Cursor - postmark-mcp
-Config: /Users/rodolf/.cursor/mcp.json
-┌────────────┬─────────────────────────┬─────────────────────────────────────────────┬─────────────────────────────────────────────┐
-│ Severity   │ ID                      │ Description                                 │ Recommendation                              │
-├────────────┼─────────────────────────┼─────────────────────────────────────────────┼─────────────────────────────────────────────┤
-│ CRITICAL   │ known-malicious         │ Package 'postmark-mcp' is on the known mal… │ Remove this server immediately.             │
-└────────────┴─────────────────────────┴─────────────────────────────────────────────┴─────────────────────────────────────────────┘
+  ┌ Cursor › postmark-mcp
+  │ ~/.cursor/mcp.json
+  │
+  │  CRITICAL  known-malicious
+  │            Package 'postmark-mcp' is on the known malicious list.
+  │            ↳ Remove this server immediately.
+  │
+  └───────────────────────────────────────────────────────
 
-VS Code - github-leaky
-Config: /Users/rodolf/.vscode/mcp.json
-┌────────────┬─────────────────────────┬─────────────────────────────────────────────┬─────────────────────────────────────────────┐
-│ Severity   │ ID                      │ Description                                 │ Recommendation                              │
-├────────────┼─────────────────────────┼─────────────────────────────────────────────┼─────────────────────────────────────────────┤
-│ CRITICAL   │ exposed-secret          │ Exposed GitHub Token in environment variab… │ Move the secret to a secure environment va… │
-└────────────┴─────────────────────────┴─────────────────────────────────────────────┴─────────────────────────────────────────────┘
+  ┌ VS Code › github-leaky
+  │ ~/.vscode/mcp.json
+  │
+  │  CRITICAL  exposed-secret
+  │            Exposed GitHub Token in environment variable 'GITHUB_TOKEN'.
+  │            ↳ Move the secret to a secure environment variable and reference it instead (e.g., ${GITHUB_TOKEN}).
+  │
+  └───────────────────────────────────────────────────────
 
-──────────────────────────────────────────────────
-✖ CRITICAL: 2 servers scanned in 12ms. Critical: 2, High: 0, Medium: 0.
+  ──────────────────────────────────────────────────
+
+   Scanned 2 servers across 2 clients in 12ms
+
+    2 critical    0 high    0 medium    0 low
+
+  ──────────────────────────────────────────────────
 ```
 
 ## What it scans
