@@ -30,7 +30,7 @@ export function scanConfig(server: ResolvedServer): Finding[] {
       const match = arg.match(/\$([A-Z0-9_]+)/);
       if (match) {
         const envVar = match[1];
-        if (!server.env || !(envVar in server.env) && !(envVar in process.env)) {
+        if (!server.env || (!(envVar in server.env) && !(envVar in process.env))) {
            findings.push({
             id: 'missing-env-var',
             severity: 'MEDIUM',
@@ -39,14 +39,6 @@ export function scanConfig(server: ResolvedServer): Finding[] {
         }
       }
     }
-  }
-  
-  if (!server.args?.includes('--rate-limit') && server.command !== 'npx') {
-    findings.push({
-      id: 'no-rate-limit',
-      severity: 'LOW',
-      description: `No rate limiting flags detected.`,
-    });
   }
 
   return findings;

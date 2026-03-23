@@ -1,7 +1,5 @@
 import { Command } from 'commander';
 import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 
 import { runScan } from './commands/scan.js';
 import { runAudit } from './commands/audit.js';
@@ -10,11 +8,10 @@ import { runWatch } from './commands/watch.js';
 import { runLs } from './commands/ls.js';
 import { runInit } from './commands/init.js';
 import { runCi } from './commands/ci.js';
+import { listScanners } from './commands/scanners.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const pkgPath = join(__dirname, '../package.json');
-const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+const pkgUrl = new URL('../package.json', import.meta.url);
+const pkg = JSON.parse(readFileSync(pkgUrl, 'utf8'));
 
 const program = new Command();
 
@@ -26,8 +23,9 @@ program
 program
   .command('scan', { isDefault: true })
   .description('Full security scan of all detected AI tool configs')
-  .action(async () => {
-    const report = await runScan();
+  .option('-v, --verbose', 'Enable verbose output')
+  .action(async (options) => {
+    const report = await runScan(options);
     if (report.criticalCount > 0 || report.highCount > 0) {
       process.exit(1);
     }
@@ -57,6 +55,11 @@ program
   .command('init')
   .description('Create .mcp-scan.json config in current directory')
   .action(runInit);
+
+program
+  .command('scanners')
+  .description('List all available security scanners')
+  .action(listScanners);
 
 program
   .command('ci')

@@ -10,11 +10,17 @@ import { ScanReport, ServerScanResult } from '../types/scan-result.js';
 import { printReport } from '../utils/reporter.js';
 import { createSpinner } from '../utils/spinner.js';
 
-export async function runScan(options: { silent?: boolean, json?: boolean } = {}): Promise<ScanReport> {
+export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean } = {}): Promise<ScanReport> {
   const startTime = Date.now();
   const spinner = !options.silent ? createSpinner('Detecting MCP configurations...').start() : null;
 
+  if (options.verbose && spinner) {
+    spinner.stop();
+    logger.info('Verbose mode enabled. Printing detailed logs.');
+  }
+
   const tools = detectTools();
+  if (options.verbose) logger.detail(`Detected ${tools.length} potential tool configs.`);
   const report: ScanReport = {
     results: [],
     totalScanned: 0,
@@ -35,8 +41,9 @@ export async function runScan(options: { silent?: boolean, json?: boolean } = {}
     if (!config) continue;
 
     const servers = extractServers(tool.name, tool.configPath, config);
+    const activeServers = servers.filter(s => !s.disabled);
     
-    for (const server of servers) {
+    for (const server of activeServers) {
       const serverStartTime = Date.now();
       
       const serverKey = `${server.command} ${server.args?.join(' ') || ''}`;

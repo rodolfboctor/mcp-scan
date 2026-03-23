@@ -11,7 +11,6 @@ export function runInit() {
   }
 
   const defaultConfig = {
-    $schema: "https://mcp-scan.thynkq.com/schema.json",
     ignoreServers: [],
     ignoreRules: [],
     customBlocklist: []

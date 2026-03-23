@@ -1,11 +1,14 @@
+import Table from 'cli-table3';
 import { ScanReport } from '../types/scan-result.js';
 import { logger } from './logger.js';
 import { SEVERITY_ORDER } from '../types/severity.js';
 
 export function printReport(report: ScanReport) {
-  logger.divider();
-  logger.brand(`mcp-scan results`);
-  logger.divider();
+  logger.emptyLine();
+  logger.brand('╔════════════════════════════════════════════╗');
+  logger.brand('║              mcp-scan results              ║');
+  logger.brand('╚════════════════════════════════════════════╝');
+  logger.emptyLine();
 
   if (report.results.length === 0) {
     logger.info('No MCP servers detected to scan.');
@@ -13,43 +16,49 @@ export function printReport(report: ScanReport) {
   }
 
   for (const result of report.results) {
-    const header = `${result.toolName} - ${result.serverName} (${result.scanDurationMs}ms)`;
+    const header = `${result.toolName} - ${result.serverName}`;
     if (result.findings.length === 0) {
-      logger.pass(`${header}: 0 findings`);
+      logger.pass(`${header} (0 findings)`);
       continue;
     }
 
-    logger.log(`\nServer: ${header}`);
+    logger.log(header);
     logger.detail(`Config: ${result.configPath}`);
     
-    // Sort findings by severity desc
     const sortedFindings = [...result.findings].sort(
       (a, b) => SEVERITY_ORDER[b.severity] - SEVERITY_ORDER[a.severity]
     );
 
-    for (const finding of sortedFindings) {
-      const msg = `[${finding.id}] ${finding.description}`;
-      if (finding.severity === 'CRITICAL') logger.critical(msg);
-      else if (finding.severity === 'HIGH') logger.high(msg);
-      else if (finding.severity === 'MEDIUM') logger.medium(msg);
-      else if (finding.severity === 'LOW') logger.low(msg);
-      else logger.info(msg);
+    const table = new Table({
+        head: ['Severity', 'ID', 'Description', 'Recommendation'],
+        colWidths: [12, 25, 45, 45],
+        style: { head: ['cyan'] }
+    });
 
-      if (finding.fixRecommendation) {
-        logger.fix(finding.fixRecommendation);
-      }
+    for (const finding of sortedFindings) {
+        table.push([
+            finding.severity,
+            finding.id,
+            finding.description,
+            finding.fixRecommendation || 'N/A'
+        ]);
     }
+    logger.log(table.toString());
+    logger.emptyLine();
   }
 
   logger.divider();
   const summaryMsg = `${report.totalScanned} servers scanned in ${report.totalDurationMs}ms. ` +
-    `${report.criticalCount} critical, ${report.highCount} high, ${report.mediumCount} medium.`;
+    `Critical: ${report.criticalCount}, High: ${report.highCount}, Medium: ${report.mediumCount}.`;
 
-  if (report.criticalCount > 0 || report.highCount > 0) {
+  if (report.criticalCount > 0) {
     logger.critical(summaryMsg);
+  } else if (report.highCount > 0) {
+    logger.high(summaryMsg);
   } else if (report.mediumCount > 0) {
     logger.medium(summaryMsg);
   } else {
     logger.pass(summaryMsg);
   }
+  logger.emptyLine();
 }

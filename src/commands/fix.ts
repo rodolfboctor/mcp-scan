@@ -40,7 +40,7 @@ export async function runFix() {
                 const env = config.mcpServers[result.serverName].env as Record<string, string>;
                 for (const key of Object.keys(env)) {
                    if (env[key].length > 20) { // Naive check for the fix
-                       env[key] = `\${${key}_SECRET}`;
+                       env[key] = `\${${key}}`;
                    }
                 }
                 

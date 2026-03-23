@@ -7,7 +7,7 @@ export function runLs() {
   const tools = detectTools();
   
   const table = new Table({
-    head: ['Tool', 'Server Name', 'Command', 'Status'],
+    head: ['Tool', 'Server Name', 'Command', 'Status', 'Args', 'Env Vars'],
     style: { head: ['cyan'] }
   });
 
@@ -24,7 +24,9 @@ export function runLs() {
         tool.name,
         server.name,
         server.command,
-        server.disabled ? 'Disabled' : 'Active'
+        server.disabled ? 'Disabled' : 'Active',
+        server.args?.length || 0,
+        Object.keys(server.env || {}).length
       ]);
       totalCount++;
     }

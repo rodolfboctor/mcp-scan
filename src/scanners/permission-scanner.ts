@@ -1,7 +1,8 @@
 import { ResolvedServer } from '../types/config.js';
 import { Finding } from '../types/scan-result.js';
 
-const DANGEROUS_PATHS = ['/', '~', '~/.ssh', '~/.aws', '~/.gnupg'];
+const DANGEROUS_PATHS = ['/', '~'];
+const SENSITIVE_PATHS = ['.ssh', '.aws', '.gnupg', '.env'];
 const BROAD_PATHS = ['/Users', '/home'];
 
 export function scanPermissions(server: ResolvedServer): Finding[] {
@@ -18,6 +19,14 @@ export function scanPermissions(server: ResolvedServer): Finding[] {
         fixRecommendation: `Restrict access to a specific, non-sensitive directory.`,
         fixable: false
       });
+    } else if (SENSITIVE_PATHS.some(p => arg.includes(p))) {
+        findings.push({
+            id: 'excessive-permissions',
+            severity: 'HIGH',
+            description: `Server requests access to sensitive path: '${arg}'.`,
+            fixRecommendation: `Restrict access to a specific, non-sensitive directory.`,
+            fixable: false
+        });
     } else if (BROAD_PATHS.some(p => arg.startsWith(p) && arg.split('/').length <= 3)) {
       findings.push({
         id: 'broad-filesystem-access',

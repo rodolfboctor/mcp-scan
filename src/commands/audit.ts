@@ -2,7 +2,6 @@ import { runScan } from './scan.js';
 import { scanPackageDeep } from '../scanners/package-scanner.js';
 import { printReport } from '../utils/reporter.js';
 import { createSpinner } from '../utils/spinner.js';
-import { logger } from '../utils/logger.js';
 import { detectTools } from '../config/detector.js';
 import { parseConfig, extractServers } from '../config/parser.js';
 

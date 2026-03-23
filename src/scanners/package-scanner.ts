@@ -18,7 +18,7 @@ export async function scanPackageDeep(server: ResolvedServer): Promise<Finding[]
     if (!res.ok) return findings;
 
     const data = await res.json() as any;
-    if (data.time && data.time.modified) {
+    if (data && typeof data === 'object' && data.time && typeof data.time.modified === 'string') {
       const lastModified = new Date(data.time.modified);
       const now = new Date();
       const diffMonths = (now.getTime() - lastModified.getTime()) / (1000 * 60 * 60 * 24 * 30);
@@ -31,7 +31,7 @@ export async function scanPackageDeep(server: ResolvedServer): Promise<Finding[]
         });
       }
     }
-  } catch (error) {
+  } catch {
     // Ignore network errors during deep audit
   }
 

@@ -15,7 +15,14 @@ export function scanTyposquat(server: ResolvedServer): Finding[] {
   }
 
   // Remove version tags like @latest
-  packageName = packageName.split('@').slice(0, packageName.startsWith('@') ? 2 : 1).join('@');
+  if (packageName.startsWith('@')) {
+    const parts = packageName.split('@');
+    if (parts.length > 2) {
+      packageName = `@${parts[1]}`;
+    }
+  } else {
+    packageName = packageName.replace(/@[^/]+$/, '');
+  }
 
   // Skip if it's actually an official server
   if (OFFICIAL_SERVERS.has(packageName)) return findings;
