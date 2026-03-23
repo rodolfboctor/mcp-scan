@@ -1,24 +1,16 @@
-<svg width="600" height="100" xmlns="http://www.w3.org/2000/svg">
+<svg width="400" height="80" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&display=swap');
       .title {
-        font-family: 'Roboto Mono', monospace;
-        font-size: 48px;
+        font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+        font-size: 42px;
         font-weight: 700;
         fill: #339DFF;
       }
-      .cursor {
-        animation: blink 1s infinite;
-      }
-      @keyframes blink {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0; }
-      }
     </style>
   </defs>
-  <text x="10" y="60" class="title">mcp-scan</text>
-  <rect x="280" y="20" width="15" height="50" fill="#339DFF" class="cursor">
+  <text x="10" y="52" class="title">mcp-scan</text>
+  <rect x="265" y="12" width="4" height="46" fill="#339DFF" rx="2">
     <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite" />
   </rect>
 </svg>
