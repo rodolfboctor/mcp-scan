@@ -13,6 +13,7 @@ export function getConfigPaths() {
     'VS Code': '',
     'Claude Code': '',
     'Windsurf': '',
+    'Gemini CLI': '',
   };
 
   if (platform === 'darwin') {
@@ -21,12 +22,14 @@ export function getConfigPaths() {
     paths['VS Code'] = path.join(home, '.vscode', 'mcp.json');
     paths['Claude Code'] = path.join(home, '.claude.json');
     paths['Windsurf'] = path.join(home, '.codeium', 'windsurf', 'mcp_config.json');
+    paths['Gemini CLI'] = path.join(home, '.gemini', 'settings.json');
   } else if (platform === 'win32') {
     paths['Claude Desktop'] = path.join(appData, 'Claude', 'claude_desktop_config.json');
     paths['Cursor'] = path.join(userProfile, '.cursor', 'mcp.json');
     paths['VS Code'] = path.join(userProfile, '.vscode', 'mcp.json');
     paths['Claude Code'] = path.join(userProfile, '.claude.json');
     paths['Windsurf'] = path.join(userProfile, '.codeium', 'windsurf', 'mcp_config.json');
+    paths['Gemini CLI'] = path.join(userProfile, '.gemini', 'settings.json');
   } else {
     // Linux and others
     paths['Claude Desktop'] = path.join(home, '.config', 'Claude', 'claude_desktop_config.json');
@@ -34,6 +37,7 @@ export function getConfigPaths() {
     paths['VS Code'] = path.join(home, '.vscode', 'mcp.json');
     paths['Claude Code'] = path.join(home, '.claude.json');
     paths['Windsurf'] = path.join(home, '.codeium', 'windsurf', 'mcp_config.json');
+    paths['Gemini CLI'] = path.join(home, '.gemini', 'settings.json');
   }
 
   return paths;
@@ -44,6 +48,7 @@ export function getProjectLevelPaths() {
   return [
     path.join(cwd, '.mcp.json'),
     path.join(cwd, '.cursor', 'mcp.json'),
-    path.join(cwd, '.vscode', 'mcp.json')
+    path.join(cwd, '.vscode', 'mcp.json'),
+    path.join(cwd, '.gemini', 'settings.json')
   ];
 }

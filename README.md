@@ -71,6 +71,7 @@ Config: /Users/rodolf/.vscode/mcp.json
 - **VS Code Copilot**: `~/.vscode/mcp.json`
 - **Claude Code**: `~/.claude.json`
 - **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
+- **Gemini CLI / Codex**: `~/.gemini/settings.json`
 
 ## CI/CD usage
 
