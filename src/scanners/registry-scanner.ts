@@ -16,6 +16,9 @@ export function scanRegistry(server: ResolvedServer): Finding[] {
     packageName = server.command;
   }
 
+  // Guard: no package name means nothing to scan
+  if (!packageName) return findings;
+
   // Remove version tags like @latest
   packageName = packageName.split('@').slice(0, packageName.startsWith('@') ? 2 : 1).join('@');
 

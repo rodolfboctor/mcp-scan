@@ -2,6 +2,7 @@ import { ResolvedServer } from '../types/config.js';
 import { Finding } from '../types/scan-result.js';
 
 export function scanAst(server: ResolvedServer): Finding[] {
+  if (!server.command) return [];
   const findings: Finding[] = [];
   const fullCommand = [server.command, ...(server.args || [])].join(' ');
 
