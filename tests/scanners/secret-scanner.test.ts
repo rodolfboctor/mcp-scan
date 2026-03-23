@@ -79,6 +79,24 @@ describe('Secret Scanner', () => {
     expect(findings).toHaveLength(1);
   });
 
+  it('should allow environment variable references', () => {
+    const findings = scanSecrets({
+      name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
+      env: { TOKEN: '${GITHUB_TOKEN}' }
+    });
+    // This might flag as MEDIUM if GITHUB_TOKEN is not set, but not CRITICAL
+    const critical = findings.filter(f => f.severity === 'CRITICAL');
+    expect(critical).toHaveLength(0);
+  });
+
+  it('should flag missing referenced env vars', () => {
+    const findings = scanSecrets({
+      name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
+      env: { TOKEN: '${NON_EXISTENT_VAR_12345}' }
+    });
+    expect(findings.some(f => f.id === 'missing-referenced-env-var')).toBe(true);
+  });
+
   it('should pass safe strings', () => {
     const findings = scanSecrets({
       name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
