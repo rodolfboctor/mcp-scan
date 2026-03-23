@@ -31,19 +31,30 @@ export function printReport(report: ScanReport, options: { ugig?: boolean } = {}
 
   // Header banner
   const boxWidth = 50;
+  const innerWidth = boxWidth - 4; // 46 visible chars between │ and │
   const border = brand;
-  
-  logger.log(border('  ╭' + '─'.repeat(boxWidth - 4) + '╮'));
-  logger.log(border('  │') + ' '.repeat(boxWidth - 4) + border('│'));
-  
-  const titleLine = `   🛡️  ${chalk.white.bold('mcp-scan')}  ${dim('v' + (report.version || '1.0.3'))}`;
-  const subtitleLine = `   ${accentGray('Security scanner for MCP server configs')}`;
-  
-  logger.log(border('  │') + titleLine.padEnd(boxWidth - 4 + 10) + border('│')); // +10 for ANSI escape codes
-  logger.log(border('  │') + subtitleLine.padEnd(boxWidth - 4 + 10) + border('│'));
-  
-  logger.log(border('  │') + ' '.repeat(boxWidth - 4) + border('│'));
-  logger.log(border('  ╰' + '─'.repeat(boxWidth - 4) + '╯'));
+
+  const version = report.version || '1.0.3';
+
+  // Compute padding by measuring visible width (strip ANSI, count emoji as 2 cols)
+  function pad(content: string, visibleLen: number): string {
+    return content + ' '.repeat(Math.max(0, innerWidth - visibleLen));
+  }
+
+  // 🛡️ = 2 cols, rest ASCII: 3 + 2 + 2 + 8 + 2 + 1 + version.length
+  const titleVisLen = 18 + version.length;
+  const titleContent = `   🛡️  ${chalk.white.bold('mcp-scan')}  ${dim('v' + version)}`;
+
+  // subtitle is pure ASCII: 3 + 39 = 42
+  const subtitleVisLen = 42;
+  const subtitleContent = `   ${accentGray('Security scanner for MCP server configs')}`;
+
+  logger.log(border('  ╭' + '─'.repeat(innerWidth) + '╮'));
+  logger.log(border('  │') + ' '.repeat(innerWidth) + border('│'));
+  logger.log(border('  │') + pad(titleContent, titleVisLen) + border('│'));
+  logger.log(border('  │') + pad(subtitleContent, subtitleVisLen) + border('│'));
+  logger.log(border('  │') + ' '.repeat(innerWidth) + border('│'));
+  logger.log(border('  ╰' + '─'.repeat(innerWidth) + '╯'));
   logger.emptyLine();
 
   if (report.results.length === 0) {
@@ -120,9 +131,14 @@ export function printReport(report: ScanReport, options: { ugig?: boolean } = {}
     logger.log(parts.join(''));
   }
 
-  if ((isAllClear || options.ugig) && total > 0) {
-    logger.emptyLine();
-    logger.log(dim('   All servers verified clean. List them on ') + brand.dim('ugig.net/mcp') + dim(' →'));
+  if (total > 0) {
+    if (isAllClear) {
+      logger.emptyLine();
+      logger.log(dim('   All servers verified clean. List them on ') + brand.dim('ugig.net/mcp') + dim(' →'));
+    } else if (options.ugig) {
+      logger.emptyLine();
+      logger.log(dim('   List your servers on ') + brand.dim('ugig.net/mcp') + dim(' →'));
+    }
   }
 
   logger.emptyLine();
