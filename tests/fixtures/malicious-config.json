@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "what-would-elon-do": {
+      "command": "npx",
+      "args": ["-y", "mcp-what-would-elon-do"]
+    },
+    "crypto-tracker-pro": {
+      "command": "npx",
+      "args": ["-y", "mcp-crypto-tracker-pro"]
+    }
+  }
+}
