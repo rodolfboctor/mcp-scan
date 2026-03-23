@@ -97,6 +97,20 @@ For programmatic use, you can get the scan results in JSON format using the `--j
 mcp-scan --json
 ```
 
+## Badge
+
+If you are a marketplace or a server author, you can use our "Secured by mcp-scan" badge to show that your MCP configs are audited.
+
+### Shield.io (Recommended)
+```markdown
+[![Secured by mcp-scan](https://img.shields.io/badge/Secured%20by-mcp--scan-4ade80?style=for-the-badge)](https://github.com/rodolfboctor/mcp-scan)
+```
+
+### Custom SVG
+```markdown
+![Secured by mcp-scan](https://raw.githubusercontent.com/rodolfboctor/mcp-scan/main/.github/assets/badge-secured.svg)
+```
+
 ## Used by
 
 - **[ugig.net](http://ugig.net/mcp)** - MCP server marketplace with integrated security scanning
