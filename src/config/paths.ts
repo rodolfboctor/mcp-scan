@@ -1,0 +1,49 @@
+import os from 'os';
+import path from 'path';
+
+export function getConfigPaths() {
+  const home = os.homedir();
+  const platform = os.platform();
+  const appData = process.env.APPDATA || path.join(home, 'AppData', 'Roaming');
+  const userProfile = process.env.USERPROFILE || home;
+
+  const paths = {
+    'Claude Desktop': '',
+    'Cursor': '',
+    'VS Code': '',
+    'Claude Code': '',
+    'Windsurf': '',
+  };
+
+  if (platform === 'darwin') {
+    paths['Claude Desktop'] = path.join(home, 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json');
+    paths['Cursor'] = path.join(home, '.cursor', 'mcp.json');
+    paths['VS Code'] = path.join(home, '.vscode', 'mcp.json');
+    paths['Claude Code'] = path.join(home, '.claude.json');
+    paths['Windsurf'] = path.join(home, '.codeium', 'windsurf', 'mcp_config.json');
+  } else if (platform === 'win32') {
+    paths['Claude Desktop'] = path.join(appData, 'Claude', 'claude_desktop_config.json');
+    paths['Cursor'] = path.join(userProfile, '.cursor', 'mcp.json');
+    paths['VS Code'] = path.join(userProfile, '.vscode', 'mcp.json');
+    paths['Claude Code'] = path.join(userProfile, '.claude.json');
+    paths['Windsurf'] = path.join(userProfile, '.codeium', 'windsurf', 'mcp_config.json');
+  } else {
+    // Linux and others
+    paths['Claude Desktop'] = path.join(home, '.config', 'Claude', 'claude_desktop_config.json');
+    paths['Cursor'] = path.join(home, '.cursor', 'mcp.json');
+    paths['VS Code'] = path.join(home, '.vscode', 'mcp.json');
+    paths['Claude Code'] = path.join(home, '.claude.json');
+    paths['Windsurf'] = path.join(home, '.codeium', 'windsurf', 'mcp_config.json');
+  }
+
+  return paths;
+}
+
+export function getProjectLevelPaths() {
+  const cwd = process.cwd();
+  return [
+    path.join(cwd, '.mcp.json'),
+    path.join(cwd, '.cursor', 'mcp.json'),
+    path.join(cwd, '.vscode', 'mcp.json')
+  ];
+}
