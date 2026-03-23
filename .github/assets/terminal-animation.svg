@@ -1,0 +1,52 @@
+<svg width="800" height="400" xmlns="http://www.w3.org/2000/svg">
+  <foreignObject width="800" height="400">
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      <style>
+        .term-container {
+          background-color: #1a1b26;
+          color: #a9b1d6;
+          font-family: 'Roboto Mono', monospace;
+          font-size: 14px;
+          line-height: 1.5;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .line {
+          white-space: pre;
+        }
+        .prompt { color: #bb9af7; }
+        .command { color: #7aa2f7; }
+        .output { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      </style>
+      <div class="term-container">
+        <div class="line"><span class="prompt">~ $ </span><span class="command">npx mcp-scan</span></div>
+        <div class="line output" style="animation-delay: 0.5s;">
+          <span style="color: #3FB950;">✓</span> Scan complete in 4ms
+        </div>
+        <div class="line output" style="animation-delay: 1s;">
+          --------------------------------------------------
+        </div>
+        <div class="line output" style="animation-delay: 1.5s;">
+          <span style="color: #339DFF;">mcp-scan results</span>
+        </div>
+        <div class="line output" style="animation-delay: 2s;">
+          --------------------------------------------------
+        </div>
+        <div class="line output" style="animation-delay: 2.5s;">
+          <span style="color: #3FB950;">✓</span><span style="font-weight: bold;"> PASS:</span> Claude Code - thynkq-router (0ms): 0 findings
+        </div>
+        <div class="line output" style="animation-delay: 3s;">
+          --------------------------------------------------
+        </div>
+        <div class="line output" style="animation-delay: 3.5s;">
+          <span style="color: #3FB950;">✓</span><span style="font-weight: bold;"> PASS:</span> 1 servers scanned in 4ms. 0 critical, 0 high, 0 medium.
+        </div>
+      </div>
+    </div>
+  </foreignObject>
+</svg>
