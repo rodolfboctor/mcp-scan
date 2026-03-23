@@ -67,20 +67,22 @@ export function printReport(report: ScanReport) {
       (a, b) => SEVERITY_ORDER[b.severity] - SEVERITY_ORDER[a.severity]
     );
 
-    logger.log(brand.bold(`  ${result.toolName}`) + chalk.white(` › `) + chalk.bold(result.serverName));
-    logger.log(dim(`  ${result.configPath}`));
-    logger.emptyLine();
+    const rail = brand.dim('  │ ');
+    
+    logger.log(brand('  ┌ ') + brand.bold(result.toolName) + accentGray(' › ') + chalk.white.bold(result.serverName));
+    logger.log(rail + dim(result.configPath));
+    logger.log(rail);
 
     for (const finding of sortedFindings) {
-      logger.log(`  ${severityBadge(finding.severity)}  ${chalk.bold(finding.id)}`);
-      logger.log(`           ${finding.description}`);
+      logger.log(rail + ` ${severityBadge(finding.severity)}  ${chalk.bold(finding.id)}`);
+      logger.log(rail + `           ${chalk.white(finding.description)}`);
       if (finding.fixRecommendation) {
-        logger.log(dim(`           ↳ ${finding.fixRecommendation}`));
+        logger.log(rail + dim(`           ↳ ${finding.fixRecommendation}`));
       }
-      logger.emptyLine();
+      logger.log(rail);
     }
 
-    logger.log(dim('  ' + '─'.repeat(60)));
+    logger.log(brand.dim('  └' + '─'.repeat(55)));
     logger.emptyLine();
   }
 
