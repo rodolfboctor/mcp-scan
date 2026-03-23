@@ -151,5 +151,10 @@ PRs and issues welcome. If you find a malicious MCP package in the wild, report 
 ---
 
 <div align="center">
-  <sub>Built by <a href="https://thynkq.com">ThynkQ</a></sub>
+  <sub>
+    Built by <strong>Rodolf</strong> &nbsp;·&nbsp;
+    <a href="https://thynkq.com" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;">
+      <span style="font-family:'Urbanist',system-ui,sans-serif;font-weight:400;letter-spacing:-0.03em">thynk</span><svg height="13" width="13" viewBox="0 0 28 36" fill="none" style="vertical-align:middle"><circle cx="13" cy="18" r="10" stroke="#339DFF" stroke-width="3.5" fill="none" stroke-linecap="round"/><line x1="18.5" y1="23.5" x2="25" y2="30" stroke="#339DFF" stroke-width="3.5" stroke-linecap="round"/></svg>
+    </a>
+  </sub>
 </div>
