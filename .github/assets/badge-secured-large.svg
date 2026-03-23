@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="240" height="40" role="img" aria-label="secured by: mcp-scan">
+  <linearGradient id="s" x2="0" y2="100%">
+    <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+    <stop offset="1" stop-opacity=".1"/>
+  </linearGradient>
+  <clipPath id="r">
+    <rect width="240" height="40" rx="6" fill="#fff"/>
+  </clipPath>
+  <g clip-path="url(#r)">
+    <rect width="130" height="40" fill="#1a1a2e"/>
+    <rect x="130" width="110" height="40" fill="#4ade80"/>
+    <rect width="240" height="40" fill="url(#s)"/>
+  </g>
+  <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="220">
+    <text aria-hidden="true" x="650" y="280" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="1100">secured by</text>
+    <text x="650" y="260" transform="scale(.1)" fill="#fff" textLength="1100">secured by</text>
+    <text aria-hidden="true" x="1850" y="280" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="900">mcp-scan</text>
+    <text x="1850" y="260" transform="scale(.1)" fill="#fff" textLength="900">mcp-scan</text>
+  </g>
+</svg>
