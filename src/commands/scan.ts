@@ -7,10 +7,12 @@ import { scanTyposquat } from '../scanners/typosquat-scanner.js';
 import { scanTransport } from '../scanners/transport-scanner.js';
 import { scanConfig } from '../scanners/config-scanner.js';
 import { ScanReport, ServerScanResult } from '../types/scan-result.js';
-import { printReport } from '../utils/reporter.js';
 import { createSpinner } from '../utils/spinner.js';
+import { printJsonReport } from '../utils/json-reporter.js';
+import { runFix } from './fix.js';
+import { SEVERITY_ORDER, Severity } from '../types/severity.js';
 
-export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean } = {}): Promise<ScanReport> {
+export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean } = {}): Promise<ScanReport> {
   const startTime = Date.now();
   const spinner = !options.silent ? createSpinner('Detecting MCP configurations...').start() : null;
 
@@ -33,6 +35,7 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
   };
 
   const seenServers = new Set<string>();
+  const minSeverity = options.severity ? SEVERITY_ORDER[options.severity.toUpperCase() as Severity] : 0;
 
   for (const tool of tools) {
     if (!tool.exists) continue;
@@ -67,7 +70,7 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
 
       if (spinner) spinner.text = `Scanning ${server.name} in ${tool.name}...`;
 
-      const findings = [
+      const allFindings = [
         ...scanSecrets(server),
         ...scanPermissions(server),
         ...scanRegistry(server),
@@ -75,6 +78,8 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
         ...scanTransport(server),
         ...scanConfig(server)
       ];
+
+      const findings = allFindings.filter(f => SEVERITY_ORDER[f.severity] >= minSeverity);
 
       const serverResult: ServerScanResult = {
         serverName: server.name,
@@ -103,8 +108,14 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
     spinner.succeed(`Scan complete in ${report.totalDurationMs}ms`);
   }
 
-  if (!options.json) {
+  if (options.json) {
+    printJsonReport(report);
+  } else {
     printReport(report);
+  }
+  
+  if (options.fix) {
+    await runFix();
   }
 
   return report;

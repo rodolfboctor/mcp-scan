@@ -24,6 +24,9 @@ program
   .command('scan', { isDefault: true })
   .description('Full security scan of all detected AI tool configs')
   .option('-v, --verbose', 'Enable verbose output')
+  .option('--json', 'Output report in JSON format')
+  .option('--fix', 'Automatically fix issues')
+  .option('--severity <level>', 'Filter by severity (low, medium, high, critical)', 'low')
   .action(async (options) => {
     const report = await runScan(options);
     if (report.criticalCount > 0 || report.highCount > 0) {
