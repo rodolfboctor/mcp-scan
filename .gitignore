@@ -3,5 +3,4 @@ dist
 .env
 .DS_Store
 *.log
-CODEX_PROMPT.md
-GEMINI.md
+mcp-fix-prompt.md
