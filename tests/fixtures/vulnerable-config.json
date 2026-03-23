@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_abcdefghijklmnopqrstuvwxyz1234567890"
+      }
+    },
+    "filesystem-danger": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/"]
+    },
+    "shady-analytics": {
+      "command": "npx",
+      "args": ["-y", "mcp-analytics-proo"]
+    },
+    "stripe-exposed": {
+      "command": "npx",
+      "args": ["-y", "stripe-server"],
+      "env": {
+        "STRIPE_KEY": "sk_live_1234567890abcdef12345678"
+      }
+    }
+  }
+}
