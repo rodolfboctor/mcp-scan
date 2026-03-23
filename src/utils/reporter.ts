@@ -128,11 +128,11 @@ export function printReport(report: ScanReport) {
   logger.log(
     dim('  by ') +
     chalk.white.bold('Rodolf') +
-    dim(' · ') +
-    dim('thynk') +
+    accentGray(' · ') +
+    accentGray('thynk') +
     brand.bold('Q') +
-    dim('  ') +
-    chalk.hex('#339DFF').dim('thynkq.com')
+    accentGray('  ') +
+    brand.dim.underline('thynkq.com')
   );
   logger.emptyLine();
 }
