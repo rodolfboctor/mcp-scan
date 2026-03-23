@@ -18,7 +18,7 @@ import { runFix } from './fix.js';
 import { SEVERITY_ORDER, Severity } from '../types/severity.js';
 import { logger } from '../utils/logger.js';
 
-export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string } = {}): Promise<ScanReport> {
+export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string } = {}): Promise<ScanReport> {
   const startTime = Date.now();
   const spinner = !options.silent ? createSpinner('Detecting MCP configurations...').start() : null;
 
@@ -47,7 +47,8 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
     mediumCount: 0,
     lowCount: 0,
     infoCount: 0,
-    totalDurationMs: 0
+    totalDurationMs: 0,
+    version: options.version
   };
 
   const seenServers = new Set<string>();

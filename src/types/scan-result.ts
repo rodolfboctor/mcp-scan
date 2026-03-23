@@ -25,4 +25,5 @@ export interface ScanReport {
   lowCount: number;
   infoCount: number;
   totalDurationMs: number;
+  version?: string;
 }
