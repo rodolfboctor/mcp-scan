@@ -29,7 +29,7 @@ program
   .option('--severity <level>', 'Filter by severity (low, medium, high, critical)', 'low')
   .option('-c, --config <path>', 'Path to a specific MCP config file to scan')
   .action(async (options) => {
-    const report = await runScan(options);
+    const report = await runScan({ ...options, version: pkg.version });
     if (report.criticalCount > 0 || report.highCount > 0) {
       process.exit(1);
     }

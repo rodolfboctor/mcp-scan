@@ -4,10 +4,6 @@ import { logger } from './logger.js';
 import { SEVERITY_ORDER } from '../types/severity.js';
 
 import chalk from 'chalk';
-import { createRequire } from 'module';
-
-const require = createRequire(import.meta.url);
-const pkg = require('../../package.json');
 
 const brand = chalk.hex('#339DFF');
 const accentGray = chalk.hex('#8B949E');
@@ -40,7 +36,7 @@ export function printReport(report: ScanReport) {
   logger.log(border('  ╭' + '─'.repeat(boxWidth - 4) + '╮'));
   logger.log(border('  │') + ' '.repeat(boxWidth - 4) + border('│'));
   
-  const titleLine = `   🛡️  ${chalk.white.bold('mcp-scan')}  ${dim('v' + pkg.version)}`;
+  const titleLine = `   🛡️  ${chalk.white.bold('mcp-scan')}  ${dim('v' + (report.version || '1.0.3'))}`;
   const subtitleLine = `   ${accentGray('Security scanner for MCP server configs')}`;
   
   logger.log(border('  │') + titleLine.padEnd(boxWidth - 4 + 10) + border('│')); // +10 for ANSI escape codes
