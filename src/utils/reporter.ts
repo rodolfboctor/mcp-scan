@@ -4,8 +4,13 @@ import { logger } from './logger.js';
 import { SEVERITY_ORDER } from '../types/severity.js';
 
 import chalk from 'chalk';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const pkg = require('../../package.json');
 
 const brand = chalk.hex('#339DFF');
+const accentGray = chalk.hex('#8B949E');
 const criticalBg = chalk.bgHex('#F85149').white.bold;
 const highBg = chalk.bgHex('#F0883E').white.bold;
 const mediumBg = chalk.bgHex('#D29922').white.bold;
@@ -29,9 +34,20 @@ export function printReport(report: ScanReport) {
   logger.emptyLine();
 
   // Header banner
-  logger.brand('  ┌─────────────────────────────────────────────┐');
-  logger.brand('  │  🛡️  mcp-scan  ·  Security Report             │');
-  logger.brand('  └─────────────────────────────────────────────┘');
+  const boxWidth = 50;
+  const border = brand;
+  
+  logger.log(border('  ╭' + '─'.repeat(boxWidth - 4) + '╮'));
+  logger.log(border('  │') + ' '.repeat(boxWidth - 4) + border('│'));
+  
+  const titleLine = `   🛡️  ${chalk.white.bold('mcp-scan')}  ${dim('v' + pkg.version)}`;
+  const subtitleLine = `   ${accentGray('Security scanner for MCP server configs')}`;
+  
+  logger.log(border('  │') + titleLine.padEnd(boxWidth - 4 + 10) + border('│')); // +10 for ANSI escape codes
+  logger.log(border('  │') + subtitleLine.padEnd(boxWidth - 4 + 10) + border('│'));
+  
+  logger.log(border('  │') + ' '.repeat(boxWidth - 4) + border('│'));
+  logger.log(border('  ╰' + '─'.repeat(boxWidth - 4) + '╯'));
   logger.emptyLine();
 
   if (report.results.length === 0) {
