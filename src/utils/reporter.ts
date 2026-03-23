@@ -97,21 +97,33 @@ export function printReport(report: ScanReport) {
     logger.emptyLine();
   }
 
-  // Final summary bar
+  // Final summary section
   const total = report.totalScanned;
   const ms = report.totalDurationMs;
-  const parts = [];
-  if (report.criticalCount > 0) parts.push(criticalBg(` ${report.criticalCount} critical `));
-  if (report.highCount > 0)     parts.push(highBg(` ${report.highCount} high `));
-  if (report.mediumCount > 0)   parts.push(mediumBg(` ${report.mediumCount} medium `));
-  if (report.lowCount > 0)      parts.push(lowBg(` ${report.lowCount} low `));
+  const uniqueClients = new Set(report.results.map(r => r.toolName)).size;
+  
+  const divider = brand.dim('  ' + '─'.repeat(50));
+  
+  logger.log(divider);
+  logger.emptyLine();
 
-  if (parts.length === 0) {
-    logger.log(passGreen(`  ✓ All clear`) + dim(` — ${total} server${total !== 1 ? 's' : ''} scanned in ${ms}ms`));
+  if (report.criticalCount === 0 && report.highCount === 0 && report.mediumCount === 0 && report.lowCount === 0) {
+    logger.log(passGreen(`   ✓ All clear`) + dim(` — ${total} server${total !== 1 ? 's' : ''} scanned in ${ms}ms`));
   } else {
-    logger.log(`  ${parts.join('  ')}` + dim(`  ·  ${total} server${total !== 1 ? 's' : ''} in ${ms}ms`));
+    logger.log(chalk.white(`   Scanned ${chalk.bold(total)} server${total !== 1 ? 's' : ''} across ${chalk.bold(uniqueClients)} client${uniqueClients !== 1 ? 's' : ''} in ${ms}ms`));
+    logger.emptyLine();
+    
+    const parts = [
+      report.criticalCount > 0 ? chalk.hex('#F85149').bold(`    ${report.criticalCount} critical`) : dim(`    0 critical`),
+      report.highCount > 0     ? chalk.hex('#F0883E').bold(`    ${report.highCount} high`)     : dim(`    0 high`),
+      report.mediumCount > 0   ? chalk.hex('#D29922').bold(`    ${report.mediumCount} medium`) : dim(`    0 medium`),
+      report.lowCount > 0      ? dim.bold(`    ${report.lowCount} low`) : dim(`    0 low`),
+    ];
+    logger.log(parts.join(''));
   }
 
+  logger.emptyLine();
+  logger.log(divider);
   logger.emptyLine();
   logger.log(
     dim('  by ') +
