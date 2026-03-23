@@ -26,7 +26,7 @@ function severityBadge(severity: string): string {
   }
 }
 
-export function printReport(report: ScanReport) {
+export function printReport(report: ScanReport, options: { ugig?: boolean } = {}) {
   logger.emptyLine();
 
   // Header banner
@@ -103,7 +103,9 @@ export function printReport(report: ScanReport) {
   logger.log(divider);
   logger.emptyLine();
 
-  if (report.criticalCount === 0 && report.highCount === 0 && report.mediumCount === 0 && report.lowCount === 0) {
+  const isAllClear = report.criticalCount === 0 && report.highCount === 0 && report.mediumCount === 0 && report.lowCount === 0;
+
+  if (isAllClear) {
     logger.log(passGreen(`   ✓ All clear`) + dim(` — ${total} server${total !== 1 ? 's' : ''} scanned in ${ms}ms`));
   } else {
     logger.log(chalk.white(`   Scanned ${chalk.bold(total)} server${total !== 1 ? 's' : ''} across ${chalk.bold(uniqueClients)} client${uniqueClients !== 1 ? 's' : ''} in ${ms}ms`));
@@ -116,6 +118,11 @@ export function printReport(report: ScanReport) {
       report.lowCount > 0      ? dim.bold(`    ${report.lowCount} low`) : dim(`    0 low`),
     ];
     logger.log(parts.join(''));
+  }
+
+  if ((isAllClear || options.ugig) && total > 0) {
+    logger.emptyLine();
+    logger.log(dim('   All servers verified clean. List them on ') + brand.dim('ugig.net/mcp') + dim(' →'));
   }
 
   logger.emptyLine();
