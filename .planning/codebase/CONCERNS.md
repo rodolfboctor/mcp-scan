@@ -1,17 +1,47 @@
-# Concerns
+# Codebase Concerns
 
-## Technical Debt
-- **Type Safety**: Some areas (like `parser.ts` and `index.ts`) still use `any` or loose typing, which could lead to runtime errors if configurations don't match expectations.
-- **Config Writing**: While `writer.ts` is atomic, it doesn't currently validate that the updated configuration is still valid JSON/TOML before writing.
+**Analysis Date:** 2024-05-15
 
-## Performance
-- **Network Calls**: `package-scanner.ts` makes network calls to the npm registry. During large scans or in CI environments with poor connectivity, this could slow down the tool significantly. Caching is not currently implemented.
-- **Sequential Scan**: Scanners run sequentially per server. For users with dozens of servers, parallelizing the scanning logic could improve performance.
+## Tech Debt
 
-## Security
-- **Heuristic-Based**: The tool relies on regex and blocklists. While effective for common patterns, it may miss sophisticated or novel attacks (false negatives) and may flag legitimate configurations (false positives).
-- **Hardcoded Patterns**: The `SECRET_PATTERNS` list is hardcoded. It needs a mechanism for easier updates or a community-driven remote feed to stay effective.
+**Reporter Utility:**
+- Issue: `src/utils/reporter.ts` is currently the largest single file (157 lines). While not excessively large, this could become a monolithic module if reporting logic expands to include many formats or complex conditional outputs.
+- Files: `src/utils/reporter.ts`
+- Impact: Potential for increased complexity and reduced maintainability if not managed as the project grows.
+- Fix approach: Monitor its size and complexity. Consider refactoring into smaller, more focused modules or using a strategy pattern for different report formats if the need arises.
+
+## Known Bugs
+
+- Not detected.
+
+## Security Considerations
+
+- Not explicitly detected from automated checks.
+
+## Performance Bottlenecks
+
+- Not detected.
 
 ## Fragile Areas
-- **Config Detection**: Path resolution for AI tools (`paths.ts`) is based on default installation locations. If a user has a custom installation path, the tool will fail to find the configuration.
-- **TOML Parsing**: The Codex CLI support is new and relies on `smol-toml`. Its robustness against varied TOML styles remains to be seen.
+
+- Not detected.
+
+## Scaling Limits
+
+- Not detected.
+
+## Dependencies at Risk
+
+- Not detected.
+
+## Missing Critical Features
+
+- Not detected.
+
+## Test Coverage Gaps
+
+- Not explicitly checked by current analysis.
+
+---
+
+*Concerns audit: 2024-05-15*
