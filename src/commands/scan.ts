@@ -9,6 +9,7 @@ import { scanConfig } from '../scanners/config-scanner.js';
 import { ScanReport, ServerScanResult } from '../types/scan-result.js';
 import { createSpinner } from '../utils/spinner.js';
 import { printJsonReport } from '../utils/json-reporter.js';
+import { printReport } from '../utils/reporter.js';
 import { runFix } from './fix.js';
 import { SEVERITY_ORDER, Severity } from '../types/severity.js';
 
