@@ -1,0 +1,3 @@
+[mcp_servers]
+sqlite = { command = "npx", args = ["-y", "@modelcontextprotocol/server-sqlite", "test.db"] }
+puppeteer = { command = "npx", args = ["-y", "@modelcontextprotocol/server-puppeteer"] }

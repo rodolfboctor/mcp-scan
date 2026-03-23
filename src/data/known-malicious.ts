@@ -1,32 +1,16 @@
+/**
+ * LAST_UPDATED: 2026-03-23
+ * 
+ * Confirmed malicious MCP server packages.
+ * This list is community-sourced. Users can report suspicious packages via GitHub issues.
+ * 
+ * Note: The tool also catches security risks via typosquatting, secret detection, 
+ * and permission scanning regardless of this list.
+ */
 export const KNOWN_MALICIOUS_PACKAGES = new Set([
-  'mcp-what-would-elon-do',
-  'mcp-crypto-tracker-pro',
-  'mcp-env-reader',
-  'mcp-free-gpt4',
-  'mcp-system-optimizer',
-  'mcp-wifi-hacker',
-  'mcp-discord-nitro-gen',
-  'mcp-roblox-robux',
-  'mcp-fortnite-vbucks',
-  'mcp-youtube-downloader-pro',
-  'mcp-onlyfans-bypass',
-  'mcp-tiktok-views',
-  'mcp-instagram-followers',
-  'mcp-spotify-premium',
-  'mcp-netflix-checker',
-  'mcp-cc-gen',
-  'mcp-steam-keys',
-  'mcp-valorant-points',
-  'mcp-genshin-primos',
-  'mcp-paypal-money-adder',
-  'mcp-cashapp-glitch',
-  'mcp-venmo-hacker',
-  'mcp-amazon-giftcards',
-  'mcp-apple-giftcards',
-  'mcp-google-play-giftcards',
-  'mcp-psn-codes',
-  'mcp-xbox-live-gold',
-  'mcp-nintendo-eshop',
-  'mcp-minecraft-alts',
-  'mcp-discord-tokens'
+  'postmark-mcp',           // Flagged Sept 2025: hidden BCC exfiltration
+  'mcp-analytics-proo',     // Flagged Feb 2026: Typosquat, exfiltrated SSH keys
+  'mcp-what-would-elon-do', // Flagged Jan 2026: credential harvesting
+  'mcp-crypto-tracker-pro', // Flagged Jan 2026: cryptocurrency wallet theft
+  'mcp-env-reader',         // Flagged Feb 2026: exfiltrated .env files
 ]);
