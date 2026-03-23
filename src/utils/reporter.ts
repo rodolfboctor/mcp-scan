@@ -88,8 +88,11 @@ export function printReport(report: ScanReport) {
 
   // Clean servers summary
   if (clean.length > 0) {
+    const maxNameLength = Math.max(...clean.map(r => `${r.toolName} › ${r.serverName}`.length));
+    
     for (const result of clean) {
-      logger.log(passGreen(`  ✓`) + ` ${result.toolName} › ${result.serverName}`);
+      const name = `${result.toolName} › ${result.serverName}`;
+      logger.log(passGreen(`  ✓ `) + name.padEnd(maxNameLength + 2) + dim('0 issues'));
     }
     logger.emptyLine();
   }
