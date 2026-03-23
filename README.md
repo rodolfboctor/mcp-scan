@@ -1,8 +1,8 @@
 <div align="center">
   <img src=".github/assets/logo-animated.svg" alt="mcp-scan animated logo" width="400"/>
-  <h1>Security Scanner for MCP Servers</h1>
+  <h1>Security scanner for your MCP server configs.</h1>
   <p>
-    <strong>Your AI's first line of defense.</strong>
+    <strong>Find leaked secrets, typosquatting, and misconfigurations before they bite you.</strong>
   </p>
   <p>
     <a href="https://www.npmjs.com/package/mcp-scan"><img src="https://img.shields.io/npm/v/mcp-scan?style=for-the-badge&logo=npm&color=CB3837" alt="npm version"></a>
@@ -13,67 +13,95 @@
 
 ---
 
-## The Problem
-
-In the rapidly evolving world of AI-powered development, **Model Context Protocol (MCP) servers have become a critical part of our toolchain**. They have unprecedented access to our systems, handling everything from code generation to file system manipulation.
-
-But with great power comes great responsibility. A misconfigured or malicious MCP server can expose sensitive data, execute arbitrary code, and introduce critical vulnerabilities into your projects.
-
--   **42%** of MCP skills have known vulnerabilities.
--   **12%** are confirmed malware.
-
-*Source: Fictional January 2026 Security Report*
-
-## The Solution
-
-**`mcp-scan` is `npm audit` for your AI.** It's a lightweight, blazing-fast security scanner that proactively detects vulnerabilities, exposed secrets, and misconfigurations in your MCP servers.
-
-<div align="center">
-  <img src=".github/assets/terminal-animation.svg" alt="mcp-scan terminal animation" width="800"/>
-</div>
-
-## Key Features
-
--   **Comprehensive Scanning:** Detects a wide range of vulnerabilities, from exposed secrets to shell injection risks.
--   **Blazing Fast:** Written in TypeScript and highly optimized for performance.
--   **Developer-Friendly:** Clear, actionable output that helps you fix issues quickly.
--   **CI/CD Integration:** Easily integrate `mcp-scan` into your existing workflows.
--   **Automatic Fixes:** Interactively fix certain classes of vulnerabilities.
-
-## Getting Started
-
-Get up and running in seconds. All you need is Node.js and `npx`.
+## Installation
 
 ```bash
+# For global installation
+npm install -g mcp-scan
+
+# Or run directly
 npx mcp-scan
 ```
 
-## All Commands
+## Demo
 
-| Command                 | Description                                                 |
-| ----------------------- | ----------------------------------------------------------- |
-| `mcp-scan`              | Default scan of all AI tool configs.                        |
-| `mcp-scan audit <server>` | Deep audit including npm registry checks.                   |
-| `mcp-scan fix`          | Interactive auto-fix for fixable issues.                    |
-| `mcp-scan watch`        | Watch config files and rescan on changes.                   |
-| `mcp-scan ls`           | List all detected MCP servers.                              |
-| `mcp-scan init`         | Create a `.mcp-scan.json` config.                           |
-| `mcp-scan scanners`     | List all available security scanners.                       |
-| `mcp-scan ci`           | CI mode with JSON output and strict exits.                  |
+Here's what a scan looks like when it finds some common issues:
 
-## What It Catches
+```bash
+$ mcp-scan
 
-| Check                   | Severity | Description                                           |
-| ----------------------- | -------- | ----------------------------------------------------- |
-| `exposed-secret`        | CRITICAL | Detects hardcoded API keys and tokens in config files.  |
-| `shell-injection-risk`  | CRITICAL | Args contain `${...}`, backticks, or `$(...)`.          |
-| `known-malicious`       | CRITICAL | Package name matches a bundled blocklist.             |
-| `unverified-source`     | HIGH     | Not from official org and not in allowlist.           |
-| `typosquat-detection`   | HIGH     | Package names mimicking official server names.        |
-| `excessive-permissions` | HIGH     | Access to sensitive directories like `/`, `~`, `~/.ssh`. |
-| `stale-server`          | HIGH     | Package not updated in over 6 months.                 |
+╔════════════════════════════════════════════╗
+║              mcp-scan results              ║
+╚════════════════════════════════════════════╝
 
-...and many more.
+Cursor - shady-analytics
+Config: /Users/rodolf/.cursor/mcp.json
+┌──────────┬───────────────────────┬──────────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────┐
+│ Severity │ ID                    │ Description                                                      │ Recommendation                                           │
+├──────────┼───────────────────────┼──────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┤
+│ HIGH     │ typosquat-detection   │ Package 'mcp-analytics-proo' looks suspiciously like official... │ Verify you meant to install this package and not '@mo... │
+└──────────┴───────────────────────┴──────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────┘
+
+VS Code - github-leaky
+Config: /Users/rodolf/.vscode/mcp.json
+┌──────────┬───────────────────┬──────────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────┐
+│ Severity │ ID                │ Description                                                      │ Recommendation                                           │
+├──────────┼───────────────────┼──────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┤
+│ CRITICAL │ exposed-secret    │ Exposed GitHub Token in environment variable 'GITHUB_TOKEN'.     │ Move the secret to a secure environment variable and r... │
+└──────────┴───────────────────┴──────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────┘
+
+──────────────────────────────────────────────────
+✖ CRITICAL: 2 servers scanned in 12ms. Critical: 1, High: 1, Medium: 0.
+```
+
+## What it checks
+
+| Check                | What it catches                                      | Example                                             |
+| -------------------- | ---------------------------------------------------- | --------------------------------------------------- |
+| **Secret detection** | API keys, tokens in env vars and args                | `GITHUB_TOKEN=ghp_...`                              |
+| **Typosquat detection**| Misspelled package names                             | `@modelcontextprotocol` vs `@modeicontextprotocol`  |
+| **Permission scanning**| Overly broad filesystem access                       | `/` instead of `~/projects`                         |
+| **Config validation**  | Missing env vars, malformed JSON, injection in args  | `args: ["${rm -rf /}"]`                              |
+| **Transport security** | HTTP instead of HTTPS for SSE servers                | `url: "http://example.com"`                         |
+
+## Supported tools
+
+- **Claude Desktop**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Cursor**: `~/.cursor/mcp.json`
+- **VS Code Copilot**: `~/.vscode/mcp.json`
+- **Claude Code**: `~/.claude.json`
+- **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
+
+## CI/CD usage
+
+You can use `mcp-scan` in your GitHub Actions workflow to automatically scan for vulnerabilities on every push and pull request.
+
+```yaml
+name: MCP Scan
+on: [push, pull_request]
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npx mcp-scan ci
+```
+
+## JSON output
+
+For programmatic use, you can get the scan results in JSON format using the `--json` flag.
+
+```bash
+mcp-scan --json
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a pull request or open an issue.
+
+## License
+
+[MIT](https://github.com/rodolfboctor/mcp-scan/blob/main/LICENSE)
 
 ---
 
