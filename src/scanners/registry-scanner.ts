@@ -1,7 +1,7 @@
 import { ResolvedServer } from '../types/config.js';
 import { Finding } from '../types/scan-result.js';
 import { KNOWN_MALICIOUS_PACKAGES } from '../data/known-malicious.js';
-import { OFFICIAL_SERVERS } from '../data/official-servers.js';
+import { OFFICIAL_SERVERS, TRUSTED_COMMUNITY_SERVERS } from '../data/official-servers.js';
 
 export function scanRegistry(server: ResolvedServer): Finding[] {
   const findings: Finding[] = [];
@@ -32,6 +32,12 @@ export function scanRegistry(server: ResolvedServer): Finding[] {
       id: 'official-server',
       severity: 'INFO',
       description: `Server '${packageName}' is an official @modelcontextprotocol package.`,
+    });
+  } else if (TRUSTED_COMMUNITY_SERVERS.has(packageName)) {
+    findings.push({
+      id: 'trusted-community-server',
+      severity: 'INFO',
+      description: `Server '${packageName}' is a widely trusted community package.`,
     });
   } else if (!packageName.startsWith('@modelcontextprotocol/') && (server.command === 'npx' || server.command === 'npm')) {
     findings.push({

@@ -8,6 +8,7 @@ import { scanRegistry } from '../scanners/registry-scanner.js';
 import { scanTyposquat } from '../scanners/typosquat-scanner.js';
 import { scanTransport } from '../scanners/transport-scanner.js';
 import { scanConfig } from '../scanners/config-scanner.js';
+import { scanAst } from '../scanners/ast-scanner.js';
 import { ScanReport, ServerScanResult } from '../types/scan-result.js';
 import { DetectedTool } from '../types/config.js';
 import { createSpinner } from '../utils/spinner.js';
@@ -91,7 +92,8 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
         ...scanRegistry(server),
         ...scanTyposquat(server),
         ...scanTransport(server),
-        ...scanConfig(server)
+        ...scanConfig(server),
+        ...scanAst(server)
       ];
 
       const findings = allFindings.filter(f => SEVERITY_ORDER[f.severity] >= minSeverity);

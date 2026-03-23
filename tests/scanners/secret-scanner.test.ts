@@ -19,6 +19,66 @@ describe('Secret Scanner', () => {
     expect(findings).toHaveLength(1);
   });
 
+  it('should detect Google Cloud API keys', () => {
+    const findings = scanSecrets({
+      name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
+      env: { GCP_KEY: 'AIzaSyA1234567890abcdefghij12345678901' }
+    });
+    expect(findings).toHaveLength(1);
+  });
+
+  it('should detect Slack bot tokens', () => {
+    const findings = scanSecrets({
+      name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
+      env: { SLACK_TOKEN: 'xoxb-0000test0000-0000test0000-testvaluenotrealsecret00' }
+    });
+    expect(findings).toHaveLength(1);
+  });
+
+  it('should detect Groq API keys', () => {
+    const findings = scanSecrets({
+      name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
+      env: { GROQ_KEY: 'gsk_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY' }
+    });
+    expect(findings).toHaveLength(1);
+  });
+
+  it('should detect HuggingFace tokens', () => {
+    const findings = scanSecrets({
+      name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
+      env: { HF_TOKEN: 'hf_TESTtestTESTtestTESTtestTESTtest0' }
+    });
+    expect(findings).toHaveLength(1);
+  });
+
+  it('should detect NPM tokens', () => {
+    const findings = scanSecrets({
+      name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
+      env: { NPM_TOKEN: 'npm_abcdefghijklmnopqrstuvwxyz0123456789' }
+    });
+    expect(findings).toHaveLength(1);
+  });
+
+  it('should detect Docker Hub tokens', () => {
+    const findings = scanSecrets({
+      name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
+      env: { DOCKER_TOKEN: 'dckr_pat_TESTONLY000notrealsecret00' }
+    });
+    expect(findings).toHaveLength(1);
+  });
+
+  // PlanetScale token test skipped: GitHub push protection blocks the
+  // prefix pattern even with obviously fake values. The regex is verified
+  // to match pscale_tkn_ followed by 43 alphanumeric chars.
+
+  it('should detect Private Keys', () => {
+    const findings = scanSecrets({
+      name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
+      env: { KEY: '-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA75...' }
+    });
+    expect(findings).toHaveLength(1);
+  });
+
   it('should pass safe strings', () => {
     const findings = scanSecrets({
       name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
