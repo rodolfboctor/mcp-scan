@@ -95,6 +95,10 @@ For programmatic use, you can get the scan results in JSON format using the `--j
 mcp-scan --json
 ```
 
+## Used by
+
+- **[ugig.net](http://ugig.net/mcp)** - MCP server marketplace with integrated security scanning
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a pull request or open an issue.
