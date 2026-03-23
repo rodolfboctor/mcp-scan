@@ -92,6 +92,14 @@ export function printReport(report: ScanReport) {
   }
 
   logger.emptyLine();
-  logger.log(dim('  Built by Rodolf · ') + brand('thynkq.com'));
+  logger.log(
+    dim('  by ') +
+    chalk.white.bold('Rodolf') +
+    dim(' · ') +
+    dim('thynk') +
+    brand.bold('Q') +
+    dim('  ') +
+    chalk.hex('#339DFF').dim('thynkq.com')
+  );
   logger.emptyLine();
 }
