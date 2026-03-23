@@ -1,5 +1,17 @@
 # mcp-scan — Gemini CLI Instructions
 
+## ⚠️ LAUNCH FROM PROJECT DIRECTORY
+
+Always launch Gemini from the mcp-scan project root:
+```bash
+cd /Users/rodolf/Documents/Code/mcp-scan
+gemini
+```
+
+**If you see GSD command conflict warnings at startup** (commands renamed to `/workspace.gsd:*` and `/user.gsd:*`): you launched from `~`. Exit and relaunch from the project directory. The conflicts are gone when cwd is not `~`.
+
+---
+
 ## CRITICAL: How GSD Works in Gemini
 
 You CANNOT invoke `/gsd:` slash commands. They only fire when the USER types them at the prompt. Instead, READ the workflow `.md` file directly and follow its `<process>` steps exactly.
@@ -16,103 +28,36 @@ node "$HOME/.gemini/get-shit-done/bin/gsd-tools.cjs" init <workflow-type>
 
 ---
 
-## CURRENT TASK: Fix Config Dedup Bug (v1.0.4)
+## CURRENT TASK: v2.0 Acquisition Readiness Build
 
-### What's wrong
+v1.0.4 is shipped (config dedup bug fixed, 47 tests passing). The next milestone is **v2.0 — Acquisition Readiness**.
 
-When `mcp-scan` runs from `~`, the same config file (e.g. `~/.codex/config.toml`) gets detected as both "Codex CLI" (global) and "Project Local" (project-level), because `cwd/.codex/config.toml` resolves to the same file. This produces false `duplicate-server` findings on every server in that file.
+### Context
 
-### Task spec
+mcp-scan is a CLI security scanner for MCP (Model Context Protocol) server configs. The acquisition play: OSS reputation + community signals, targeting Snyk, Wiz, or GitHub within 12-18 months. Snyk already acquired Invariant Labs (original mcp-scan creators) in June 2025. Window is closing.
 
-Read `TASKS-DEDUP-FIX.md` at the project root. It has:
-- The exact root cause
-- The exact before/after code for `src/config/detector.ts`
-- The test to add to `tests/config/detector.test.ts`
-- The verification commands
-- The commit message
+**Current state:** v1.0.4, detects 8 tools, 8 scanners. Needs: more tool coverage, deeper scanners, GitHub Action with SARIF, npm library export, community health files.
 
-### GSD Workflow — Run Fully Autonomous
+### What to build (5 phases)
 
-DO NOT ask the user any questions. All information is in `TASKS-DEDUP-FIX.md`. Execute this:
+1. **Coverage Breadth** — Zed, Continue.dev, Cline, Roo Code, Amp, Plandex, ChatGPT Desktop, GitHub Copilot. .mcp.json support. --ci flag.
+2. **Scanner Depth** — Prompt injection scanner, OSV.dev CVE lookup, .env leak scanner.
+3. **Library Export** — `src/lib.ts` public API, ESM + CJS builds. MUST come before Phase 4.
+4. **GitHub Action + SARIF** — `action.yml` AT REPO ROOT (not in a subdirectory). SARIF 2.1.0 for GitHub Security tab. action/src/action.ts imports from `../../src/lib.ts`.
+5. **Community Health** — CONTRIBUTING.md, SECURITY.md, CHANGELOG.md, pre-commit hooks.
 
-**Step 1: Read the task spec**
-```bash
-cat TASKS-DEDUP-FIX.md
+### How to start the v2.0 build
+
+The full autonomous command is at `.claude/commands/build-mcp-scan.md`. Send that to Claude Code. Gemini handles individual phases as Claude directs.
+
+For a standalone Gemini execution, follow the GSD full flow:
+```
+Step 1: Read .planning/STATE.md and .planning/ROADMAP.md
+Step 2: cat ~/.gemini/get-shit-done/workflows/new-milestone.md — follow process
+Step 3: For each phase: cat ~/.gemini/get-shit-done/workflows/discuss-phase.md, then plan-phase.md, then execute-phase.md, then verify-work.md
 ```
 
-**Step 2: Use GSD quick workflow**
-```bash
-cat ~/.gemini/get-shit-done/workflows/quick.md
-```
-
-Follow its `<process>` steps with these inputs:
-- **Task:** Fix config detector dedup bug per TASKS-DEDUP-FIX.md
-- **Context:** The exact code change is specified in the task file. Apply it exactly.
-
-**Step 3: Apply the fix to `src/config/detector.ts`**
-- Add `import path from 'path';`
-- Add `seenPaths` Set to track resolved config paths
-- Resolve all paths with `path.resolve()` before adding to detected array
-- In the project-local loop, skip paths already in `seenPaths`
-- The exact before/after code is in `TASKS-DEDUP-FIX.md`
-
-**Step 4: Replace `tests/config/detector.test.ts` entirely**
-- The full updated test file (with new imports and dedup test) is in `TASKS-DEDUP-FIX.md`
-- Add `import path from 'path'` and `import { detectTools } from '../../src/config/detector.js'`
-- Add the `'should not detect same config path under multiple tool names'` test
-- Keep the two existing tests
-
-**Step 5: Bump version**
-- Change `version` in `package.json` from `1.0.3` to `1.0.4`
-
-**Step 6: Verify**
-```bash
-npm run build
-npm test
-node dist/index.js
-node dist/index.js --json
-```
-
-Then the CRITICAL test — run from home dir to prove the bug is fixed:
-```bash
-cd ~ && node $(pwd)/../Documents/Code/mcp-scan/dist/index.js 2>&1 | head -40
-```
-The output should NOT have any "Project Local" entries that duplicate global tool entries.
-
-**Expected after fix:**
-- Build: clean
-- Tests: 47+ passed (46 existing + 1 new dedup test)
-- `node dist/index.js` from project dir: no "Project Local" duplicates
-- `node dist/index.js` from `~`: no false duplicate-server findings
-- No false `duplicate-server` findings for configs detected under multiple tool names
-
-**Step 7: Set git author and commit**
-```bash
-git config user.name "Abanoub Rodolf Boctor"
-git config user.email "abanoub.rodolf@gmail.com"
-```
-```
-fix(detector): deduplicate configs that resolve to the same file path
-
-When cwd matches home dir, project-local detection re-discovers global
-tool configs under "Project Local", causing false duplicate-server
-findings. Resolve all paths before comparison and skip already-seen files.
-```
-
-**Step 8: Push**
-```bash
-git push origin main
-```
-
-**Step 9: Report results**
-After pushing, print a summary showing:
-- Files changed
-- Test results
-- Before/after comparison (what the user would see differently)
-
-### TLDR for this task
-
-One file to change (`src/config/detector.ts`), one test file to update (`tests/config/detector.test.ts`), one version bump (`package.json`). The fix resolves all config paths and skips duplicates. The full updated test file and code are in `TASKS-DEDUP-FIX.md`. Do not ask questions. Execute, verify from both project dir AND home dir, commit, push.
+DO NOT use /gsd:quick. Use the full discuss→plan→execute→verify loop for every phase.
 
 ---
 
@@ -126,8 +71,6 @@ One file to change (`src/config/detector.ts`), one test file to update (`tests/c
 | Lint | `npm run lint` |
 | Entry | `src/index.ts` (Commander.js) |
 | Main output file | `src/utils/reporter.ts` |
-| Logger | `src/utils/logger.ts` |
-| Spinner | `src/utils/spinner.ts` |
 | Config detector | `src/config/detector.ts` |
 | Config paths | `src/config/paths.ts` |
 | Scan logic | `src/commands/scan.ts` |
@@ -159,7 +102,14 @@ by Rodolf · thynkQ  thynkq.com
 
 Research-first. Never fabricate regex patterns, package lists, or threat intel. Verify against official docs. If unsure, add a TODO instead of guessing.
 
-## Verification (after every task)
+## Critical guardrails
+
+- `action.yml` must be at REPO ROOT for `uses: rodolfboctor/mcp-scan@v1` to work
+- Library Export (Phase 3) MUST be done before GitHub Action (Phase 4) — the Action imports from the library
+- Use `process.exitCode = 1` not `process.exit(1)` for --ci flag so tests can verify behavior
+- `import path from 'path'` (not `* as path`) in TypeScript
+
+## Verification (after every change)
 
 ```bash
 npm run build
@@ -170,9 +120,8 @@ node dist/index.js --json
 
 ## Reference Files
 
-- `TASKS-DEDUP-FIX.md` — Current bug fix spec (v1.0.4)
-- `PRD.md` — Product requirements for v1.0.3
-- `TASKS-VISUAL-UPGRADE.md` — Detailed spec for 8 visual upgrade tasks (DONE)
-- `TASKS-UGIG-INTEGRATION.md` — Detailed spec for 4 ugig.net integration tasks (DONE)
-- `.planning/codebase/` — Codebase map
+- `.claude/commands/build-mcp-scan.md` — Full autonomous build command (30 GSD invocations)
 - `.planning/STATE.md` — GSD state tracking
+- `.planning/ROADMAP.md` — Phase breakdown
+- `TASKS-DEDUP-FIX.md` — v1.0.4 fix spec (DONE)
+- `.planning/codebase/` — Codebase map
