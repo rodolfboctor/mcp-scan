@@ -3,6 +3,7 @@ import { logger } from '../utils/logger.js';
 import { atomicWriteConfig } from '../config/writer.js';
 import { parseConfig } from '../config/parser.js';
 import readline from 'readline';
+import { SECRET_PATTERNS } from '../data/secret-patterns.js';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -32,24 +33,40 @@ export async function runFix() {
       if (answer.toLowerCase().startsWith('y')) {
         try {
            const config = parseConfig(result.configPath);
-           if (config && config.mcpServers[result.serverName]) {
-             
-             // Simplistic auto-fix for exposed secrets
-             if (finding.id === 'exposed-secret' && config.mcpServers[result.serverName].env) {
-                // Find which env var looks like a secret and strip it, replacing with a generic ref
-                const env = config.mcpServers[result.serverName].env as Record<string, string>;
-                for (const key of Object.keys(env)) {
-                   if (env[key].length > 20) { // Naive check for the fix
-                       env[key] = `\${${key}}`;
-                   }
-                }
-                
-                atomicWriteConfig(result.configPath, JSON.stringify(config, null, 2));
-                logger.pass('Fix applied successfully.');
-                fixedCount++;
-             } else {
-                logger.error('Auto-fix logic not implemented for this specific issue type yet.');
-             }
+           if (!config || !config.mcpServers[result.serverName]) continue;
+
+           const server = config.mcpServers[result.serverName];
+           let changed = false;
+
+           // 1. Fix exposed secrets
+           if (finding.id === 'exposed-secret' && server.env) {
+              for (const [key, value] of Object.entries(server.env)) {
+                 for (const pattern of SECRET_PATTERNS) {
+                    if (pattern.regex.test(value)) {
+                       server.env[key] = `\${${key}}`;
+                       changed = true;
+                       break;
+                    }
+                 }
+              }
+           } 
+           // 2. Fix HTTP to HTTPS
+           else if (finding.id === 'http-transport-no-auth' && server.args) {
+              server.args = server.args.map(arg => {
+                 if (arg.startsWith('http://')) {
+                    changed = true;
+                    return arg.replace('http://', 'https://');
+                 }
+                 return arg;
+              });
+           }
+
+           if (changed) {
+              atomicWriteConfig(result.configPath, JSON.stringify(config, null, 2));
+              logger.pass('Fix applied successfully.');
+              fixedCount++;
+           } else {
+              logger.error('Could not apply fix automatically.');
            }
         } catch (e: any) {
            logger.error(`Failed to apply fix: ${e.message}`);
