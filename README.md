@@ -129,6 +129,7 @@ Exits with code 1 if critical findings are detected. Pair with `--json` for prog
 mcp-scan                        # Scan all detected configs
 mcp-scan --config path/to/file  # Scan a specific config
 mcp-scan --json                 # JSON output for pipelines
+mcp-scan --ugig                 # Show marketplace link for verified servers
 mcp-scan ci                     # CI mode (strict exit codes)
 ```
 
@@ -146,7 +147,7 @@ Show your users their MCP configs are audited:
 
 | Project | Type | Link |
 |:--------|:-----|:-----|
-| **ugig.net** | MCP marketplace | [ugig.net/mcp](http://ugig.net/mcp) |
+| **ugig.net** | MCP marketplace — browse and list verified servers | [ugig.net/mcp](https://ugig.net/mcp) |
 
 > Using mcp-scan? [Open an issue](https://github.com/rodolfboctor/mcp-scan/issues) and we'll add you here.
 
