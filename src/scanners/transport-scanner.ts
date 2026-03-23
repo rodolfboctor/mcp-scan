@@ -13,6 +13,8 @@ export function scanTransport(server: ResolvedServer): Finding[] {
       id: 'http-transport-no-auth',
       severity: 'MEDIUM',
       description: `Server connects via HTTP but no authentication credentials were found in env.`,
+      fixRecommendation: `Upgrade to HTTPS if supported by the server.`,
+      fixable: true
     });
   }
 
