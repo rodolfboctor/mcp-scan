@@ -28,6 +28,7 @@ program
   .option('--fix', 'Automatically fix issues')
   .option('--severity <level>', 'Filter by severity (low, medium, high, critical)', 'low')
   .option('-c, --config <path>', 'Path to a specific MCP config file to scan')
+  .option('--ugig', 'Show ugig.net marketplace link for verified servers')
   .action(async (options) => {
     const report = await runScan({ ...options, version: pkg.version });
     if (report.criticalCount > 0 || report.highCount > 0) {
