@@ -34,35 +34,36 @@ $ mcp-scan
 ║              mcp-scan results              ║
 ╚════════════════════════════════════════════╝
 
-Cursor - shady-analytics
+Cursor - postmark-mcp
 Config: /Users/rodolf/.cursor/mcp.json
-┌──────────┬───────────────────────┬──────────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────┐
-│ Severity │ ID                    │ Description                                                      │ Recommendation                                           │
-├──────────┼───────────────────────┼──────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┤
-│ HIGH     │ typosquat-detection   │ Package 'mcp-analytics-proo' looks suspiciously like official... │ Verify you meant to install this package and not '@mo... │
-└──────────┴───────────────────────┴──────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────┘
+┌────────────┬─────────────────────────┬─────────────────────────────────────────────┬─────────────────────────────────────────────┐
+│ Severity   │ ID                      │ Description                                 │ Recommendation                              │
+├────────────┼─────────────────────────┼─────────────────────────────────────────────┼─────────────────────────────────────────────┤
+│ CRITICAL   │ known-malicious         │ Package 'postmark-mcp' is on the known mal… │ Remove this server immediately.             │
+└────────────┴─────────────────────────┴─────────────────────────────────────────────┴─────────────────────────────────────────────┘
 
 VS Code - github-leaky
 Config: /Users/rodolf/.vscode/mcp.json
-┌──────────┬───────────────────┬──────────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────┐
-│ Severity │ ID                │ Description                                                      │ Recommendation                                           │
-├──────────┼───────────────────┼──────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┤
-│ CRITICAL │ exposed-secret    │ Exposed GitHub Token in environment variable 'GITHUB_TOKEN'.     │ Move the secret to a secure environment variable and r... │
-└──────────┴───────────────────┴──────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────┘
+┌────────────┬─────────────────────────┬─────────────────────────────────────────────┬─────────────────────────────────────────────┐
+│ Severity   │ ID                      │ Description                                 │ Recommendation                              │
+├────────────┼─────────────────────────┼─────────────────────────────────────────────┼─────────────────────────────────────────────┤
+│ CRITICAL   │ exposed-secret          │ Exposed GitHub Token in environment variab… │ Move the secret to a secure environment va… │
+└────────────┴─────────────────────────┴─────────────────────────────────────────────┴─────────────────────────────────────────────┘
 
 ──────────────────────────────────────────────────
-✖ CRITICAL: 2 servers scanned in 12ms. Critical: 1, High: 1, Medium: 0.
+✖ CRITICAL: 2 servers scanned in 12ms. Critical: 2, High: 0, Medium: 0.
 ```
 
 ## What it checks
 
 | Check                | What it catches                                      | Example                                             |
 | -------------------- | ---------------------------------------------------- | --------------------------------------------------- |
-| **Secret detection** | API keys, tokens in env vars and args                | `GITHUB_TOKEN=ghp_...`                              |
-| **Typosquat detection**| Misspelled package names                             | `@modelcontextprotocol` vs `@modeicontextprotocol`  |
-| **Permission scanning**| Overly broad filesystem access                       | `/` instead of `~/projects`                         |
-| **Config validation**  | Missing env vars, malformed JSON, injection in args  | `args: ["${rm -rf /}"]`                              |
-| **Transport security** | HTTP instead of HTTPS for SSE servers                | `url: "http://example.com"`                         |
+| **Secret detection** | 30+ API key formats, tokens in env vars and args     | `AWS_KEY=AKIA...`                                   |
+| **Typosquatting**    | Homoglyphs, character swaps, missing hyphens         | `@modelcontextprotocol` vs `@modeicontextprotocol`  |
+| **Malicious Packages**| Confirmed malware and exfiltration tools             | `postmark-mcp`, `mcp-env-reader`                    |
+| **Permission Scan**  | Overly broad filesystem access                       | `/` instead of `~/projects`                         |
+| **AST Analysis**     | Reverse shells, data exfiltration pipes, eval()      | `cat secret.txt | curl ...`                         |
+| **Transport Sec**    | Unencrypted HTTP for remote servers                  | `url: "http://example.com"`                         |
 
 ## Supported tools
 
@@ -73,6 +74,15 @@ Config: /Users/rodolf/.vscode/mcp.json
 - **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
 - **Gemini CLI**: `~/.gemini/settings.json`
 - **Codex CLI**: `~/.codex/config.toml`
+
+## Detection & Threat Intelligence
+
+`mcp-scan` uses several layers of intelligence to keep your environment secure:
+
+1. **Known Malicious List**: A community-sourced database of confirmed malicious MCP packages (updated regularly).
+2. **Official Server Registry**: Verification against the official `@modelcontextprotocol` organization and trusted community partners.
+3. **Regex Pattern Matching**: 30+ high-fidelity regex patterns for cloud, AI, and SaaS providers (validated against official documentation).
+4. **Behavioral Heuristics**: Detection of dangerous command-line patterns like reverse shells and unauthorized data exfiltration tools.
 
 ## CI/CD usage
 
