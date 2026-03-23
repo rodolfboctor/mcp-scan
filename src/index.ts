@@ -27,6 +27,7 @@ program
   .option('--json', 'Output report in JSON format')
   .option('--fix', 'Automatically fix issues')
   .option('--severity <level>', 'Filter by severity (low, medium, high, critical)', 'low')
+  .option('-c, --config <path>', 'Path to a specific MCP config file to scan')
   .action(async (options) => {
     const report = await runScan(options);
     if (report.criticalCount > 0 || report.highCount > 0) {

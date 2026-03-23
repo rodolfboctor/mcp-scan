@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { detectTools } from '../config/detector.js';
 import { parseConfig, extractServers } from '../config/parser.js';
 import { scanSecrets } from '../scanners/secret-scanner.js';
@@ -7,13 +9,15 @@ import { scanTyposquat } from '../scanners/typosquat-scanner.js';
 import { scanTransport } from '../scanners/transport-scanner.js';
 import { scanConfig } from '../scanners/config-scanner.js';
 import { ScanReport, ServerScanResult } from '../types/scan-result.js';
+import { DetectedTool } from '../types/config.js';
 import { createSpinner } from '../utils/spinner.js';
 import { printJsonReport } from '../utils/json-reporter.js';
 import { printReport } from '../utils/reporter.js';
 import { runFix } from './fix.js';
 import { SEVERITY_ORDER, Severity } from '../types/severity.js';
+import { logger } from '../utils/logger.js';
 
-export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean } = {}): Promise<ScanReport> {
+export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string } = {}): Promise<ScanReport> {
   const startTime = Date.now();
   const spinner = !options.silent ? createSpinner('Detecting MCP configurations...').start() : null;
 
@@ -22,7 +26,17 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
     logger.info('Verbose mode enabled. Printing detailed logs.');
   }
 
-  const tools = detectTools();
+  let tools: DetectedTool[];
+
+  if (options.config) {
+    const configPath = path.resolve(options.config);
+    const exists = fs.existsSync(configPath);
+    const toolName = path.basename(configPath, path.extname(configPath));
+    tools = [{ name: toolName, configPath, exists }];
+    if (options.verbose) logger.detail(`Using config file: ${configPath}`);
+  } else {
+    tools = detectTools();
+  }
   if (options.verbose) logger.detail(`Detected ${tools.length} potential tool configs.`);
   const report: ScanReport = {
     results: [],
