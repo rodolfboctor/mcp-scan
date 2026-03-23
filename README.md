@@ -1,17 +1,20 @@
 <div align="center">
-  <img src=".github/assets/logo-animated.svg" alt="mcp-scan animated logo" width="400"/>
-  <h1>Security scanner for your MCP server configs.</h1>
+
+  <h1>🛡️ mcp-scan</h1>
+
+  <p><strong>Security scanner for your MCP server configs.</strong></p>
+  <p>Find leaked secrets, typosquatting, and misconfigurations before they become incidents.</p>
+
   <p>
-    <strong>Find leaked secrets, typosquatting, and misconfigurations before they bite you.</strong>
+    <a href="https://www.npmjs.com/package/mcp-scan"><img src="https://img.shields.io/npm/v/mcp-scan?style=flat-square&color=339DFF" alt="npm version"></a>
+    <a href="https://www.npmjs.com/package/mcp-scan"><img src="https://img.shields.io/npm/dm/mcp-scan?style=flat-square&color=339DFF" alt="downloads"></a>
+    <a href="https://github.com/rodolfboctor/mcp-scan/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/mcp-scan?style=flat-square" alt="license"></a>
+    <a href="https://github.com/rodolfboctor/mcp-scan/stargazers"><img src="https://img.shields.io/github/stars/rodolfboctor/mcp-scan?style=flat-square&color=339DFF" alt="stars"></a>
   </p>
-  <p>
-    <a href="https://www.npmjs.com/package/mcp-scan"><img src="https://img.shields.io/npm/v/mcp-scan?style=for-the-badge&logo=npm&color=CB3837" alt="npm version"></a>
-    <a href="https://www.npmjs.com/package/mcp-scan"><img src="https://img.shields.io/npm/dm/mcp-scan?style=for-the-badge&logo=npm&color=CB3837" alt="npm downloads"></a>
-    <a href="https://github.com/rodolfboctor/mcp-scan/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/mcp-scan?style=for-the-badge&color=blue" alt="license"></a>
-  </p>
+
 </div>
 
----
+<br/>
 
 ## Installation
 
@@ -54,42 +57,51 @@ Config: /Users/rodolf/.vscode/mcp.json
 ✖ CRITICAL: 2 servers scanned in 12ms. Critical: 2, High: 0, Medium: 0.
 ```
 
-## What it checks
+## What it scans
 
-| Check                | What it catches                                      | Example                                             |
-| -------------------- | ---------------------------------------------------- | --------------------------------------------------- |
-| **Secret detection** | 30+ API key formats, tokens in env vars and args     | `AWS_KEY=AKIA...`                                   |
-| **Typosquatting**    | Homoglyphs, character swaps, missing hyphens         | `@modelcontextprotocol` vs `@modeicontextprotocol`  |
-| **Malicious Packages**| Confirmed malware and exfiltration tools             | `postmark-mcp`, `mcp-env-reader`                    |
-| **Permission Scan**  | Overly broad filesystem access                       | `/` instead of `~/projects`                         |
-| **AST Analysis**     | Reverse shells, data exfiltration pipes, eval()      | `cat secret.txt | curl ...`                         |
-| **Transport Sec**    | Unencrypted HTTP for remote servers                  | `url: "http://example.com"`                         |
+| Scanner | What it catches | Example |
+|:--------|:----------------|:--------|
+| **Secrets** | 30+ API key formats in env vars and args | `OPENAI_KEY=sk-proj-...` |
+| **Typosquatting** | Homoglyphs, swaps, missing hyphens | `@modeicontextprotocol` |
+| **Malicious packages** | Confirmed malware and exfiltration tools | `postmark-mcp` |
+| **Permissions** | Overly broad filesystem access | `/` instead of `~/projects` |
+| **AST analysis** | Reverse shells, exfil pipes, eval() | `cat secrets \| curl ...` |
+| **Transport** | Unencrypted HTTP for remote servers | `http://example.com` |
 
-## Supported tools
+## Supported clients
 
-- **Claude Desktop**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Cursor**: `~/.cursor/mcp.json`
-- **VS Code Copilot**: `~/.vscode/mcp.json`
-- **Claude Code**: `~/.claude.json`
-- **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
-- **Gemini CLI**: `~/.gemini/settings.json`
-- **Codex CLI**: `~/.codex/config.toml`
+| Client | Config path | Format |
+|:-------|:-----------|:-------|
+| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` | JSON |
+| Cursor | `~/.cursor/mcp.json` | JSON |
+| VS Code Copilot | `~/.vscode/mcp.json` | JSON |
+| Claude Code | `~/.claude.json` | JSON |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json` | JSON |
+| Gemini CLI | `~/.gemini/settings.json` | JSON |
+| Codex CLI | `~/.codex/config.toml` | TOML |
 
-## Detection & Threat Intelligence
+> Paths shown for macOS. Windows and Linux equivalents are auto-detected.
 
-`mcp-scan` uses several layers of intelligence to keep your environment secure:
+## How it works
 
-1. **Known Malicious List**: A community-sourced database of confirmed malicious MCP packages (updated regularly).
-2. **Official Server Registry**: Verification against the official `@modelcontextprotocol` organization and trusted community partners.
-3. **Regex Pattern Matching**: 30+ high-fidelity regex patterns for cloud, AI, and SaaS providers (validated against official documentation).
-4. **Behavioral Heuristics**: Detection of dangerous command-line patterns like reverse shells and unauthorized data exfiltration tools.
+```
+  Config files       ──►  6 parallel scanners  ──►  Findings report
+  (auto-detected)         secrets, typosquat,        with severity,
+                          malicious, perms,          fix guidance,
+                          AST, transport             and exit codes
+```
 
-## CI/CD usage
+1. **Discovers** MCP configs across all supported clients
+2. **Parses** JSON and TOML formats, extracts server entries
+3. **Runs** 6 scanners in parallel against each server entry
+4. **Reports** findings sorted by severity with actionable recommendations
 
-You can use `mcp-scan` in your GitHub Actions workflow to automatically scan for vulnerabilities on every push and pull request.
+## CI/CD
+
+Add to any GitHub Actions workflow:
 
 ```yaml
-name: MCP Scan
+name: MCP Security Scan
 on: [push, pull_request]
 jobs:
   scan:
@@ -99,35 +111,38 @@ jobs:
       - run: npx mcp-scan ci
 ```
 
-## JSON output
+Exits with code 1 if critical findings are detected. Pair with `--json` for programmatic parsing.
 
-For programmatic use, you can get the scan results in JSON format using the `--json` flag.
+## CLI reference
 
 ```bash
-mcp-scan --json
+mcp-scan                        # Scan all detected configs
+mcp-scan --config path/to/file  # Scan a specific config
+mcp-scan --json                 # JSON output for pipelines
+mcp-scan ci                     # CI mode (strict exit codes)
 ```
 
 ## Badge
 
-If you are a marketplace or a server author, you can use our "Secured by mcp-scan" badge to show that your MCP configs are audited.
+Show your users their MCP configs are audited:
 
-### Shield.io (Recommended)
 ```markdown
-[![Secured by mcp-scan](https://img.shields.io/badge/Secured%20by-mcp--scan-4ade80?style=for-the-badge)](https://github.com/rodolfboctor/mcp-scan)
+[![Secured by mcp-scan](https://img.shields.io/badge/Secured%20by-mcp--scan-339DFF?style=flat-square)](https://github.com/rodolfboctor/mcp-scan)
 ```
 
-### Custom SVG
-```markdown
-![Secured by mcp-scan](https://raw.githubusercontent.com/rodolfboctor/mcp-scan/main/.github/assets/badge-secured.svg)
-```
+[![Secured by mcp-scan](https://img.shields.io/badge/Secured%20by-mcp--scan-339DFF?style=flat-square)](https://github.com/rodolfboctor/mcp-scan)
 
-## Used by
+## Integrations
 
-- **[ugig.net](http://ugig.net/mcp)** - MCP server marketplace with integrated security scanning
+| Project | Type | Link |
+|:--------|:-----|:-----|
+| **ugig.net** | MCP marketplace | [ugig.net/mcp](http://ugig.net/mcp) |
+
+> Using mcp-scan? [Open an issue](https://github.com/rodolfboctor/mcp-scan/issues) and we'll add you here.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a pull request or open an issue.
+PRs and issues welcome. If you find a malicious MCP package in the wild, report it and we'll add it to the blocklist same day.
 
 ## License
 
@@ -136,10 +151,5 @@ Contributions are welcome! Please feel free to submit a pull request or open an 
 ---
 
 <div align="center">
-  <h3>Built with ❤️ by Rodolf</h3>
-  <p>
-    <a href="https://linkedin.com/in/abanoubrodolf"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
-    <a href="https://github.com/rodolfboctor"><img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
-    <a href="https://thynkq.com"><img src="https://img.shields.io/badge/Website-339DFF?style=for-the-badge&logo=website&logoColor=white" alt="Website"></a>
-  </p>
+  <sub>Built by <a href="https://thynkq.com">ThynkQ</a></sub>
 </div>
