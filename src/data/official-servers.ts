@@ -70,7 +70,6 @@ export const TRUSTED_COMMUNITY_SERVERS = new Set([
   'stripe-mcp',
   'paypal-mcp',
   'plaid-mcp',
-  'figma-mcp',
   'canva-mcp',
   'shopify-mcp',
 ]);
