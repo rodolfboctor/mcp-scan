@@ -54,3 +54,16 @@ export function loadPolicy(cwd: string = process.cwd()): McpScanPolicy | null {
   return null;
 }
 
+export function loadIgnoreList(cwd: string = process.cwd()): string[] {
+  const ignorePath = path.join(cwd, '.mcp-scan-ignore');
+  try {
+    if (fs.existsSync(ignorePath)) {
+      const content = fs.readFileSync(ignorePath, 'utf8');
+      return content.split('\n')
+        .map(line => line.trim())
+        .filter(line => line && !line.startsWith('#'));
+    }
+  } catch (error) {}
+  return [];
+}
+
