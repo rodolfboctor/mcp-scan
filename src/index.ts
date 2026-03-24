@@ -39,6 +39,8 @@ program
   .option('--sarif <path>', 'Output report in SARIF format for GitHub Security Scanning')
   .option('--html <path>', 'Output report in self-contained HTML format')
   .option('--sbom <path>', 'Output Software Bill of Materials (SBOM) in CycloneDX format')
+  .option('--webhook <url>', 'POST scan results to a webhook URL')
+  .option('--slack-webhook <url>', 'POST scan results to a Slack webhook URL')
   .addHelpText('after', `
 Examples:
   $ mcp-scan
@@ -48,6 +50,8 @@ Examples:
   $ mcp-scan --html report.html
   $ mcp-scan --sarif results.sarif
   $ mcp-scan --sbom sbom.json
+  $ mcp-scan --webhook https://example.com/webhook
+  $ mcp-scan --slack-webhook https://hooks.slack.com/services/...
   $ mcp-scan --fix
   `)
   .action(async (options) => {
@@ -82,6 +86,16 @@ Examples:
         const { logger } = await import('./utils/logger.js');
         logger.pass(`SBOM generated: ${options.sbom}`);
       }
+    }
+
+    if (options.webhook) {
+      const { sendWebhook } = await import('./utils/webhook.js');
+      await sendWebhook(options.webhook, report);
+    }
+
+    if (options.slackWebhook) {
+      const { sendSlackWebhook } = await import('./utils/webhook.js');
+      await sendSlackWebhook(options.slackWebhook, report);
     }
 
     if (report.criticalCount > 0 || report.highCount > 0) {
