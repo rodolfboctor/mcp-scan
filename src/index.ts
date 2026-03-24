@@ -11,7 +11,7 @@ import { runInit } from './commands/init.js';
 import { runCi } from './commands/ci.js';
 import { listScanners } from './commands/scanners.js';
 import { submitToUgig } from './commands/submit.js';
-import { writeSarifReport } from './utils/sarif-reporter.js';
+import { runProxy } from './commands/proxy.js';
 
 const pkgUrl = new URL('../package.json', import.meta.url);
 const pkg = JSON.parse(readFileSync(pkgUrl, 'utf8'));
@@ -37,12 +37,14 @@ program
   .option('--dry-run', 'Preview what would be submitted without sending (use with --submit)')
   .option('--ci', 'Enable CI mode (JSON output, strict exit codes)')
   .option('--sarif <path>', 'Output report in SARIF format for GitHub Security Scanning')
+  .option('--html <path>', 'Output report in self-contained HTML format')
   .addHelpText('after', `
 Examples:
   $ mcp-scan
   $ mcp-scan --severity high
   $ mcp-scan --config ~/.cursor/mcp.json
   $ mcp-scan --json > report.json
+  $ mcp-scan --html report.html
   $ mcp-scan --sarif results.sarif
   $ mcp-scan --fix
   `)
@@ -54,7 +56,19 @@ Examples:
     const report = await runScan({ ...options, version: pkg.version, ci: options.ci });
 
     if (options.sarif) {
+      const { writeSarifReport } = await import('./utils/sarif-reporter.js');
       writeSarifReport(report, options.sarif);
+    }
+
+    if (options.html) {
+      const { generateHtmlReport } = await import('./utils/html-reporter.js');
+      const { writeFileSync } = await import('fs');
+      const htmlContent = generateHtmlReport(report);
+      writeFileSync(options.html, htmlContent);
+      if (!options.silent && !options.json) {
+        const { logger } = await import('./utils/logger.js');
+        logger.pass(`HTML report generated: ${options.html}`);
+      }
     }
 
     if (report.criticalCount > 0 || report.highCount > 0) {
@@ -69,50 +83,72 @@ Examples:
 program
   .command('audit <server>')
   .description('Deep audit of a specific server')
-  .action(runAudit);
+  .action(async (server) => {
+    await runAudit(server);
+  });
 
 program
   .command('fix')
   .description('Interactive auto-fix for exposed secrets and permissions')
-  .action(runFix);
+  .action(async () => {
+    await runFix();
+  });
 
 program
   .command('watch')
   .description('Continuous monitoring of config files')
-  .action(runWatch);
+  .action(async () => {
+    await runWatch();
+  });
 
 program
   .command('ls')
   .description('List all detected MCP servers')
-  .action(runLs);
+  .action(async () => {
+    await runLs();
+  });
 
 program
   .command('init')
   .description('Create .mcp-scan.json config in current directory')
-  .action(runInit);
+  .action(async () => {
+    await runInit();
+  });
 
 program
   .command('scanners')
   .description('List all available security scanners')
-  .action(listScanners);
+  .action(() => {
+    listScanners();
+  });
 
 program
   .command('ci')
   .description('CI mode (JSON output, strict exit codes)')
-  .option('--max-severity <level>', 'Maximum allowed severity (critical, high, medium, low)', 'high')
-  .action(runCi);
+  .option('--max-severity <level>', 'Maximum allowed severity before failing', 'high')
+  .option('--output <path>', 'Path to save JSON output')
+  .action(async (options) => {
+    await runCi(options);
+  });
 
 program
   .command('submit')
   .description('Scan and submit clean servers to ugig.net MCP marketplace')
-  .option('-c, --config <path>', 'Path to a specific MCP config file')
-  .option('--ugig-key <key>', 'ugig.net API key (or set UGIG_API_KEY env var)')
-  .option('--dry-run', 'Preview submissions without sending')
-  .option('--severity <level>', 'Minimum severity to report', 'low')
+  .option('--ugig-key <key>', 'ugig.net API key')
+  .option('--dry-run', 'Preview what would be submitted')
   .action(async (options) => {
     const report = await runScan({ ...options, version: pkg.version, silent: false });
     const apiKey = options.ugigKey || process.env.UGIG_API_KEY;
     await submitToUgig(report, { apiKey, dryRun: options.dryRun });
+  });
+
+program
+  .command('proxy')
+  .description('Run a runtime security proxy for an MCP server')
+  .option('-c, --command <cmd>', 'Command to run the MCP server')
+  .option('-a, --args <args>', 'Arguments for the MCP server (comma separated or quoted)')
+  .action(async (options) => {
+    await runProxy(options);
   });
 
 program.parse();
