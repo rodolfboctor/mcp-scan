@@ -20,6 +20,7 @@ import { DetectedTool, McpScanPolicy } from '../types/config.js';
 import { createSpinner } from '../utils/spinner.js';
 import { printJsonReport } from '../utils/json-reporter.js';
 import { printReport } from '../utils/reporter.js';
+import { logScan } from '../utils/audit-logger.js';
 import { runFix } from './fix.js';
 import { SEVERITY_ORDER, Severity } from '../types/severity.js';
 import { logger } from '../utils/logger.js';
@@ -209,6 +210,8 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
       printReport(report, { ugig: options.ugig });
     }
   }
+  
+  logScan(report);
   
   if (options.fix) {
     await runFix();
