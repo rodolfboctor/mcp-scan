@@ -27,6 +27,19 @@
 
 ---
 
+## Phase Details (Coverage Breadth)
+
+### Phase 3 (04): Coverage Breadth
+**Goal**: Detect more AI tool MCP configs than any competitor.
+**Plans**: 2 plans
+**Requirements**: COV-01, COV-02, COV-03, COV-04, COV-05, COV-06, COV-07, COV-08, COV-09
+
+Plans:
+- [ ] 04-01-PLAN.md — Verify path registry (13 named tools) and shared type definitions
+- [ ] 04-02-PLAN.md — Verify detector orchestration, JSON+TOML parser, atomic writer, and tests
+
+---
+
 ## Phase Details (v3.0)
 
 ### Phase 8: Supply Chain Armor
