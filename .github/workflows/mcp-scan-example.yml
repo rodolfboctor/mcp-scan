@@ -1,0 +1,34 @@
+name: MCP Security Scan Example
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+
+jobs:
+  scan:
+    name: MCP Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write # Required for uploading SARIF
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run mcp-scan
+        uses: rodolfboctor/mcp-scan@v1
+        with:
+          severity: 'high'
+          fail-on-findings: 'true'
+          sarif-output: 'mcp-scan-results.sarif'
+
+      - name: Upload SARIF report
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'mcp-scan-results.sarif'
