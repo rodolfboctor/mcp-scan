@@ -1,5 +1,26 @@
 import { Severity } from './severity.js';
 
+export type FindingId =
+  | 'no-malicious-package'
+  | 'malicious-package'
+  | 'no-typosquatting'
+  | 'typosquatting-package'
+  | 'outdated-package'
+  | 'unmaintained-package'
+  | 'known-vulnerability-critical'
+  | 'known-vulnerability-high';
+
+export const FINDING_IDS: FindingId[] = [
+  'no-malicious-package',
+  'malicious-package',
+  'no-typosquatting',
+  'typosquatting-package',
+  'outdated-package',
+  'unmaintained-package',
+  'known-vulnerability-critical',
+  'known-vulnerability-high',
+];
+
 export interface Finding {
   id: string;
   severity: Severity;
