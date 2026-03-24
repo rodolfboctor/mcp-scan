@@ -6,14 +6,14 @@ import readline from 'readline';
 import { SECRET_PATTERNS } from '../data/secret-patterns.js';
 import chalk from 'chalk';
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
-const question = (query: string): Promise<string> => new Promise((resolve) => rl.question(query, resolve));
-
 export async function runFix() {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  const question = (query: string): Promise<string> => new Promise((resolve) => rl.question(query, resolve));
+
   logger.brand('Starting interactive auto-fix with confidence scoring...');
   const initialReport = await runScan({ silent: true });
 
