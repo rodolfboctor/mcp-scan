@@ -116,8 +116,8 @@ program
   });
 
 program
-  .command('audit <server>')
-  .description('Deep audit of a specific server')
+  .command('audit [server]')
+  .description('View scan history or deep audit a specific server')
   .action(async (server) => {
     await runAudit(server);
   });
