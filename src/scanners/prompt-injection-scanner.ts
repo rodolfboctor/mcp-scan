@@ -46,25 +46,13 @@ export function scanPromptInjection(server: ResolvedServer): Finding[] {
 
   // Base64 patterns (longer than 50 chars)
   const base64Matches = textToScan.match(base64Regex);
-  if (base64Matches) {
-    for (const match of base64Matches) {
-      // Further check if it's actually Base64 by attempting to decode
-      try {
-        const decoded = Buffer.from(match, 'base64').toString('utf8');
-        // Simple check: if decoding doesn't result in gibberish (e.g., contains common chars)
-        // This is a heuristic, real detection is harder.
-        // For now, just detecting base64 > 50 chars is enough.
-        findings.push({
-          id: 'prompt-injection-pattern', // Reusing this ID as it's a type of injection pattern
-          severity: 'HIGH' as Severity,
-          description: `Potential prompt injection (Base64 encoded string > 50 chars) detected.`,
-          fixRecommendation: 'Review the server description and arguments for long Base64 encoded strings that could hide malicious instructions.',
-        });
-        break; // Only need to report one base64 finding per scan target
-      } catch (e) {
-        // Not a valid base64 string, ignore.
-      }
-    }
+  if (base64Matches && base64Matches.length > 0) {
+    findings.push({
+      id: 'prompt-injection-pattern',
+      severity: 'HIGH' as Severity,
+      description: `Potential prompt injection (Base64-like string > 50 chars) detected.`,
+      fixRecommendation: 'Review the server description and arguments for long Base64-like encoded strings that could hide malicious instructions.',
+    });
   }
 
 
