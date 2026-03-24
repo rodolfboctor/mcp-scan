@@ -32,7 +32,7 @@ npx mcp-scan
 - Typosquatting via Levenshtein + homoglyph detection
 - Known malicious MCP packages
 - Overly broad filesystem permissions (/ instead of ~/projects)
-- Reverse shells and exfiltration via AST analysis
+- Reverse shells and exfiltration via static analysis
 - Prompt injection in tool descriptions
 
 [ATTACH: screenshot of scanner list from terminal output]
