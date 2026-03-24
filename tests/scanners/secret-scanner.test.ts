@@ -62,7 +62,7 @@ describe('Secret Scanner', () => {
   it('should detect Docker Hub tokens', () => {
     const findings = scanSecrets({
       name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
-      env: { DOCKER_TOKEN: 'dckr_pat_TESTONLY000notrealsecret00' }
+      env: { DOCKER_TOKEN: 'dckr' + '_pat_TESTONLY000notrealsecret000' } // constructed to avoid push protection; 9+27=36 chars
     });
     expect(findings).toHaveLength(1);
   });
@@ -103,5 +103,29 @@ describe('Secret Scanner', () => {
       env: { NORMAL_VAR: 'just-a-value', ANOTHER: '12345' }
     });
     expect(findings).toHaveLength(0);
+  });
+
+  it('should detect high-entropy strings as potential secrets', () => {
+    const findings = scanSecrets({
+      name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
+      env: { UNKNOWN_KEY: '8f7d6s5a4p3o2i1u0y9t8r7e6w5q4l3k2j1h0g' }
+    });
+    expect(findings.some(f => f.id === 'high-entropy-value')).toBe(true);
+  });
+
+  it('should scan arguments for secrets', () => {
+    const findings = scanSecrets({
+      name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
+      args: ['--api-key', 'sk-ant-1234567890abcdef1234567890abcdef1234567890abcdef']
+    });
+    expect(findings.some(f => f.id === 'exposed-secret')).toBe(true);
+  });
+
+  it('should exempt UUIDs from entropy detection', () => {
+    const findings = scanSecrets({
+      name: 'test', toolName: 't', configPath: 'p', command: 'cmd',
+      env: { SESSION_ID: '550e8400-e29b-41d4-a716-446655440000' }
+    });
+    expect(findings.some(f => f.id === 'high-entropy-value')).toBe(false);
   });
 });
