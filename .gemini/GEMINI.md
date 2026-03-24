@@ -176,19 +176,80 @@ runs:
 
 ---
 
-## EXECUTION SEQUENCE
+---
 
+## EXECUTION SEQUENCE — SKIP DISCUSS-PHASE
+
+**DO NOT run the discuss-phase workflow.** It has interactive checkbox prompts that cannot be automated. Instead:
+
+**For each phase (3, 4, 5, 6, 7):**
+
+### Step A — Write CONTEXT.md directly
+
+Write the file `.planning/phases/0X-<slug>/0X-CONTEXT.md` using the pre-answered decisions from the phase section above. Use this template:
+
+```markdown
+# Phase X: <Name> — Context
+
+## Goal
+<from phase section above>
+
+## Key Decisions
+<list all decisions from the phase section, one per bullet>
+
+## Implementation Approach
+<specific files to create/edit, in order>
+
+## Verification
+<how to prove it works — build, test, smoke test>
+
+## canonical_refs
+- GEMINI.md — all phase specs
+- src/config/paths.ts — tool path definitions
+- src/config/detector.ts — config detection logic
+- src/commands/scan.ts — scan orchestration
+
+## code_context
+- Existing tool path pattern: see src/config/paths.ts getConfigPaths()
+- Existing scanner pattern: see src/scanners/config-scanner.ts
+- Test pattern: see tests/ directory
 ```
-1. Read .planning/STATE.md, .planning/ROADMAP.md
-2. Phase 3: cat discuss-phase.md workflow → follow (use answers above) → plan → execute → npm run build && npm test → verify → commit
-3. Phase 4: same flow
-4. Phase 5: same flow
-5. Phase 6: same flow — verify action.yml is at repo root
-6. Phase 7: same flow
-7. npm run build && npm run build:action && npm test -- --reporter=verbose
-8. git push origin main
-9. cat ~/.gemini/get-shit-done/workflows/session-report.md → follow it
+
+Commit it:
+```bash
+git add .planning/phases/0X-<slug>/0X-CONTEXT.md
+node "$HOME/.gemini/get-shit-done/bin/gsd-tools.cjs" commit "docs(0X): add phase context" --files ".planning/phases/0X-<slug>/0X-CONTEXT.md"
 ```
+
+### Step B — Run plan-phase workflow
+
+```bash
+cat ~/.gemini/get-shit-done/workflows/plan-phase.md
+node "$HOME/.gemini/get-shit-done/bin/gsd-tools.cjs" init phase-op X
+```
+
+Follow the plan-phase workflow. It will find your CONTEXT.md and use it to generate a PLAN.md.
+
+### Step C — Run execute-phase workflow
+
+```bash
+cat ~/.gemini/get-shit-done/workflows/execute-phase.md
+node "$HOME/.gemini/get-shit-done/bin/gsd-tools.cjs" init phase-op X
+```
+
+Follow the execute-phase workflow. Write the actual code. Run `npm run build && npm test` after each task.
+
+### Step D — Verify
+
+```bash
+npm run build
+npm test
+node dist/index.js
+```
+
+All tests must pass. Build must be clean. Then commit the phase.
+
+### Step E — Repeat for next phase
 
 ---
 
