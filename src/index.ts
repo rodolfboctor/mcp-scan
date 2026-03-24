@@ -37,6 +37,15 @@ program
   .option('--dry-run', 'Preview what would be submitted without sending (use with --submit)')
   .option('--ci', 'Enable CI mode (JSON output, strict exit codes)')
   .option('--sarif <path>', 'Output report in SARIF format for GitHub Security Scanning')
+  .addHelpText('after', `
+Examples:
+  $ mcp-scan
+  $ mcp-scan --severity high
+  $ mcp-scan --config ~/.cursor/mcp.json
+  $ mcp-scan --json > report.json
+  $ mcp-scan --sarif results.sarif
+  $ mcp-scan --fix
+  `)
   .action(async (options) => {
     if (options.ci) {
       options.json = true; // Force JSON output in CI mode
