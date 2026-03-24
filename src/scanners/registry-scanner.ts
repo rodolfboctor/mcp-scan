@@ -10,8 +10,8 @@ export function scanRegistry(server: ResolvedServer): Finding[] {
   let packageName = '';
   if (server.command === 'npx' || server.command === 'npm') {
     // npx -y @modelcontextprotocol/server-postgres
-    const pkgArg = server.args?.find(a => !a.startsWith('-'));
-    if (pkgArg) packageName = pkgArg;
+    const pkgArg = (Array.isArray(server.args) ? server.args : (server.args ? Object.values(server.args) : [])).find(a => typeof a === 'string' && !a.startsWith('-'));
+    if (pkgArg) packageName = pkgArg as string;
   } else {
     packageName = server.command;
   }

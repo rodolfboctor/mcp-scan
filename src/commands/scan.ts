@@ -2,7 +2,7 @@ import os from 'os';
 import fs from 'fs';
 import path from 'path';
 import { detectTools } from '../config/detector.js';
-import { parseConfig, extractServers, loadPolicy } from '../config/parser.js';
+import { parseConfig, extractServers, loadPolicy, loadIgnoreList } from '../config/parser.js';
 import { scanSecrets } from '../scanners/secret-scanner.js';
 import { scanPermissions } from '../scanners/permission-scanner.js';
 import { scanRegistry } from '../scanners/registry-scanner.js';
@@ -29,6 +29,7 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
   const startTime = Date.now();
   
   const policy = loadPolicy();
+  const ignoreList = loadIgnoreList();
   if (policy && !options.silent) {
     logger.detail(`Applied security policy from .mcp-scan.json`);
   }
@@ -172,7 +173,23 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
         allFindings = allFindings.filter(f => f.severity === 'CRITICAL');
       }
 
-      const findings = allFindings.filter(f => SEVERITY_ORDER[f.severity] >= minSeverity);
+      // Apply ignore list
+      const processedFindings = allFindings.map(f => {
+        const isIgnored = ignoreList.includes(f.id) || 
+                          ignoreList.includes(server.name) || 
+                          ignoreList.some(i => tool.configPath.endsWith(i));
+        
+        if (isIgnored) {
+          return {
+            ...f,
+            severity: 'INFO' as Severity,
+            description: `[SUPPRESSED] ${f.description}`
+          };
+        }
+        return f;
+      });
+
+      const findings = processedFindings.filter(f => SEVERITY_ORDER[f.severity] >= minSeverity);
 
       const serverResult: ServerScanResult = {
         serverName: server.name,
