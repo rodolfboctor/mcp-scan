@@ -11,6 +11,7 @@ import { runInit } from './commands/init.js';
 import { runCi } from './commands/ci.js';
 import { listScanners } from './commands/scanners.js';
 import { submitToUgig } from './commands/submit.js';
+import { writeSarifReport } from './utils/sarif-reporter.js';
 
 const pkgUrl = new URL('../package.json', import.meta.url);
 const pkg = JSON.parse(readFileSync(pkgUrl, 'utf8'));
@@ -35,12 +36,18 @@ program
   .option('--ugig-key <key>', 'ugig.net API key for --submit (or set UGIG_API_KEY env var)')
   .option('--dry-run', 'Preview what would be submitted without sending (use with --submit)')
   .option('--ci', 'Enable CI mode (JSON output, strict exit codes)')
+  .option('--sarif <path>', 'Output report in SARIF format for GitHub Security Scanning')
   .action(async (options) => {
     if (options.ci) {
       options.json = true; // Force JSON output in CI mode
       chalk.level = 0; // Disable chalk colors in CI mode
     }
     const report = await runScan({ ...options, version: pkg.version, ci: options.ci });
+
+    if (options.sarif) {
+      writeSarifReport(report, options.sarif);
+    }
+
     if (report.criticalCount > 0 || report.highCount > 0) {
       process.exitCode = 1;
     }
