@@ -94,6 +94,14 @@ Examples:
   });
 
 program
+  .command('diff <oldReport> <newReport>')
+  .description('Compare two scan reports and show changes')
+  .action(async (oldPath, newPath) => {
+    const { runDiff } = await import('./commands/diff.js');
+    await runDiff(oldPath, newPath);
+  });
+
+program
   .command('audit <server>')
   .description('Deep audit of a specific server')
   .action(async (server) => {
