@@ -36,3 +36,7 @@ We will acknowledge your report within 48 hours. For critical vulnerabilities, w
 ## Disclosure format
 
 Fixed vulnerabilities are documented with advisory IDs in the format MCP-SCAN-YYYY-NNN.
+
+## Contact
+
+Abanoub Rodolf Boctor -- [abanoub.rodolf@gmail.com](mailto:abanoub.rodolf@gmail.com)
