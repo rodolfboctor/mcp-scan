@@ -1,13 +1,23 @@
 ---
 name: Feature request
-about: Suggest an improvement or new capability
+about: Suggest an improvement or a new capability
 labels: enhancement
 ---
 
-**What problem does this solve?**
+## Summary
+Brief description of the proposed feature.
 
-**Proposed solution:**
+## Problem statement
+What problem does this solve? What is the current limitation?
 
-**Alternatives considered:**
+## Proposed solution
+Describe your proposed solution or the new behavior you want to see.
 
-**Would you be willing to submit a PR for this?**
+## Alternatives considered
+What other ways could this problem be solved?
+
+## Implementation
+Would you be willing to submit a pull request for this?
+
+## Additional context
+Add any other screenshots or examples here.
