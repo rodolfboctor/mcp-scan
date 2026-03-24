@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { readFileSync } from 'fs';
+import chalk from 'chalk';
 
 import { runScan } from './commands/scan.js';
 import { runAudit } from './commands/audit.js';
@@ -29,10 +30,15 @@ program
   .option('--severity <level>', 'Filter by severity (low, medium, high, critical)', 'low')
   .option('-c, --config <path>', 'Path to a specific MCP config file to scan')
   .option('--ugig', 'Show ugig.net marketplace link for verified servers')
+  .option('--ci', 'Enable CI mode (JSON output, strict exit codes)')
   .action(async (options) => {
-    const report = await runScan({ ...options, version: pkg.version });
+    if (options.ci) {
+      options.json = true; // Force JSON output in CI mode
+      chalk.level = 0; // Disable chalk colors in CI mode
+    }
+    const report = await runScan({ ...options, version: pkg.version, ci: options.ci });
     if (report.criticalCount > 0 || report.highCount > 0) {
-      process.exit(1);
+      process.exitCode = 1;
     }
   });
 

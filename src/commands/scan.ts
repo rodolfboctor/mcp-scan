@@ -18,9 +18,9 @@ import { runFix } from './fix.js';
 import { SEVERITY_ORDER, Severity } from '../types/severity.js';
 import { logger } from '../utils/logger.js';
 
-export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string, ugig?: boolean } = {}): Promise<ScanReport> {
+export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string, ugig?: boolean, ci?: boolean } = {}): Promise<ScanReport> {
   const startTime = Date.now();
-  const spinner = !options.silent ? createSpinner('Detecting MCP configurations...').start() : null;
+  const spinner = !options.silent ? createSpinner('Detecting MCP configurations...', !options.ci).start() : null;
 
   if (options.verbose && spinner) {
     spinner.stop();
@@ -36,7 +36,7 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
     tools = [{ name: toolName, configPath, exists }];
     if (options.verbose) logger.detail(`Using config file: ${configPath}`);
   } else {
-    tools = detectTools();
+    tools = await detectTools({ fs, os, process });
   }
   if (options.verbose) logger.detail(`Detected ${tools.length} potential tool configs.`);
   const report: ScanReport = {
