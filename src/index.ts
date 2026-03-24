@@ -149,6 +149,14 @@ program
   });
 
 program
+  .command('doctor')
+  .description('Run system diagnostic check for mcp-scan')
+  .action(async () => {
+    const { runDoctor } = await import('./commands/doctor.js');
+    await runDoctor();
+  });
+
+program
   .command('ls')
   .description('List all detected MCP servers')
   .action(async () => {
