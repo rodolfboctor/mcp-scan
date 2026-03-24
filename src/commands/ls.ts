@@ -1,10 +1,12 @@
 import Table from 'cli-table3';
+import fs from 'fs';
+import os from 'os';
 import { detectTools } from '../config/detector.js';
 import { parseConfig, extractServers } from '../config/parser.js';
 import { logger } from '../utils/logger.js';
 
-export function runLs() {
-  const tools = detectTools();
+export async function runLs() {
+  const tools = await detectTools({ fs, os, process });
   
   const table = new Table({
     head: ['Tool', 'Server Name', 'Command', 'Status', 'Args', 'Env Vars'],

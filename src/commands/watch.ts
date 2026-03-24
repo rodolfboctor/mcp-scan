@@ -1,4 +1,5 @@
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { runScan } from './scan.js';
 import { logger } from '../utils/logger.js';
@@ -12,8 +13,8 @@ import { sendWebhook, sendSlackWebhook } from '../utils/webhook.js';
  */
 export async function runWatch(options: { webhook?: string, slackWebhook?: string } = {}) {
   logger.brand('Starting enhanced watch mode...');
-  
-  const tools = await detectTools();
+
+  const tools = await detectTools({ fs, os, process });
   const validPaths = tools.filter(t => t.exists).map(t => t.configPath);
 
   if (validPaths.length === 0) {
