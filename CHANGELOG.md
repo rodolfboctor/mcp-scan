@@ -48,7 +48,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Unified tsup build config with correct shims for ESM/CJS dual output.
 
 ### Changed
-- README rewritten with full CLI reference, 14 supported clients, GitHub Action docs, and SARIF integration guide.
+- Version 1.5.0: 10 scanners, 13 clients, SARIF, GitHub Action.
 
 ## [1.2.0] - 2026-03-24
 
