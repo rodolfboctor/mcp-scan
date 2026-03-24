@@ -63,6 +63,7 @@ export interface Finding {
   description: string;
   fixRecommendation?: string;
   fixable?: boolean;
+  remediationConfidence?: number; // 1-100
 }
 
 export interface ServerScanResult {

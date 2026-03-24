@@ -20,7 +20,8 @@ export function scanTransport(server: ResolvedServer, allowedDomains: string[] =
       severity: 'MEDIUM',
       description: `Server connects via HTTP but no authentication credentials were found in env.`,
       fixRecommendation: `Upgrade to HTTPS if supported by the server.`,
-      fixable: true
+      fixable: true,
+      remediationConfidence: 90
     });
   }
 
@@ -30,6 +31,9 @@ export function scanTransport(server: ResolvedServer, allowedDomains: string[] =
       id: 'outdated-transport',
       severity: 'LOW',
       description: `Server uses deprecated 'sse' transport.`,
+      fixRecommendation: 'Upgrade to streamable-http transport.',
+      fixable: true,
+      remediationConfidence: 80
     });
   }
 
