@@ -25,7 +25,7 @@ The repository is organized as follows:
 - `src/types/`: TypeScript interfaces and Zod schemas.
 - `src/utils/`: Shared utilities (logger, reporter, generators).
 - `src/data/`: CVE snapshots and malicious package blocklists.
-- `tests/`: Comprehensive test suite grouped by component.
+- `tests/`: Extensive test suite grouped by component.
 
 ## Code style
 
@@ -41,7 +41,7 @@ We maintain high standards for code quality:
 1. Create a new file in `src/scanners/`.
 2. Export a function that accepts a `ResolvedServer` and returns an array of `Finding` objects.
 3. Register the scanner in `src/commands/scanners.ts`.
-4. Add comprehensive tests in `tests/scanners/` covering various edge cases.
+4. Add extensive tests in `tests/scanners/` covering various edge cases.
 
 ## Pull request process
 
