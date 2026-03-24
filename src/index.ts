@@ -38,6 +38,7 @@ program
   .option('--ci', 'Enable CI mode (JSON output, strict exit codes)')
   .option('--sarif <path>', 'Output report in SARIF format for GitHub Security Scanning')
   .option('--html <path>', 'Output report in self-contained HTML format')
+  .option('--sbom <path>', 'Output Software Bill of Materials (SBOM) in CycloneDX format')
   .addHelpText('after', `
 Examples:
   $ mcp-scan
@@ -46,6 +47,7 @@ Examples:
   $ mcp-scan --json > report.json
   $ mcp-scan --html report.html
   $ mcp-scan --sarif results.sarif
+  $ mcp-scan --sbom sbom.json
   $ mcp-scan --fix
   `)
   .action(async (options) => {
@@ -68,6 +70,17 @@ Examples:
       if (!options.silent && !options.json) {
         const { logger } = await import('./utils/logger.js');
         logger.pass(`HTML report generated: ${options.html}`);
+      }
+    }
+
+    if (options.sbom) {
+      const { generateSbom } = await import('./utils/sbom-generator.js');
+      const { writeFileSync } = await import('fs');
+      const sbomContent = await generateSbom(report);
+      writeFileSync(options.sbom, JSON.stringify(sbomContent, null, 2));
+      if (!options.silent && !options.json) {
+        const { logger } = await import('./utils/logger.js');
+        logger.pass(`SBOM generated: ${options.sbom}`);
       }
     }
 

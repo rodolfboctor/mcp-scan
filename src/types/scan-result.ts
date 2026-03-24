@@ -64,6 +64,14 @@ export interface ServerScanResult {
   findings: Finding[];
   scanDurationMs: number;
   trustScore?: number;
+  metadata?: {
+    packageName?: string;
+    version?: string;
+    license?: string;
+    repositoryUrl?: string;
+    author?: string;
+    source?: 'npm' | 'local' | 'unknown';
+  };
 }
 
 export interface ScanReport {
