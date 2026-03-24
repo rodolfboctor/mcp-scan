@@ -2,7 +2,7 @@ import os from 'os';
 import fs from 'fs';
 import path from 'path';
 import { detectTools } from '../config/detector.js';
-import { parseConfig, extractServers } from '../config/parser.js';
+import { parseConfig, extractServers, loadPolicy } from '../config/parser.js';
 import { scanSecrets } from '../scanners/secret-scanner.js';
 import { scanPermissions } from '../scanners/permission-scanner.js';
 import { scanRegistry } from '../scanners/registry-scanner.js';
@@ -15,8 +15,8 @@ import { scanToolPoisoning } from '../scanners/tool-poisoning-scanner.js';
 import { scanEnvLeak } from '../scanners/env-leak-scanner.js';
 import { scanSupplyChain } from '../scanners/supply-chain-scanner.js';
 import { scanLicense } from '../scanners/license-scanner.js';
-import { ScanReport, ServerScanResult } from '../types/scan-result.js';
-import { DetectedTool } from '../types/config.js';
+import { ScanReport, ServerScanResult, Finding } from '../types/scan-result.js';
+import { DetectedTool, McpScanPolicy } from '../types/config.js';
 import { createSpinner } from '../utils/spinner.js';
 import { printJsonReport } from '../utils/json-reporter.js';
 import { printReport } from '../utils/reporter.js';
@@ -27,6 +27,11 @@ import { logger } from '../utils/logger.js';
 export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string, ugig?: boolean, ci?: boolean, sbom?: string } = {}): Promise<ScanReport> {
   const startTime = Date.now();
   
+  const policy = loadPolicy();
+  if (policy && !options.silent) {
+    logger.detail(`Applied security policy from .mcp-scan.json`);
+  }
+
   // Initialize logger based on options
   if (options.silent) logger.isSilent = true;
   if (options.verbose) logger.isVerbose = true;
@@ -63,7 +68,9 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
   };
 
   const seenServers = new Set<string>();
-  const minSeverity = options.severity ? SEVERITY_ORDER[options.severity.toUpperCase() as Severity] : 0;
+  
+  const minSeverityLevel = (options.severity || policy?.maxSeverity || 'low').toUpperCase() as Severity;
+  const minSeverity = SEVERITY_ORDER[minSeverityLevel] || 0;
 
   for (const tool of tools) {
     if (!tool.exists) continue;
@@ -98,7 +105,7 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
 
       if (spinner) spinner.text = `Scanning ${server.name} in ${tool.name}...`;
 
-      const allFindings = [
+      let allFindings = [
         ...scanSecrets(server),
         ...scanEnvLeak(server, tool.configPath),
         ...scanPromptInjection(server),
@@ -106,10 +113,41 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
         ...scanPermissions(server),
         ...scanRegistry(server),
         ...scanTyposquat(server),
-        ...scanTransport(server),
+        ...scanTransport(server, policy?.allowedDomains),
         ...scanConfig(server),
-        ...scanAst(server)
+        ...scanAst(server, policy?.allowedDomains)
       ];
+
+      // Simple heuristic for package name from supply-chain-scanner
+      let packageName = '';
+      if (server.command === 'npx' || server.command === 'npm') {
+        const pkgArg = (Array.isArray(server.args) ? server.args : (server.args ? Object.values(server.args) : [])).find(a => typeof a === 'string' && !a.startsWith('-'));
+        if (pkgArg) packageName = pkgArg as string;
+      }
+
+      // Apply policy: Blocked Packages
+      if (policy && policy.blockedPackages && (policy.blockedPackages.includes(packageName) || policy.blockedPackages.includes(server.name))) {
+        allFindings.push({
+          id: 'blocked-package-policy',
+          severity: 'CRITICAL',
+          description: `Package '${packageName || server.name}' is explicitly blocked by company policy.`,
+          fixRecommendation: 'Remove this server or replace it with an approved alternative.'
+        });
+      }
+
+      // Apply policy: Required Env Var Prefix
+      if (policy && policy.requiredEnvVarPrefix && server.env) {
+        for (const key of Object.keys(server.env)) {
+          if (!key.startsWith(policy.requiredEnvVarPrefix)) {
+            allFindings.push({
+              id: 'env-var-prefix-risk',
+              severity: 'LOW',
+              description: `Environment variable '${key}' does not match required prefix '${policy.requiredEnvVarPrefix}'.`,
+              fixRecommendation: `Rename the environment variable to use the '${policy.requiredEnvVarPrefix}' prefix.`
+            });
+          }
+        }
+      }
 
       let trustScore: number | undefined;
       let metadata: any;
@@ -121,6 +159,16 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
         
         const licenseFindings = scanLicense(metadata);
         allFindings.push(...licenseFindings);
+      }
+
+      // Apply policy: Suppress Rules
+      if (policy && policy.suppressRules) {
+        allFindings = allFindings.filter(f => !policy.suppressRules?.includes(f.id));
+      }
+
+      // Apply policy: Allowed Packages (skip all severity < critical)
+      if (policy && policy.allowedPackages && (policy.allowedPackages.includes(packageName) || policy.allowedPackages.includes(server.name))) {
+        allFindings = allFindings.filter(f => f.severity === 'CRITICAL');
       }
 
       const findings = allFindings.filter(f => SEVERITY_ORDER[f.severity] >= minSeverity);

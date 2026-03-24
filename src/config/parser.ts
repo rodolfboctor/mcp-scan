@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import * as toml from 'smol-toml';
-import { McpConfig, ResolvedServer } from '../types/config.js';
+import { McpConfig, ResolvedServer, McpScanPolicy } from '../types/config.js';
 import { logger } from '../utils/logger.js';
 
 export function parseConfig(configPath: string): McpConfig | null {
@@ -40,3 +40,17 @@ export function extractServers(toolName: string, configPath: string, config: Mcp
 
   return servers;
 }
+
+export function loadPolicy(cwd: string = process.cwd()): McpScanPolicy | null {
+  const policyPath = path.join(cwd, '.mcp-scan.json');
+  try {
+    if (fs.existsSync(policyPath)) {
+      const content = fs.readFileSync(policyPath, 'utf8');
+      return JSON.parse(content) as McpScanPolicy;
+    }
+  } catch (error: any) {
+    logger.warn(`Failed to parse policy at ${policyPath}: ${error.message}`);
+  }
+  return null;
+}
+

@@ -22,3 +22,12 @@ export interface ResolvedServer extends McpServerEntry {
   toolName: string;
   configPath: string;
 }
+
+export interface McpScanPolicy {
+  allowedPackages?: string[];
+  blockedPackages?: string[];
+  allowedDomains?: string[];
+  requiredEnvVarPrefix?: string;
+  maxSeverity?: 'info' | 'low' | 'medium' | 'high' | 'critical';
+  suppressRules?: string[];
+}
