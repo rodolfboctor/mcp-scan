@@ -14,6 +14,7 @@ import { scanPromptInjection } from '../scanners/prompt-injection-scanner.js';
 import { scanToolPoisoning } from '../scanners/tool-poisoning-scanner.js';
 import { scanEnvLeak } from '../scanners/env-leak-scanner.js';
 import { scanSupplyChain } from '../scanners/supply-chain-scanner.js';
+import { scanLicense } from '../scanners/license-scanner.js';
 import { ScanReport, ServerScanResult } from '../types/scan-result.js';
 import { DetectedTool } from '../types/config.js';
 import { createSpinner } from '../utils/spinner.js';
@@ -117,6 +118,9 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
         allFindings.push(...supplyChainResult.findings);
         trustScore = supplyChainResult.trustScore;
         metadata = supplyChainResult.metadata;
+        
+        const licenseFindings = scanLicense(metadata);
+        allFindings.push(...licenseFindings);
       }
 
       const findings = allFindings.filter(f => SEVERITY_ORDER[f.severity] >= minSeverity);
