@@ -1,2 +1,5 @@
 {
+  "enabledPlugins": {
+    "preview@claude-code-marketplace": false
+  }
 }
