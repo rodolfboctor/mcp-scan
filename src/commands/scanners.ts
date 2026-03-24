@@ -13,6 +13,7 @@ const SCANNERS = [
   { name: 'ast-scanner', description: 'Static analysis for reverse shells, eval() abuse, and data exfiltration.' },
   { name: 'package-scanner', description: 'Deep package audit with OSV.dev CVE lookup and version verification.' },
   { name: 'tool-poisoning-scanner', description: 'Detects tool poisoning and capability injection via natural language instructions.' },
+  { name: 'supply-chain-scanner', description: 'Calculates trust scores based on GitHub stars, forks, and recent activity.' },
   { name: 'license-scanner', description: 'Checks for open-source license compliance and risk (e.g. GPL, AGPL).' },
 ];
 
