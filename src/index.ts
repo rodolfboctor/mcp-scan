@@ -134,8 +134,10 @@ program
 program
   .command('watch')
   .description('Continuous monitoring of config files')
-  .action(async () => {
-    await runWatch();
+  .option('--webhook <url>', 'POST new findings to a webhook URL')
+  .option('--slack-webhook <url>', 'POST new findings to a Slack webhook URL')
+  .action(async (options) => {
+    await runWatch(options);
   });
 
 program
