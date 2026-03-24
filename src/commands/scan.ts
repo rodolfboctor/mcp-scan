@@ -25,7 +25,7 @@ import { runFix } from './fix.js';
 import { SEVERITY_ORDER, Severity } from '../types/severity.js';
 import { logger } from '../utils/logger.js';
 
-export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string, ugig?: boolean, ci?: boolean, sbom?: string } = {}): Promise<ScanReport> {
+export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string, ugig?: boolean, ci?: boolean, sbom?: string, offline?: boolean } = {}): Promise<ScanReport> {
   const startTime = Date.now();
   
   const policy = loadPolicy();
@@ -153,7 +153,7 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
       let trustScore: number | undefined;
       let metadata: any;
       if (options.verbose || options.sbom) {
-        const supplyChainResult = await scanSupplyChain(server);
+        const supplyChainResult = await scanSupplyChain(server, options.offline);
         allFindings.push(...supplyChainResult.findings);
         trustScore = supplyChainResult.trustScore;
         metadata = supplyChainResult.metadata;

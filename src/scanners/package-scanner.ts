@@ -2,24 +2,35 @@ import { ResolvedServer } from '../types/config.js';
 import { Finding, FindingId } from '../types/scan-result.js';
 import { logger } from '../utils/logger.js';
 import { parseCvssVector } from 'vuln-vects';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// This is a stub for package scanning (network calls) used during deep audits
-export async function scanPackageDeep(server: ResolvedServer): Promise<Finding[]> {
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const SNAPSHOT_PATH = path.join(__dirname, '../data/cve-snapshot.json');
+
+/**
+ * Deep audit of a package, either online or using a bundled snapshot.
+ */
+export async function scanPackageDeep(server: ResolvedServer, offline: boolean = false): Promise<Finding[]> {
   const findings: Finding[] = [];
   
   let packageName = '';
   if (server.command === 'npx' || server.command === 'npm') {
-    const pkgArg = server.args?.find(a => !a.startsWith('-'));
-    if (pkgArg) packageName = pkgArg;
+    const pkgArg = (Array.isArray(server.args) ? server.args : (server.args ? Object.values(server.args) : [])).find(a => typeof a === 'string' && !a.startsWith('-'));
+    if (pkgArg) packageName = pkgArg as string;
   }
 
   if (!packageName) return findings;
+
+  if (offline) {
+    return scanPackageOffline(packageName);
+  }
 
   try {
     const res = await fetch(`https://registry.npmjs.org/${encodeURIComponent(packageName)}`);
     if (!res.ok) {
       logger.warn(`Failed to fetch package info for ${packageName} from npm registry.`);
-      // Continue to OSV.dev even if npm registry fetch fails
     } else {
       const data = await res.json() as any;
       if (data && typeof data === 'object' && data.time && typeof data.time.modified === 'string') {
@@ -37,33 +48,26 @@ export async function scanPackageDeep(server: ResolvedServer): Promise<Finding[]
       }
     }
   } catch (error) {
-    logger.warn(`Network error fetching npm registry for ${packageName}: ${error instanceof Error ? error.message : String(error)}`);
-    // Continue to OSV.dev even if npm registry fetch fails
+    logger.warn(`Network error fetching npm registry for ${packageName}. Switching to offline mode.`);
+    return scanPackageOffline(packageName);
   }
 
   // OSV.dev integration
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
 
   try {
     const osvRes = await fetch('https://api.osv.dev/v1/query', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        package: {
-          name: packageName,
-          ecosystem: 'npm',
-        },
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ package: { name: packageName, ecosystem: 'npm' } }),
       signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
 
     if (!osvRes.ok) {
-      logger.warn(`OSV.dev API request failed for ${packageName}: ${osvRes.statusText}`);
+      logger.warn(`OSV.dev API request failed for ${packageName}.`);
       return findings;
     }
 
@@ -79,12 +83,9 @@ export async function scanPackageDeep(server: ResolvedServer): Promise<Finding[]
                 const parsedScore = parseCvssVector(severity.score);
                 if (parsedScore && typeof parsedScore.baseScore === 'number') {
                   cvssScore = parsedScore.baseScore;
-                  break; // Found a valid CVSS_V3 score, no need to check further
+                  break;
                 }
-              } catch (error) {
-                logger.warn(`Failed to parse CVSS score '${severity.score}': ${error instanceof Error ? error.message : String(error)}`);
-                // Continue to next severity or default cvssScore to 0
-              }
+              } catch (error) {}
             }
           }
         }
@@ -94,7 +95,7 @@ export async function scanPackageDeep(server: ResolvedServer): Promise<Finding[]
             id: 'known-vulnerability-critical' as FindingId,
             severity: 'CRITICAL',
             description: `Critical vulnerability found in '${packageName}': ${vuln.id} - ${vuln.summary || vuln.details}`,
-            fixRecommendation: `Review OSV.dev advisory: ${vuln.id} (${vuln.details}). Upgrade package or remove it.`,
+            fixRecommendation: `Upgrade package or remove it.`,
             fixable: true,
           });
         } else if (cvssScore >= 7.0) {
@@ -102,7 +103,7 @@ export async function scanPackageDeep(server: ResolvedServer): Promise<Finding[]
             id: 'known-vulnerability-high' as FindingId,
             severity: 'HIGH',
             description: `High vulnerability found in '${packageName}': ${vuln.id} - ${vuln.summary || vuln.details}`,
-            fixRecommendation: `Review OSV.dev advisory: ${vuln.id} (${vuln.details}). Upgrade package or remove it.`,
+            fixRecommendation: `Upgrade package or remove it.`,
             fixable: true,
           });
         }
@@ -110,12 +111,39 @@ export async function scanPackageDeep(server: ResolvedServer): Promise<Finding[]
     }
 
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
-      logger.warn(`OSV.dev API request for ${packageName} timed out after 5 seconds.`);
-    } else {
-      logger.warn(`Error querying OSV.dev for ${packageName}: ${error instanceof Error ? error.message : String(error)}`);
-    }
+    logger.warn(`OSV.dev API request for ${packageName} failed or timed out. Switching to offline snapshot.`);
+    return [...findings, ...scanPackageOffline(packageName)];
   }
 
+  return findings;
+}
+
+function scanPackageOffline(packageName: string): Finding[] {
+  const findings: Finding[] = [];
+  try {
+    if (!fs.existsSync(SNAPSHOT_PATH)) return findings;
+    
+    const snapshot = JSON.parse(fs.readFileSync(SNAPSHOT_PATH, 'utf8'));
+    
+    // Check if snapshot is stale (> 30 days)
+    const updatedAt = new Date(snapshot.updatedAt);
+    const now = new Date();
+    const diffDays = (now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60 * 24);
+    if (diffDays > 30) {
+      logger.warn(`CVE snapshot is ${Math.floor(diffDays)} days old. Run 'npm run update-cve-snapshot' to update.`);
+    }
+
+    const pkgData = snapshot.packages[packageName];
+    if (pkgData && pkgData.vulns) {
+      for (const vuln of pkgData.vulns) {
+        findings.push({
+          id: vuln.severity === 'CRITICAL' ? 'known-vulnerability-critical' : 'known-vulnerability-high',
+          severity: vuln.severity,
+          description: `Bundled snapshot found ${vuln.severity} vulnerability in '${packageName}': ${vuln.id} - ${vuln.summary}`,
+          fixRecommendation: `Upgrade package or remove it. (Offline info)`
+        });
+      }
+    }
+  } catch (error) {}
   return findings;
 }
