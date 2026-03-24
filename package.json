@@ -1,6 +1,6 @@
 {
   "name": "mcp-scan",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Security scanner for MCP servers.",
   "type": "module",
   "main": "./dist/lib.js",
