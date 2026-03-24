@@ -23,7 +23,7 @@ import { runFix } from './fix.js';
 import { SEVERITY_ORDER, Severity } from '../types/severity.js';
 import { logger } from '../utils/logger.js';
 
-export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string, ugig?: boolean, ci?: boolean } = {}): Promise<ScanReport> {
+export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string, ugig?: boolean, ci?: boolean, sbom?: string } = {}): Promise<ScanReport> {
   const startTime = Date.now();
   
   // Initialize logger based on options
@@ -111,10 +111,12 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
       ];
 
       let trustScore: number | undefined;
-      if (options.verbose) {
+      let metadata: any;
+      if (options.verbose || options.sbom) {
         const supplyChainResult = await scanSupplyChain(server);
         allFindings.push(...supplyChainResult.findings);
         trustScore = supplyChainResult.trustScore;
+        metadata = supplyChainResult.metadata;
       }
 
       const findings = allFindings.filter(f => SEVERITY_ORDER[f.severity] >= minSeverity);
@@ -125,7 +127,8 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
         configPath: tool.configPath,
         findings,
         scanDurationMs: Date.now() - serverStartTime,
-        trustScore
+        trustScore,
+        metadata
       };
 
       report.results.push(serverResult);
