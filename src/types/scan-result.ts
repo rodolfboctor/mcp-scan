@@ -12,7 +12,10 @@ export type FindingId =
   | 'prompt-injection-pattern'
   | 'unicode-injection'
   | 'tool-name-shadow'
-  | 'schema-bypass-risk';
+  | 'schema-bypass-risk'
+  | 'exposed-secret'
+  | 'missing-referenced-env-var'
+  | 'duplicate-server';
 
 export const FINDING_IDS: FindingId[] = [
   'no-malicious-package',
@@ -27,6 +30,9 @@ export const FINDING_IDS: FindingId[] = [
   'unicode-injection',
   'tool-name-shadow',
   'schema-bypass-risk',
+  'exposed-secret',
+  'missing-referenced-env-var',
+  'duplicate-server',
 ];
 
 export interface Finding {

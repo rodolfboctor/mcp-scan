@@ -3,6 +3,8 @@ export interface McpServerEntry {
   args?: string[];
   env?: Record<string, string>;
   disabled?: boolean;
+  description?: string;
+  schema?: any;
 }
 
 export interface McpConfig {

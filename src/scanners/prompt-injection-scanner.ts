@@ -8,20 +8,29 @@ export function scanPromptInjection(server: ResolvedServer): Finding[] {
     'ignore previous instructions', 'ignore all prior', 'you are now',
     'disregard', 'forget your instructions', 'override your'
   ];
+  // Unicode patterns with descriptions
   const unicodePatterns = [
-    '\u200B', '\uFEFF', '\u202E', '\u00AD'
-  ]; // Using escaped unicode for regex
+    { char: '\u200B', name: 'U+200B (Zero Width Space)' },
+    { char: '\uFEFF', name: 'U+FEFF (Byte Order Mark)' },
+    { char: '\u202E', name: 'U+202E (Right-to-Left Override)' },
+    { char: '\u00AD', name: 'U+00AD (Soft Hyphen)' }
+  ];
   const toolNamePatterns = [
     'bash', 'python', 'eval', 'exec', 'shell', 'terminal', 'run', 'system'
   ];
   const base64Regex = /[A-Za-z0-9+/]{50,}={0,2}/;
 
   // Check server description and arguments
-  const textToScan = [server.description, ...Object.values(server.args || {})].filter(Boolean).join(' ');
+  const argsValues = server.args ? (Array.isArray(server.args) ? server.args : Object.values(server.args)) : [];
+  const textToScan = [server.description, ...argsValues].filter(Boolean).join(' ');
 
   // String patterns
   for (const pattern of stringPatterns) {
-    if (textToScan.toLowerCase().includes(pattern)) {
+    // Create a regex that matches the pattern case-insensitively, 
+    // and allows for word variations (like ignores instead of ignore) by not using word boundaries
+    // but ensures the sequence of words is there.
+    const regex = new RegExp(pattern.split(' ').join('.*'), 'i');
+    if (regex.test(textToScan)) {
       findings.push({
         id: 'prompt-injection-pattern',
         severity: 'HIGH' as Severity,
@@ -32,13 +41,12 @@ export function scanPromptInjection(server: ResolvedServer): Finding[] {
   }
 
   // Unicode patterns
-  for (const pattern of unicodePatterns) {
-    const regex = new RegExp(pattern, 'g');
-    if (regex.test(textToScan)) {
+  for (const { char, name } of unicodePatterns) {
+    if (textToScan.includes(char)) {
       findings.push({
         id: 'unicode-injection',
         severity: 'HIGH' as Severity,
-        description: `Potential unicode injection pattern detected: "${pattern}".`,
+        description: `Potential unicode injection pattern detected: ${name}.`,
         fixRecommendation: 'Review the server description and arguments for suspicious unicode characters that could be used for obfuscation.',
       });
     }
