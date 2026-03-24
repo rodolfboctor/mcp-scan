@@ -107,6 +107,7 @@ $ mcp-scan
 | Claude Code | `~/.claude.json` | JSON |
 | Gemini CLI | `~/.gemini/settings.json` | JSON |
 | Codex CLI | `~/.codex/config.toml` | TOML |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json` | JSON |
 | Zed | `~/.config/zed/settings.json` | JSON |
 | Continue.dev | `~/.continue/config.json` | JSON |
 | Cline / Roo Code | VS Code extension settings | JSON |
@@ -145,10 +146,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: rodolfboctor/mcp-scan@v1
+      - uses: rodolfboctor/mcp-scan@main
         with:
-          severity: high       # fail on high or critical (default)
-          sarif: true          # upload to GitHub Security tab
+          severity: high                          # fail on high or critical (default)
+          sarif-output: mcp-scan-results.sarif    # SARIF report path (default)
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: mcp-scan-results.sarif
 ```
 
 ### GitHub Actions (npx)
