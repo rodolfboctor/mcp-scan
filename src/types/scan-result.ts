@@ -8,7 +8,11 @@ export type FindingId =
   | 'outdated-package'
   | 'unmaintained-package'
   | 'known-vulnerability-critical'
-  | 'known-vulnerability-high';
+  | 'known-vulnerability-high'
+  | 'prompt-injection-pattern'
+  | 'unicode-injection'
+  | 'tool-name-shadow'
+  | 'schema-bypass-risk';
 
 export const FINDING_IDS: FindingId[] = [
   'no-malicious-package',
@@ -19,6 +23,10 @@ export const FINDING_IDS: FindingId[] = [
   'unmaintained-package',
   'known-vulnerability-critical',
   'known-vulnerability-high',
+  'prompt-injection-pattern',
+  'unicode-injection',
+  'tool-name-shadow',
+  'schema-bypass-risk',
 ];
 
 export interface Finding {
