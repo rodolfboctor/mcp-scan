@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1280">
+  <title>mcp-scan social preview</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 1280px;
+      height: 640px;
+      overflow: hidden;
+      background: #0d1117;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .wrapper {
+      width: 1280px;
+      height: 640px;
+      background: #0d1117;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 48px 80px;
+    }
+    .shield {
+      position: absolute;
+      top: 40px;
+      left: 48px;
+      font-size: 48px;
+      line-height: 1;
+    }
+    .title {
+      color: #ffffff;
+      font-size: 72px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+    .subtitle {
+      color: #8b949e;
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+    .terminal {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 24px 32px;
+      width: 860px;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, Consolas, monospace;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .term-line { color: #c9d1d9; }
+    .term-prompt { color: #58a6ff; }
+    .term-cmd { color: #e6edf3; }
+    .term-dim { color: #6e7681; }
+    .term-header { color: #8b949e; margin-bottom: 4px; }
+    .sev-critical { color: #f85149; font-weight: 600; }
+    .sev-high { color: #f0883e; font-weight: 600; }
+    .sev-medium { color: #d29922; font-weight: 600; }
+    .sev-low { color: #58a6ff; font-weight: 600; }
+    .sev-clean { color: #3fb950; }
+    .footer-url {
+      position: absolute;
+      bottom: 28px;
+      right: 48px;
+      color: #484f58;
+      font-size: 14px;
+      font-family: system-ui, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="shield">🔒</div>
+
+    <div class="title">mcp-scan</div>
+    <div class="subtitle">Security scanner for MCP server configurations</div>
+
+    <div class="terminal">
+      <div class="term-line"><span class="term-prompt">$</span> <span class="term-cmd">npx mcp-scan</span></div>
+      <div class="term-line term-dim">Scanning 4 servers across 3 clients...</div>
+      <div class="term-line">&nbsp;</div>
+      <div class="term-line term-header">Claude Desktop</div>
+      <div class="term-line">&nbsp; filesystem &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="sev-high">2 findings</span> <span class="term-dim">(</span><span class="sev-high">1 high</span><span class="term-dim">, </span><span class="sev-medium">1 medium</span><span class="term-dim">)</span></div>
+      <div class="term-line">&nbsp; brave-search &nbsp;&nbsp;&nbsp; <span class="sev-clean">0 findings</span></div>
+      <div class="term-line term-header">Cursor</div>
+      <div class="term-line">&nbsp; sqlite &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="sev-medium">1 finding</span> <span class="term-dim">(</span><span class="sev-medium">1 medium</span><span class="term-dim">)</span></div>
+      <div class="term-line term-header">Windsurf</div>
+      <div class="term-line">&nbsp; linear &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="sev-clean">0 findings</span></div>
+      <div class="term-line">&nbsp;</div>
+      <div class="term-line term-dim">Scanned 4 servers in 847ms</div>
+      <div class="term-line"><span class="sev-critical">0 critical</span> &nbsp; <span class="sev-high">1 high</span> &nbsp; <span class="sev-medium">2 medium</span> &nbsp; <span class="sev-low">0 low</span></div>
+    </div>
+
+    <div class="footer-url">github.com/rodolfboctor/mcp-scan</div>
+  </div>
+</body>
+</html>
