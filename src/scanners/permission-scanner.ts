@@ -11,6 +11,7 @@ export function scanPermissions(server: ResolvedServer): Finding[] {
   if (!server.args) return findings;
 
   for (const arg of server.args) {
+    if (typeof arg !== 'string') continue;
     if (DANGEROUS_PATHS.includes(arg)) {
       findings.push({
         id: 'excessive-permissions',
