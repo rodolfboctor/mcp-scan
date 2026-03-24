@@ -1,0 +1,7 @@
+- id: mcp-scan
+  name: MCP Security Scan
+  description: Scans MCP server configurations for security issues
+  language: node
+  entry: mcp-scan
+  args: ['--ci', '--severity', 'high']
+  pass_filenames: false
