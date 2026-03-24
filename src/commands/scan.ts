@@ -20,7 +20,7 @@ import { DetectedTool, McpScanPolicy } from '../types/config.js';
 import { createSpinner } from '../utils/spinner.js';
 import { printJsonReport } from '../utils/json-reporter.js';
 import { printReport } from '../utils/reporter.js';
-import { logScan } from '../utils/audit-logger.js';
+import { logScan, checkFingerprints } from '../utils/audit-logger.js';
 import { runFix } from './fix.js';
 import { SEVERITY_ORDER, Severity } from '../types/severity.js';
 import { logger } from '../utils/logger.js';
@@ -210,6 +210,19 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
         else if (finding.severity === 'MEDIUM') report.mediumCount++;
         else if (finding.severity === 'LOW') report.lowCount++;
         else if (finding.severity === 'INFO') report.infoCount++;
+      }
+    }
+  }
+
+  // 17. Server Fingerprinting (Mutation Check)
+  const mutations = checkFingerprints(report.results);
+  for (const result of report.results) {
+    const serverKey = `${result.toolName}:${result.serverName}`;
+    if (mutations[serverKey]) {
+      result.findings.push(...mutations[serverKey]);
+      for (const f of mutations[serverKey]) {
+        if (f.severity === 'LOW') report.lowCount++;
+        else if (f.severity === 'MEDIUM') report.mediumCount++;
       }
     }
   }
