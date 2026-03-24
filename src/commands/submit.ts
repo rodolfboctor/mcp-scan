@@ -37,7 +37,7 @@ function buildListingPayload(result: ServerScanResult) {
     tagline: `MCP server verified by mcp-scan`,
     description: `Security-scanned MCP server. Passed mcp-scan v1.x with no critical or high severity findings. Config detected from ${result.toolName}.`,
     price_sats: 0,
-    category: 'tools',
+    category: 'other',
     tags: ['mcp', 'verified', 'mcp-scan', result.toolName.toLowerCase()],
     status: 'active',
     source_url: '',
