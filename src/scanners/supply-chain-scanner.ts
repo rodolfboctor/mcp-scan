@@ -117,7 +117,8 @@ function scanSupplyChainOffline(packageName: string): SupplyChainResult {
     if (pkgData) {
       result.metadata!.version = pkgData.version;
       result.metadata!.license = pkgData.license;
-      result.trustScore = 100; // Assume trusted if in our top-500 snapshot
+      const hasKnownCves = Array.isArray(pkgData.vulns) && pkgData.vulns.length > 0;
+      result.trustScore = hasKnownCves ? 40 : 100;
     }
   } catch (_error) {}
   return result;
