@@ -26,6 +26,14 @@ outputs:
     description: 'Total findings'
   critical-count:
     description: 'Critical findings'
+  high-count:
+    description: 'High severity findings'
+  medium-count:
+    description: 'Medium severity findings'
+  low-count:
+    description: 'Low severity findings'
+  info-count:
+    description: 'Info findings'
   sarif-path:
     description: 'Path to SARIF file'
 runs:
