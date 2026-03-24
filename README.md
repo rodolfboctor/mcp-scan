@@ -61,6 +61,7 @@ $ npx mcp-scan
 | Plandex | `~/.plandex/config.json` | macOS, Linux |
 | GitHub Copilot | `~/.config/github-copilot/apps.json` | macOS, Linux |
 | ChatGPT Desktop | `~/Library/Application Support/com.openai.chat/settings.json` | macOS |
+| Project local | `.mcp.json`, `.cursor/mcp.json`, `.vscode/mcp.json` | All |
 
 Windows paths are automatically detected using `%APPDATA%` and `%USERPROFILE%`.
 
@@ -102,6 +103,7 @@ Windows paths are automatically detected using `%APPDATA%` and `%USERPROFILE%`.
 | `fix` | Interactive auto-fix for secrets and permissions |
 | `watch` | Continuous monitoring of config files |
 | `ls` | List all detected MCP servers |
+| `scanners` | List all available security scanners |
 | `diff` | Compare two scan reports and show changes |
 | `submit` | Scan and submit clean servers to ugig.net marketplace |
 | `ci` | CI mode with JSON output and strict exit codes |
@@ -122,6 +124,7 @@ Windows paths are automatically detected using `%APPDATA%` and `%USERPROFILE%`.
 | `--offline` | Skip network calls, use bundled CVE snapshot | `false` |
 | `--severity <level>` | Filter by minimum severity | `low` |
 | `--config <path>` | Scan a specific config file | `undefined` |
+| `--ugig` | Show ugig.net links for verified servers | `false` |
 | `--fix` | Automatically apply fixes where possible | `false` |
 | `--submit` | Submit clean servers to ugig.net | `false` |
 | `--ugig-key <key>` | ugig.net API key | `process.env.UGIG_API_KEY` |
@@ -178,6 +181,11 @@ console.log(`Found ${report.totalFindings} issues.`);
 - **GitHub Security**: Upload SARIF reports to see findings in your repository security tab.
 - **Slack**: Send alerts to your team using `--slack-webhook <url>`.
 - **Custom webhooks**: Integrate with any system using `--webhook <url>`.
+
+### Troubleshooting
+- **Rate limits**: If you see GitHub API errors, set `GITHUB_TOKEN` in your environment.
+- **Config not detected**: Use `mcp-scan --config path/to/config.json` to scan a specific file.
+- **Node version**: Ensure you are using Node.js 18 or higher.
 
 ### Architecture
 <details>
