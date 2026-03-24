@@ -3,6 +3,7 @@ import path from 'path';
 import os from 'os';
 import crypto from 'crypto';
 import { ScanReport, ServerScanResult, Finding } from '../types/scan-result.js';
+import { atomicWriteConfig } from '../config/writer.js';
 
 const AUDIT_LOG_DIR = path.join(os.homedir(), '.mcp-scan');
 const AUDIT_LOG_FILE = path.join(AUDIT_LOG_DIR, 'audit.log');
@@ -90,7 +91,7 @@ function updateFingerprints(results: ServerScanResult[]) {
       fingerprints[key] = generateFingerprint(result);
     }
 
-    fs.writeFileSync(FINGERPRINT_FILE, JSON.stringify(fingerprints, null, 2), 'utf8');
+    atomicWriteConfig(FINGERPRINT_FILE, JSON.stringify(fingerprints, null, 2));
   } catch (_error) {}
 }
 
