@@ -1,8 +1,11 @@
 node_modules
 dist
-data
+/data
 .env
 .DS_Store
 *.log
 mcp-fix-prompt.md
 CODEX_PROMPT.md
+echo-server.js
+test-proxy.js
+test-proxy.cjs
