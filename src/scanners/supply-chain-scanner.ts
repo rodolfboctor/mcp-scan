@@ -100,7 +100,7 @@ export async function scanSupplyChain(server: ResolvedServer, offline: boolean =
         logger.detail(`Supply Chain: Owner mismatch detected between npm maintainers and GitHub owner for ${packageName}.`);
     }
 
-  } catch (_error) {
+  } catch (error) {
     logger.warn(`Supply Chain: Error during scan for ${packageName}: ${error instanceof Error ? error.message : String(error)}. Switching to offline mode.`);
     return scanSupplyChainOffline(packageName);
   }
