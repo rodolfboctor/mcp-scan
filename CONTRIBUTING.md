@@ -1,63 +1,67 @@
 # Contributing to mcp-scan
 
-Thank you for your interest in improving `mcp-scan`! We welcome contributions of all kinds.
+## Development setup
 
-## Development Setup
+```bash
+git clone https://github.com/rodolfboctor/mcp-scan.git
+cd mcp-scan
+npm install
+npm test        # vitest unit tests
+npm run build   # TypeScript compile via tsup
+node dist/index.js  # smoke test
+```
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/rodolfboctor/mcp-scan.git
-   cd mcp-scan
-   ```
+## Code style
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+- TypeScript strict mode throughout.
+- Dependency injection: pass `{ fs, os, process }` to functions that need system access. This is what makes unit tests work without mocking globals.
+- Tests: vitest, files in `tests/`.
+- No new runtime dependencies without discussion. The package ships to users; every dep is a supply chain risk.
 
-3. **Run in development mode:**
-   ```bash
-   npm run dev
-   ```
+## Project structure
 
-4. **Run tests:**
-   ```bash
-   npm test
-   ```
+```
+src/
+  commands/     CLI command implementations (scan, fix, watch, audit, etc.)
+  scanners/     Individual security scanner modules
+  config/       Config detection (detector.ts) and parsing (paths.ts)
+  types/        TypeScript interfaces and Zod schemas
+  utils/        Logger, reporter, SARIF/HTML/SBOM generators, webhook
+  data/         CVE snapshot, known malicious packages, official server list
+tests/
+  scanners/     Unit tests per scanner
+  commands/     Command-level tests
+  config/       Config detection tests
+```
 
-## Project Structure
+## Adding a scanner
 
-- `src/commands/`: CLI command implementations.
-- `src/scanners/`: Individual security scanner logic.
-- `src/config/`: Configuration detection and parsing.
-- `src/types/`: TypeScript interfaces and schemas.
-- `src/utils/`: Shared utilities (logger, reporter, etc.).
+1. Create `src/scanners/your-scanner.ts`.
+2. Export a function that takes a `ResolvedServer` and returns `Finding[]`. Keep it synchronous if possible.
+3. Import and call it in `src/commands/scan.ts` inside the `allFindings` array.
+4. Add tests in `tests/scanners/your-scanner.test.ts`. Cover the happy path, the finding path, and edge cases (empty args, missing command, etc.).
 
-## Adding a New Scanner
+## Pull requests
 
-To add a new security scanner:
-1. Create a new file in `src/scanners/` (e.g., `my-new-scanner.ts`).
-2. Export a function that takes a `ResolvedServer` and returns an array of `Finding`.
-3. Register your scanner in `src/commands/scan.ts` in the `allFindings` array.
-4. Add comprehensive tests in `tests/scanners/my-new-scanner.test.ts`.
+- One logical change per PR.
+- All tests pass: `npm test`.
+- Build passes: `npm run build`.
+- Describe what changed and why in the PR description.
+- Scanner changes require tests.
+- New dependencies require justification.
 
-## Pull Request Requirements
+## Commit style
 
-- **Tests:** All changes must include corresponding tests.
-- **Linting:** Ensure your code follows the project's coding standards.
-- **Commits:** Use [Conventional Commits](https://www.conventionalcommits.org/).
-- **Documentation:** Update `README.md` or other documentation if applicable.
+Conventional commits:
+- `feat:` new functionality
+- `fix:` bug fix
+- `docs:` documentation only
+- `test:` adding or fixing tests
+- `refactor:` no behavior change
+- `chore:` maintenance, deps, build
 
-## Commit Style
+First line under 72 characters. Specific about what changed and where.
 
-We follow the Conventional Commits specification:
-- `feat:` for new features
-- `fix:` for bug fixes
-- `docs:` for documentation changes
-- `style:` for formatting changes
-- `refactor:` for code restructuring
-- `test:` for adding/fixing tests
-- `chore:` for maintenance tasks
+## Reporting a malicious package
 
----
-Built by [Abanoub Rodolf Boctor](https://linkedin.com/in/abanoubrodolf) and [ThynkQ](https://thynkq.com).
+If you find a malicious MCP package in the wild, open an issue with the package name and evidence. It gets added to the blocklist same day.
