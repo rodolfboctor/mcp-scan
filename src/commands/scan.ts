@@ -14,6 +14,7 @@ import { scanPromptInjection } from '../scanners/prompt-injection-scanner.js';
 import { scanToolPoisoning } from '../scanners/tool-poisoning-scanner.js';
 import { scanEnvLeak } from '../scanners/env-leak-scanner.js';
 import { scanSupplyChain } from '../scanners/supply-chain-scanner.js';
+import { scanPackageDeep } from '../scanners/package-scanner.js';
 import { scanLicense } from '../scanners/license-scanner.js';
 import { ScanReport, ServerScanResult, Finding } from '../types/scan-result.js';
 import { DetectedTool, McpScanPolicy } from '../types/config.js';
@@ -37,10 +38,10 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
   }
 
   // Initialize logger based on options
-  if (options.silent) logger.isSilent = true;
+  if (options.silent || options.json || options.ci) logger.isSilent = true;
   if (options.verbose) logger.isVerbose = true;
 
-  const spinner = !options.silent ? createSpinner('Detecting MCP configurations...', !options.ci).start() : null;
+  const spinner = !logger.isSilent ? createSpinner('Detecting MCP configurations...', !options.ci).start() : null;
 
   if (options.verbose && spinner) {
     spinner.stop();
@@ -156,7 +157,10 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
 
       let trustScore: number | undefined;
       let metadata: any;
-      if (options.verbose || options.sbom) {
+      if (options.verbose || options.sbom || options.ci) {
+        const packageFindings = await scanPackageDeep(server, options.offline);
+        allFindings.push(...packageFindings);
+
         const supplyChainResult = await scanSupplyChain(server, options.offline);
         allFindings.push(...supplyChainResult.findings);
         trustScore = supplyChainResult.trustScore;
