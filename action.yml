@@ -1,0 +1,33 @@
+name: 'mcp-scan'
+description: 'Security scanner for MCP server configurations'
+author: 'ThynkQ'
+branding:
+  icon: 'shield'
+  color: 'blue'
+inputs:
+  config:
+    description: 'Path to specific MCP config file'
+    required: false
+    default: ''
+  severity:
+    description: 'Minimum severity threshold (critical|high|medium|low|info)'
+    required: false
+    default: 'high'
+  fail-on-findings:
+    description: 'Exit with code 1 if findings exist at or above threshold'
+    required: false
+    default: 'true'
+  sarif-output:
+    description: 'Path for SARIF report output'
+    required: false
+    default: 'mcp-scan-results.sarif'
+outputs:
+  findings-count:
+    description: 'Total findings'
+  critical-count:
+    description: 'Critical findings'
+  sarif-path:
+    description: 'Path to SARIF file'
+runs:
+  using: 'node20'
+  main: 'action/dist/action.cjs'
