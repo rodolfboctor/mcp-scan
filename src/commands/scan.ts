@@ -12,6 +12,7 @@ import { scanConfig } from '../scanners/config-scanner.js';
 import { scanAst } from '../scanners/ast-scanner.js';
 import { scanPromptInjection } from '../scanners/prompt-injection-scanner.js';
 import { scanEnvLeak } from '../scanners/env-leak-scanner.js';
+import { scanSupplyChain } from '../scanners/supply-chain-scanner.js';
 import { ScanReport, ServerScanResult } from '../types/scan-result.js';
 import { DetectedTool } from '../types/config.js';
 import { createSpinner } from '../utils/spinner.js';
@@ -97,8 +98,8 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
 
       const allFindings = [
         ...scanSecrets(server),
-        ...scanEnvLeak(server, tool.configPath), // Added env leak scanner
-        ...scanPromptInjection(server), // Added prompt injection scanner
+        ...scanEnvLeak(server, tool.configPath),
+        ...scanPromptInjection(server),
         ...scanPermissions(server),
         ...scanRegistry(server),
         ...scanTyposquat(server),
@@ -107,6 +108,13 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
         ...scanAst(server)
       ];
 
+      let trustScore: number | undefined;
+      if (options.verbose) {
+        const supplyChainResult = await scanSupplyChain(server);
+        allFindings.push(...supplyChainResult.findings);
+        trustScore = supplyChainResult.trustScore;
+      }
+
       const findings = allFindings.filter(f => SEVERITY_ORDER[f.severity] >= minSeverity);
 
       const serverResult: ServerScanResult = {
@@ -114,7 +122,8 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
         toolName: tool.name,
         configPath: tool.configPath,
         findings,
-        scanDurationMs: Date.now() - serverStartTime
+        scanDurationMs: Date.now() - serverStartTime,
+        trustScore
       };
 
       report.results.push(serverResult);

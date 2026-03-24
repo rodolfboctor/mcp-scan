@@ -15,7 +15,9 @@ export type FindingId =
   | 'schema-bypass-risk'
   | 'exposed-secret'
   | 'missing-referenced-env-var'
-  | 'duplicate-server';
+  | 'duplicate-server'
+  | 'supply-chain-low-trust'
+  | 'supply-chain-rug-pull';
 
 export const FINDING_IDS: FindingId[] = [
   'no-malicious-package',
@@ -33,6 +35,8 @@ export const FINDING_IDS: FindingId[] = [
   'exposed-secret',
   'missing-referenced-env-var',
   'duplicate-server',
+  'supply-chain-low-trust',
+  'supply-chain-rug-pull',
 ];
 
 export interface Finding {
@@ -49,6 +53,7 @@ export interface ServerScanResult {
   configPath: string;
   findings: Finding[];
   scanDurationMs: number;
+  trustScore?: number;
 }
 
 export interface ScanReport {
