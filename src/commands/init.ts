@@ -11,11 +11,14 @@ export function runInit() {
   }
 
   const defaultConfig = {
-    ignoreServers: [],
-    ignoreRules: [],
-    customBlocklist: []
+    "allowedPackages": [],
+    "blockedPackages": [],
+    "allowedDomains": ["localhost", "127.0.0.1"],
+    "requiredEnvVarPrefix": "",
+    "maxSeverity": "low",
+    "suppressRules": []
   };
 
   fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2), 'utf8');
-  logger.pass(`Created .mcp-scan.json configuration file.`);
+  logger.pass(`Created .mcp-scan.json security policy template.`);
 }

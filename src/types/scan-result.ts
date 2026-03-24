@@ -24,7 +24,9 @@ export type FindingId =
   | 'env-var-scope-leak'
   | 'high-entropy-value'
   | 'license-risk'
-  | 'exfiltration-vector';
+  | 'exfiltration-vector'
+  | 'blocked-package-policy'
+  | 'env-var-prefix-risk';
 
 export const FINDING_IDS: FindingId[] = [
   'no-malicious-package',
@@ -51,6 +53,8 @@ export const FINDING_IDS: FindingId[] = [
   'high-entropy-value',
   'license-risk',
   'exfiltration-vector',
+  'blocked-package-policy',
+  'env-var-prefix-risk',
 ];
 
 export interface Finding {

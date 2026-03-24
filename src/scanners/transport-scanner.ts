@@ -1,11 +1,17 @@
 import { ResolvedServer } from '../types/config.js';
 import { Finding } from '../types/scan-result.js';
 
-export function scanTransport(server: ResolvedServer): Finding[] {
+export function scanTransport(server: ResolvedServer, allowedDomains: string[] = []): Finding[] {
   const findings: Finding[] = [];
   
   // A simplistic check - if it's an HTTP URL in args but no headers/auth are visible
-  const hasHttpArg = server.args?.some(a => a.startsWith('http://') || a.startsWith('https://'));
+  const hasHttpArg = server.args?.some(a => {
+    if (typeof a !== 'string') return false;
+    const isHttp = a.startsWith('http://') || a.startsWith('https://');
+    if (!isHttp) return false;
+    const isAllowed = allowedDomains.some(d => a.includes(d));
+    return isHttp && !isAllowed;
+  });
   const hasAuthEnv = server.env && Object.keys(server.env).some(k => k.toLowerCase().includes('token') || k.toLowerCase().includes('key'));
 
   if (hasHttpArg && !hasAuthEnv) {
