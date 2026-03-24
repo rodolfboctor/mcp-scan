@@ -141,6 +141,14 @@ program
   });
 
 program
+  .command('history')
+  .description('Show scan history trends and common findings')
+  .action(async () => {
+    const { showHistoryTrends } = await import('./commands/history.js');
+    await showHistoryTrends();
+  });
+
+program
   .command('ls')
   .description('List all detected MCP servers')
   .action(async () => {
