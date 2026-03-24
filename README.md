@@ -50,7 +50,7 @@ $ mcp-scan
 
   ╭──────────────────────────────────────────────╮
   │                                              │
-  │   🛡️  mcp-scan  v1.0.3                        │
+  │   🛡️  mcp-scan  v1.5.0                        │
   │   Security scanner for MCP server configs    │
   │                                              │
   ╰──────────────────────────────────────────────╯
@@ -86,44 +86,56 @@ $ mcp-scan
 
 | Scanner | What it catches | Example |
 |:--------|:----------------|:--------|
-| **Secrets** | 30+ API key formats in env vars and args | `OPENAI_KEY=sk-proj-...` |
-| **Typosquatting** | Homoglyphs, swaps, missing hyphens | `@modeicontextprotocol` |
+| **Secrets** | 43+ API key formats in env vars and args | `OPENAI_KEY=sk-proj-...` |
+| **Typosquatting** | Homoglyphs, character swaps, missing hyphens | `@modeicontextprotocol` |
 | **Malicious packages** | Confirmed malware and exfiltration tools | `postmark-mcp` |
 | **Permissions** | Overly broad filesystem access | `/` instead of `~/projects` |
-| **AST analysis** | Reverse shells, exfil pipes, eval() | `cat secrets \| curl ...` |
+| **Config** | Shell injection vectors and argument list issues | `rm -rf` in args |
 | **Transport** | Unencrypted HTTP for remote servers | `http://example.com` |
+| **Prompt injection** | Jailbreak patterns and unicode tricks in tool descriptions | `Ignore previous instructions` |
+| **Env leak** | Secrets passing through environment variable passthrough | `AWS_SECRET_ACCESS_KEY` in env |
+| **AST analysis** | Reverse shells, eval() abuse, data exfiltration | `cat secrets \| curl ...` |
+| **Package audit** | CVE lookup via OSV.dev and version verification | CVSS 9.8 in dependency |
 
 ## Supported clients
 
-| Client | Config path | Format |
-|:-------|:-----------|:-------|
+| Client | Config path (macOS) | Format |
+|:-------|:-------------------|:-------|
 | Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` | JSON |
 | Cursor | `~/.cursor/mcp.json` | JSON |
-| VS Code Copilot | `~/.vscode/mcp.json` | JSON |
+| VS Code | `~/.vscode/mcp.json` | JSON |
 | Claude Code | `~/.claude.json` | JSON |
-| Windsurf | `~/.codeium/windsurf/mcp_config.json` | JSON |
 | Gemini CLI | `~/.gemini/settings.json` | JSON |
 | Codex CLI | `~/.codex/config.toml` | TOML |
+| Zed | `~/.config/zed/settings.json` | JSON |
+| Continue.dev | `~/.continue/config.json` | JSON |
+| Cline / Roo Code | VS Code extension settings | JSON |
+| Amp | `~/.amp/config.json` | JSON |
+| Plandex | `~/.plandex/config.json` | JSON |
+| GitHub Copilot | `~/.config/github-copilot/apps.json` | JSON |
+| Project-level | `.mcp.json`, `.cursor/mcp.json`, `.vscode/mcp.json` | JSON |
 
-> Paths shown for macOS. Windows and Linux equivalents are auto-detected.
+> Windows and Linux paths are auto-detected.
 
 ## How it works
 
 ```
-  Config files       ──►  6 parallel scanners  ──►  Findings report
-  (auto-detected)         secrets, typosquat,        with severity,
-                          malicious, perms,          fix guidance,
-                          AST, transport             and exit codes
+  Config files       ──►  10 parallel scanners  ──►  Findings report
+  (auto-detected)         secrets, typosquat,         with severity,
+                          malicious, perms,           fix guidance,
+                          AST, transport,             and exit codes
+                          prompt injection,
+                          env leak, CVEs
 ```
 
 1. **Discovers** MCP configs across all supported clients
 2. **Parses** JSON and TOML formats, extracts server entries
-3. **Runs** 6 scanners in parallel against each server entry
+3. **Runs** 10 scanners in parallel against each server entry
 4. **Reports** findings sorted by severity with actionable recommendations
 
 ## CI/CD
 
-Add to any GitHub Actions workflow:
+### GitHub Actions (native action)
 
 ```yaml
 name: MCP Security Scan
@@ -133,19 +145,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npx mcp-scan ci
+      - uses: rodolfboctor/mcp-scan@v1
+        with:
+          severity: high       # fail on high or critical (default)
+          sarif: true          # upload to GitHub Security tab
 ```
 
-Exits with code 1 if critical findings are detected. Pair with `--json` for programmatic parsing.
+### GitHub Actions (npx)
+
+```yaml
+- run: npx mcp-scan ci --max-severity high
+```
+
+Exits 0 if clean, 1 if findings at or above the threshold. Use `--max-severity critical` to only fail on critical.
+
+### SARIF output
+
+```bash
+mcp-scan scan --sarif results.sarif
+```
+
+Upload to GitHub Security tab for inline annotation on PRs.
 
 ## CLI reference
 
 ```bash
-mcp-scan                        # Scan all detected configs
-mcp-scan --config path/to/file  # Scan a specific config
-mcp-scan --json                 # JSON output for pipelines
-mcp-scan --ugig                 # Show marketplace link for verified servers
-mcp-scan ci                     # CI mode (strict exit codes)
+mcp-scan scan                           # Scan all detected configs
+mcp-scan scan -c path/to/config.json    # Scan a specific file
+mcp-scan scan --json                    # JSON output for pipelines
+mcp-scan scan --sarif results.sarif     # SARIF output for GitHub Security
+mcp-scan scan --ugig                    # Show ugig.net marketplace link
+mcp-scan ci                             # CI mode (strict exit codes)
+mcp-scan ci --max-severity critical     # Only fail on critical
+mcp-scan ls                             # List all detected MCP servers
+mcp-scan scanners                       # List all available scanners
+mcp-scan fix                            # Interactive auto-fix
+mcp-scan submit --ugig-key YOUR_KEY     # Submit clean servers to ugig.net
 ```
 
 ## Badge
