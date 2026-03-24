@@ -209,10 +209,19 @@ program
   });
 
 program
+  .command('dashboard')
+  .description('Launch the interactive enterprise dashboard (TUI)')
+  .action(async () => {
+    const { runDashboard } = await import('./commands/dashboard.js');
+    await runDashboard();
+  });
+
+program
   .command('proxy')
-  .description('Run a runtime security proxy for an MCP server')
+  .description('Run a local proxy server that intercepts traffic to an MCP server')
   .option('-c, --command <cmd>', 'Command to run the MCP server')
   .option('-a, --args <args>', 'Arguments for the MCP server (comma separated or quoted)')
+  .option('--ui', 'Launch the TUI dashboard alongside the proxy')
   .action(async (options) => {
     await runProxy(options);
   });

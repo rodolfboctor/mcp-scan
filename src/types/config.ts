@@ -30,4 +30,9 @@ export interface McpScanPolicy {
   requiredEnvVarPrefix?: string;
   maxSeverity?: 'info' | 'low' | 'medium' | 'high' | 'critical';
   suppressRules?: string[];
+  privacy?: {
+    maskPii?: boolean;
+    excludePatterns?: string[];
+    customPatterns?: Record<string, string>;
+  };
 }
