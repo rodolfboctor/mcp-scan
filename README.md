@@ -67,17 +67,17 @@ Windows paths are automatically detected using `%APPDATA%` and `%USERPROFILE%`.
 ### Scanners
 | Scanner | What it detects | Severity range |
 |:--------|:----------------|:---------------|
-| **secret** | Hardcoded API keys and tokens in env vars or args | HIGH — CRITICAL |
+| **secret** | Hardcoded API keys and tokens in env vars or args | HIGH - CRITICAL |
 | **registry** | Packages on the known malicious blocklist | CRITICAL |
 | **typosquat** | Package names that closely resemble official servers | HIGH |
-| **permission** | Overly broad filesystem paths like `/`, `~`, or `.ssh` | MEDIUM — HIGH |
-| **transport** | HTTP without auth or deprecated SSE transport | LOW — MEDIUM |
-| **ast** | Suspicious execution patterns like `eval` or `exec` | HIGH — CRITICAL |
-| **prompt-injection** | Malicious instructions in server descriptions | MEDIUM — HIGH |
+| **permission** | Overly broad filesystem paths like `/`, `~`, or `.ssh` | MEDIUM - HIGH |
+| **transport** | HTTP without auth or deprecated SSE transport | LOW - MEDIUM |
+| **ast** | Suspicious execution patterns like `eval` or `exec` | HIGH - CRITICAL |
+| **prompt-injection** | Malicious instructions in server descriptions | MEDIUM - HIGH |
 | **tool-poisoning** | Capability injection and cross-tool manipulation | HIGH |
 | **env-leak** | Secrets in `.env` files exposed to server process | HIGH |
-| **package** | Known CVEs via OSV.dev API or bundled snapshot | MEDIUM — CRITICAL |
-| **supply-chain** | Low trust scores based on npm and GitHub metadata | LOW — MEDIUM |
+| **package** | Known CVEs via OSV.dev API or bundled snapshot | MEDIUM - CRITICAL |
+| **supply-chain** | Low trust scores based on npm and GitHub metadata | LOW - MEDIUM |
 | **license** | Copyleft licenses or missing license fields | LOW |
 | **config** | Shell injection patterns in argument strings | HIGH |
 
