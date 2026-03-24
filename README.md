@@ -41,62 +41,6 @@ const report = await runScan({
 console.log(`Scan complete. Found ${report.criticalCount} critical issues.`);
 ```
 
-## Demo
-
-Here's what a scan looks like when it finds some common issues:
-
-```bash
-$ mcp-scan
-
-  ╭──────────────────────────────────────────────╮
-  │                                              │
-  │   🛡️  mcp-scan  v1.5.0                        │
-  │   Security scanner for MCP server configs    │
-  │                                              │
-  ╰──────────────────────────────────────────────╯
-
-  ┌ Cursor › postmark-mcp
-  │ ~/.cursor/mcp.json
-  │
-  │  CRITICAL  known-malicious
-  │            Package 'postmark-mcp' is on the known malicious list.
-  │            ↳ Remove this server immediately.
-  │
-  └───────────────────────────────────────────────────────
-
-  ┌ VS Code › github-leaky
-  │ ~/.vscode/mcp.json
-  │
-  │  CRITICAL  exposed-secret
-  │            Exposed GitHub Token in environment variable 'GITHUB_TOKEN'.
-  │            ↳ Move the secret to a secure environment variable and reference it instead (e.g., ${GITHUB_TOKEN}).
-  │
-  └───────────────────────────────────────────────────────
-
-  ──────────────────────────────────────────────────
-
-   Scanned 2 servers across 2 clients in 12ms
-
-    2 critical    0 high    0 medium    0 low
-
-  ──────────────────────────────────────────────────
-```
-
-## What it scans
-
-| Scanner | What it catches | Example |
-|:--------|:----------------|:--------|
-| **Secrets** | 43+ API key formats in env vars and args | `OPENAI_KEY=sk-proj-...` |
-| **Typosquatting** | Homoglyphs, character swaps, missing hyphens | `@modeicontextprotocol` |
-| **Malicious packages** | Confirmed malware and exfiltration tools | `postmark-mcp` |
-| **Permissions** | Overly broad filesystem access | `/` instead of `~/projects` |
-| **Config** | Shell injection vectors and argument list issues | `rm -rf` in args |
-| **Transport** | Unencrypted HTTP for remote servers | `http://example.com` |
-| **Prompt injection** | Jailbreak patterns and unicode tricks in tool descriptions | `Ignore previous instructions` |
-| **Env leak** | Secrets passing through environment variable passthrough | `AWS_SECRET_ACCESS_KEY` in env |
-| **AST analysis** | Reverse shells, eval() abuse, data exfiltration | `cat secrets \| curl ...` |
-| **Package audit** | CVE lookup via OSV.dev and version verification | CVSS 9.8 in dependency |
-
 ## Supported clients
 
 | Client | Config path (macOS) | Format |
@@ -121,18 +65,40 @@ $ mcp-scan
 ## How it works
 
 ```
-  Config files       ──►  10 parallel scanners  ──►  Findings report
+  Config files       ──►  12 parallel scanners  ──►  Findings report
   (auto-detected)         secrets, typosquat,         with severity,
                           malicious, perms,           fix guidance,
                           AST, transport,             and exit codes
                           prompt injection,
-                          env leak, CVEs
+                          env leak, CVEs,
+                          tool poisoning,
+                          license compliance
 ```
 
 1. **Discovers** MCP configs across all supported clients
 2. **Parses** JSON and TOML formats, extracts server entries
-3. **Runs** 10 scanners in parallel against each server entry
+3. **Runs** 12 scanners in parallel against each server entry
 4. **Reports** findings sorted by severity with actionable recommendations
+
+## CLI Reference
+
+```bash
+mcp-scan                                # Default scan
+mcp-scan --severity high                # Only show high/critical
+mcp-scan --html report.html             # Generate self-contained HTML report
+mcp-scan --sbom sbom.json               # Generate CycloneDX v1.5 SBOM
+mcp-scan --json                         # JSON output for pipelines
+mcp-scan --sarif results.sarif          # SARIF output for GitHub Security
+mcp-scan --offline                      # Offline mode (skip network calls)
+mcp-scan audit                          # View scan history and trends
+mcp-scan audit <server>                 # Deep audit of a specific package
+mcp-scan report --configs dir/          # Aggregate all configs in a directory
+mcp-scan diff old.json new.json         # Compare two scan reports
+mcp-scan fix                            # Interactive auto-fix with confidence scoring
+mcp-scan watch                          # Continuous monitoring with live dashboard
+mcp-scan doctor                         # Run system diagnostic check
+mcp-scan init                           # Create security policy (.mcp-scan.json)
+```
 
 ## CI/CD
 
@@ -148,44 +114,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: rodolfboctor/mcp-scan@main
         with:
-          severity: high                          # fail on high or critical (default)
-          sarif-output: mcp-scan-results.sarif    # SARIF report path (default)
-      - uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: mcp-scan-results.sarif
-```
-
-### GitHub Actions (npx)
-
-```yaml
-- run: npx mcp-scan ci --max-severity high
-```
-
-Exits 0 if clean, 1 if findings at or above the threshold. Use `--max-severity critical` to only fail on critical.
-
-### SARIF output
-
-```bash
-mcp-scan scan --sarif results.sarif
-```
-
-Upload to GitHub Security tab for inline annotation on PRs.
-
-## CLI reference
-
-```bash
-mcp-scan scan                           # Scan all detected configs
-mcp-scan scan -c path/to/config.json    # Scan a specific file
-mcp-scan scan --json                    # JSON output for pipelines
-mcp-scan scan --sarif results.sarif     # SARIF output for GitHub Security
-mcp-scan scan --ugig                    # Show ugig.net marketplace link
-mcp-scan ci                             # CI mode (strict exit codes)
-mcp-scan ci --max-severity critical     # Only fail on critical
-mcp-scan ls                             # List all detected MCP servers
-mcp-scan scanners                       # List all available scanners
-mcp-scan fix                            # Interactive auto-fix
-mcp-scan submit --ugig-key YOUR_KEY     # Submit clean servers to ugig.net
+          severity: 'high'
+          sarif-output: 'mcp-scan-results.sarif'
 ```
 
 ## Badge

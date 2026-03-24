@@ -27,7 +27,8 @@ export type FindingId =
   | 'exfiltration-vector'
   | 'blocked-package-policy'
   | 'env-var-prefix-risk'
-  | 'server-mutation';
+  | 'server-mutation'
+  | 'upgrade-available';
 
 export const FINDING_IDS: FindingId[] = [
   'no-malicious-package',
@@ -57,6 +58,7 @@ export const FINDING_IDS: FindingId[] = [
   'blocked-package-policy',
   'env-var-prefix-risk',
   'server-mutation',
+  'upgrade-available',
 ];
 
 export interface Finding {
