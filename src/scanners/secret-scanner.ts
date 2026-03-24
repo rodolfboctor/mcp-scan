@@ -64,7 +64,8 @@ export function scanSecrets(server: ResolvedServer): Finding[] {
           severity: 'CRITICAL',
           description: `Exposed ${pattern.name} in ${source}${key ? ` '${key}'` : ''}.`,
           fixRecommendation: `Move the secret to a secure environment variable and reference it instead (e.g., \${${key || 'VAR_NAME'}}).`,
-          fixable: true
+          fixable: true,
+          remediationConfidence: 99
         });
         foundPattern = true;
         break; 
