@@ -11,9 +11,23 @@ interface RepoMetadata {
   owner: string;
 }
 
-export async function scanSupplyChain(server: ResolvedServer): Promise<{ findings: Finding[], trustScore: number }> {
+export interface SupplyChainResult {
+  findings: Finding[];
+  trustScore: number;
+  metadata?: {
+    packageName?: string;
+    version?: string;
+    license?: string;
+    repositoryUrl?: string;
+    author?: string;
+    source?: 'npm' | 'local' | 'unknown';
+  };
+}
+
+export async function scanSupplyChain(server: ResolvedServer): Promise<SupplyChainResult> {
   const findings: Finding[] = [];
   let trustScore = 50; // Neutral starting point
+  let metadata: SupplyChainResult['metadata'] = { source: 'local' };
 
   let packageName = '';
   if (server.command === 'npx' || server.command === 'npm') {
@@ -21,18 +35,27 @@ export async function scanSupplyChain(server: ResolvedServer): Promise<{ finding
     if (pkgArg) packageName = pkgArg;
   }
 
-  if (!packageName) return { findings, trustScore: 100 }; // Local/unknown servers are not penalized by this scanner
+  if (!packageName) return { findings, trustScore: 100, metadata };
+
+  metadata.source = 'npm';
+  metadata.packageName = packageName;
 
   try {
     const npmRes = await fetch(`https://registry.npmjs.org/${encodeURIComponent(packageName)}`);
     if (!npmRes.ok) {
       logger.warn(`Supply Chain: Failed to fetch npm registry data for ${packageName}.`);
-      return { findings, trustScore: 30 }; // Penalty for unknown registry status
+      metadata.source = 'unknown';
+      return { findings, trustScore: 30, metadata };
     }
 
     const npmData = await npmRes.json() as any;
     const repoUrl = extractRepoUrl(npmData);
     
+    metadata.version = npmData['dist-tags']?.latest;
+    metadata.license = npmData.license || npmData.licenses?.[0]?.type || npmData.licenses?.[0];
+    metadata.author = npmData.author?.name || npmData.author;
+    metadata.repositoryUrl = repoUrl || undefined;
+
     if (!repoUrl) {
       findings.push({
         id: 'supply-chain-low-trust',
@@ -40,13 +63,13 @@ export async function scanSupplyChain(server: ResolvedServer): Promise<{ finding
         description: `Package '${packageName}' has no public repository URL linked.`,
         fixRecommendation: 'Verify the authenticity of this package manually.'
       });
-      return { findings, trustScore: 20 };
+      return { findings, trustScore: 20, metadata };
     }
 
     const githubMeta = await fetchGitHubMetadata(repoUrl);
     if (!githubMeta) {
       logger.warn(`Supply Chain: Failed to fetch GitHub metadata for ${repoUrl}.`);
-      return { findings, trustScore: 40 };
+      return { findings, trustScore: 40, metadata };
     }
 
     trustScore = calculateTrustScore(githubMeta);
@@ -72,7 +95,7 @@ export async function scanSupplyChain(server: ResolvedServer): Promise<{ finding
     logger.warn(`Supply Chain: Error during scan for ${packageName}: ${error instanceof Error ? error.message : String(error)}`);
   }
 
-  return { findings, trustScore };
+  return { findings, trustScore, metadata };
 }
 
 function extractRepoUrl(npmData: any): string | null {
