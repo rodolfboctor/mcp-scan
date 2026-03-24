@@ -1,67 +1,69 @@
 # Contributing to mcp-scan
 
+Thank you for your interest in contributing to mcp-scan. This document provides guidelines for setting up your environment and submitting changes.
+
 ## Development setup
+
+Follow these steps to get started with the codebase:
 
 ```bash
 git clone https://github.com/rodolfboctor/mcp-scan.git
 cd mcp-scan
 npm install
-npm test        # vitest unit tests
-npm run build   # TypeScript compile via tsup
-node dist/index.js  # smoke test
+npm test        # Run vitest unit tests
+npm run build   # Compile TypeScript via tsup
+node dist/index.js  # Perform a smoke test
 ```
-
-## Code style
-
-- TypeScript strict mode throughout.
-- Dependency injection: pass `{ fs, os, process }` to functions that need system access. This is what makes unit tests work without mocking globals.
-- Tests: vitest, files in `tests/`.
-- No new runtime dependencies without discussion. The package ships to users; every dep is a supply chain risk.
 
 ## Project structure
 
-```
-src/
-  commands/     CLI command implementations (scan, fix, watch, audit, etc.)
-  scanners/     Individual security scanner modules
-  config/       Config detection (detector.ts) and parsing (paths.ts)
-  types/        TypeScript interfaces and Zod schemas
-  utils/        Logger, reporter, SARIF/HTML/SBOM generators, webhook
-  data/         CVE snapshot, known malicious packages, official server list
-tests/
-  scanners/     Unit tests per scanner
-  commands/     Command-level tests
-  config/       Config detection tests
-```
+The repository is organized as follows:
+
+- `src/commands/`: CLI command implementations (scan, fix, watch, audit).
+- `src/scanners/`: Individual security scanner modules.
+- `src/config/`: Configuration detection and parsing logic.
+- `src/types/`: TypeScript interfaces and Zod schemas.
+- `src/utils/`: Shared utilities (logger, reporter, generators).
+- `src/data/`: CVE snapshots and malicious package blocklists.
+- `tests/`: Comprehensive test suite grouped by component.
+
+## Code style
+
+We maintain high standards for code quality:
+
+- **TypeScript strict mode**: All code must pass strict type checking. No `any` types allowed.
+- **Dependency injection**: Pass system dependencies (fs, os, process) to functions. This ensures testability without mocking globals.
+- **Named exports**: Use named exports for all modules.
+- **File size**: Keep files under 200 lines. Split logic into smaller modules when necessary.
 
 ## Adding a scanner
 
-1. Create `src/scanners/your-scanner.ts`.
-2. Export a function that takes a `ResolvedServer` and returns `Finding[]`. Keep it synchronous if possible.
-3. Import and call it in `src/commands/scan.ts` inside the `allFindings` array.
-4. Add tests in `tests/scanners/your-scanner.test.ts`. Cover the happy path, the finding path, and edge cases (empty args, missing command, etc.).
+1. Create a new file in `src/scanners/`.
+2. Export a function that accepts a `ResolvedServer` and returns an array of `Finding` objects.
+3. Register the scanner in `src/commands/scanners.ts`.
+4. Add comprehensive tests in `tests/scanners/` covering various edge cases.
 
-## Pull requests
+## Pull request process
 
-- One logical change per PR.
-- All tests pass: `npm test`.
-- Build passes: `npm run build`.
-- Describe what changed and why in the PR description.
-- Scanner changes require tests.
-- New dependencies require justification.
+1. Create a new branch for your changes.
+2. Ensure all tests pass by running `npm test`.
+3. Verify the build succeeds with `npm run build`.
+4. Update `CHANGELOG.md` if your change is user-facing.
+5. Submit a PR with a clear description of the problem and your solution.
 
 ## Commit style
 
-Conventional commits:
-- `feat:` new functionality
-- `fix:` bug fix
-- `docs:` documentation only
-- `test:` adding or fixing tests
-- `refactor:` no behavior change
-- `chore:` maintenance, deps, build
+We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
 
-First line under 72 characters. Specific about what changed and where.
+- `feat:` New functionality.
+- `fix:` Bug fix.
+- `docs:` Documentation updates.
+- `test:` Adding or fixing tests.
+- `refactor:` Code changes that neither fix a bug nor add a feature.
+- `chore:` Maintenance tasks or dependency updates.
 
-## Reporting a malicious package
+Keep the first line under 72 characters and be specific about the changes.
 
-If you find a malicious MCP package in the wild, open an issue with the package name and evidence. It gets added to the blocklist same day.
+## Security
+
+If you discover a security vulnerability, please refer to our [SECURITY.md](SECURITY.md) for reporting instructions. Do not open public issues for security vulnerabilities.
