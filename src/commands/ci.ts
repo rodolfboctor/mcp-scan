@@ -6,8 +6,8 @@ export async function runCi(options: { maxSeverity?: string }) {
   const maxSeverityStr = (options.maxSeverity || 'high').toUpperCase() as Severity;
   const maxSeverityThreshold = SEVERITY_ORDER[maxSeverityStr] || SEVERITY_ORDER.HIGH;
 
-  const report = await runScan({ silent: true, json: true });
-  
+  const report = await runScan({ silent: true });
+
   printJsonReport(report);
 
   let shouldFail = false;
