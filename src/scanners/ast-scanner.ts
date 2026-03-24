@@ -1,10 +1,15 @@
 import { ResolvedServer } from '../types/config.js';
 import { Finding } from '../types/scan-result.js';
 
+/**
+ * Static analysis for reverse shells, eval() abuse, and data exfiltration.
+ * Upgraded to include cross-origin exfiltration analysis.
+ */
 export function scanAst(server: ResolvedServer): Finding[] {
   if (!server.command) return [];
   const findings: Finding[] = [];
-  const fullCommand = [server.command, ...(server.args || [])].join(' ');
+  const argsArray = server.args ? (Array.isArray(server.args) ? server.args : Object.values(server.args)) : [];
+  const fullCommand = [server.command, ...argsArray].join(' ');
 
   // 1. Detect suspicious shells and execution patterns
   if (/(bash|sh|zsh)\s+-c/i.test(fullCommand) || /\b(eval|exec)\b/i.test(fullCommand)) {
@@ -24,7 +29,61 @@ export function scanAst(server: ResolvedServer): Finding[] {
     });
   }
 
-  // 3. Detect reverse shells
+  // 3. Detect network calls to external IPs/domains in tool args
+  const ipRegex = /\b(?:\d{1,3}\.){3}\d{1,3}\b/;
+  const domainRegex = /\b(?:https?:\/\/)?(?:[\w-]+\.)+[\w-]{2,}\b/;
+  
+  let hasNetworkEndpoint = false;
+  let hasEnvVarInArgs = false;
+
+  for (const arg of argsArray) {
+    if (typeof arg !== 'string') continue;
+    
+    const hasIp = ipRegex.test(arg);
+    const hasExternalDomain = domainRegex.test(arg) && !arg.includes('localhost') && !arg.includes('127.0.0.1');
+    
+    if (hasIp || hasExternalDomain) {
+      hasNetworkEndpoint = true;
+      findings.push({
+        id: 'exfiltration-vector',
+        severity: 'MEDIUM',
+        description: `Tool argument contains a potential external network endpoint: '${arg}'.`,
+        fixRecommendation: 'Review if this tool should be making outbound network calls to this endpoint.'
+      });
+    }
+
+    if (/\$\{([A-Z0-9_]+)\}/.test(arg)) {
+      hasEnvVarInArgs = true;
+    }
+  }
+
+  // 4. Detect tools that pass env vars while having a network call
+  if (hasNetworkEndpoint && hasEnvVarInArgs) {
+    findings.push({
+      id: 'exfiltration-vector',
+      severity: 'HIGH',
+      description: `Tool passes environment variables in arguments while also referencing an external network endpoint.`,
+      fixRecommendation: 'This is a high-risk exfiltration vector. Avoid passing secrets or identifiers to external endpoints in arguments.'
+    });
+  }
+
+  // 5. Flag tools with both filesystem READ access AND network access
+  const hasFilesystemAccess = argsArray.some(arg => 
+    typeof arg === 'string' && (arg === '/' || arg === '~' || arg.startsWith('/Users') || arg.startsWith('/home') || arg.includes('.ssh') || arg.includes('.env'))
+  );
+  
+  const hasNetworkAccess = hasNetworkEndpoint || /curl|wget|fetch|axios|http|https/i.test(fullCommand);
+  
+  if (hasFilesystemAccess && hasNetworkAccess) {
+    findings.push({
+      id: 'exfiltration-vector',
+      severity: 'HIGH',
+      description: 'Tool has both filesystem access and network access capabilities, which is a prime exfiltration vector.',
+      fixRecommendation: 'Restrict the tool to either filesystem access or network access, but not both if possible.'
+    });
+  }
+
+  // 6. Detect reverse shells
   if (/\b(nc|netcat)\b/i.test(fullCommand)) {
     findings.push({
       id: 'reverse-shell-risk',
@@ -33,7 +92,7 @@ export function scanAst(server: ResolvedServer): Finding[] {
     });
   }
 
-  // 4. Detect Python dangerous functions in inline code
+  // 7. Detect Python dangerous functions in inline code
   if (/\bpython\d*\b.*-c.*(exec|eval)\s*\(/i.test(fullCommand)) {
     findings.push({
       id: 'python-inline-execution',
@@ -42,7 +101,7 @@ export function scanAst(server: ResolvedServer): Finding[] {
     });
   }
 
-  // 5. Detect Node.js inline code execution
+  // 8. Detect Node.js inline code execution
   if (/\bnode\b.*-e/i.test(fullCommand)) {
     findings.push({
       id: 'node-inline-execution',
@@ -51,16 +110,14 @@ export function scanAst(server: ResolvedServer): Finding[] {
     });
   }
   
-  // 6. Detect sensitive directory globbing in arguments
-  if (server.args) {
-      for (const arg of server.args) {
-          if (/\/\*\*/.test(arg) && /(\.ssh|\.aws|\.gnupg|\.env)/.test(arg)) {
-            findings.push({
-              id: 'sensitive-glob-pattern',
-              severity: 'HIGH',
-              description: `Argument contains a glob pattern that may expose sensitive directories: '${arg}'.`,
-            });
-          }
+  // 9. Detect sensitive directory globbing in arguments
+  for (const arg of argsArray) {
+      if (typeof arg === 'string' && /\/\*\*/.test(arg) && /(\.ssh|\.aws|\.gnupg|\.env)/.test(arg)) {
+        findings.push({
+          id: 'sensitive-glob-pattern',
+          severity: 'HIGH',
+          description: `Argument contains a glob pattern that may expose sensitive directories: '${arg}'.`,
+        });
       }
   }
 
