@@ -1,19 +1,29 @@
 # Security Policy
 
-## Reporting a Vulnerability
+## Reporting a vulnerability
 
-If you discover a security vulnerability within `mcp-scan`, please send an email to **rodolf@thynkq.com**.
+Email: rodolf@thynkq.com
 
-We take all security reports seriously and will respond within 48 hours.
+Include:
+- Description of the vulnerability
+- Steps to reproduce
+- Potential impact
+- Suggested fix if you have one
 
-## Response Process
+Response within 48 hours. Disclosure coordinated after a fix is released. Please do not open a public GitHub issue for security vulnerabilities before coordinating with us.
 
-1. **Acknowledgment:** We will acknowledge receipt of your report within 48 hours.
-2. **Investigation:** We will investigate the issue and determine its impact.
-3. **Fix:** We will develop and test a fix for the vulnerability.
-4. **Advisory:** We will issue a security advisory with the ID format `MCP-SCAN-YYYY-NNN`.
-5. **Release:** We will release a new version of `mcp-scan` containing the fix.
+## Scope
 
-Please do not disclose the vulnerability publicly until we have had a chance to address it.
+- mcp-scan CLI tool
+- npm package (`mcp-scan`)
+- GitHub Action (`rodolfboctor/mcp-scan`)
 
-Thank you for helping keep `mcp-scan` secure!
+## Out of scope
+
+- Issues in scanned MCP servers (report those to the server's maintainer)
+- Social engineering
+- Vulnerabilities requiring physical access to the machine
+
+## Disclosure format
+
+Fixed vulnerabilities are documented with advisory IDs in the format `MCP-SCAN-YYYY-NNN`.
