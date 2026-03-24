@@ -30,7 +30,12 @@ export async function scanPackageDeep(server: ResolvedServer, offline: boolean =
 
   let latestVersion = '';
   try {
-    const res = await fetch(`https://registry.npmjs.org/${encodeURIComponent(packageName)}`);
+    const npmController = new AbortController();
+    const npmTimeoutId = setTimeout(() => npmController.abort(), 8000);
+    const res = await fetch(`https://registry.npmjs.org/${encodeURIComponent(packageName)}`, {
+      signal: npmController.signal,
+    });
+    clearTimeout(npmTimeoutId);
     if (!res.ok) {
       logger.warn(`Failed to fetch package info for ${packageName} from npm registry.`);
     } else {
