@@ -1,6 +1,6 @@
 import { runScan } from './scan.js';
 import { logger } from '../utils/logger.js';
-import { ScanReport, ServerScanResult } from '../types/scan-result.js';
+import { ScanReport } from '../types/scan-result.js';
 import glob from 'fast-glob';
 import path from 'path';
 import fs from 'fs';
@@ -64,7 +64,7 @@ export async function runMultiConfigReport(options: { configs?: string, html?: s
                 aggregatedReport.totalScanned++;
             }
         }
-    } catch (e) {}
+    } catch (_e) {}
   }
 
   aggregatedReport.totalDurationMs = Date.now() - startTime;

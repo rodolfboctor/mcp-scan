@@ -63,7 +63,7 @@ export function loadIgnoreList(cwd: string = process.cwd()): string[] {
         .map(line => line.trim())
         .filter(line => line && !line.startsWith('#'));
     }
-  } catch (error) {}
+  } catch (_error) {}
   return [];
 }
 

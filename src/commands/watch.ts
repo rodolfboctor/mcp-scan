@@ -4,7 +4,7 @@ import path from 'path';
 import { runScan } from './scan.js';
 import { logger } from '../utils/logger.js';
 import { detectTools } from '../config/detector.js';
-import { ScanReport, ServerScanResult } from '../types/scan-result.js';
+import { ScanReport } from '../types/scan-result.js';
 import chalk from 'chalk';
 import { sendWebhook, sendSlackWebhook } from '../utils/webhook.js';
 

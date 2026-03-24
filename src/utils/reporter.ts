@@ -1,4 +1,4 @@
-import Table from 'cli-table3';
+
 import { ScanReport } from '../types/scan-result.js';
 import { logger } from './logger.js';
 import { SEVERITY_ORDER } from '../types/severity.js';
