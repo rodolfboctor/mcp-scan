@@ -5,6 +5,7 @@ import { parseCvssVector } from 'vuln-vects';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import semver from 'semver';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SNAPSHOT_PATH = path.join(__dirname, '../data/cve-snapshot.json');
@@ -27,12 +28,14 @@ export async function scanPackageDeep(server: ResolvedServer, offline: boolean =
     return scanPackageOffline(packageName);
   }
 
+  let latestVersion = '';
   try {
     const res = await fetch(`https://registry.npmjs.org/${encodeURIComponent(packageName)}`);
     if (!res.ok) {
       logger.warn(`Failed to fetch package info for ${packageName} from npm registry.`);
     } else {
       const data = await res.json() as any;
+      latestVersion = data['dist-tags']?.latest || '';
       if (data && typeof data === 'object' && data.time && typeof data.time.modified === 'string') {
         const lastModified = new Date(data.time.modified);
         const now = new Date();
@@ -72,9 +75,10 @@ export async function scanPackageDeep(server: ResolvedServer, offline: boolean =
     }
 
     const osvData = await osvRes.json() as any;
+    const vulns = osvData.vulns || [];
 
-    if (osvData && osvData.vulns && Array.isArray(osvData.vulns)) {
-      for (const vuln of osvData.vulns) {
+    if (vulns.length > 0) {
+      for (const vuln of vulns) {
         let cvssScore = 0;
         if (vuln.severity && Array.isArray(vuln.severity)) {
           for (const severity of vuln.severity) {
@@ -108,6 +112,24 @@ export async function scanPackageDeep(server: ResolvedServer, offline: boolean =
           });
         }
       }
+    }
+
+    // Upgrade Advisor Logic
+    if (latestVersion) {
+        const currentVersion = server.metadata?.version;
+        if (currentVersion && semver.valid(currentVersion) && semver.valid(latestVersion) && semver.gt(latestVersion, currentVersion)) {
+            const resolvesVulns = vulns.some((v: any) => v.fixed_in?.includes(latestVersion) || !v.affected?.some((a: any) => a.ranges?.some((r: any) => r.type === 'SEMVER' && r.events?.some((e: any) => e.fixed === latestVersion))));
+            
+            findings.push({
+                id: 'upgrade-available',
+                severity: 'INFO',
+                description: `A newer version of '${packageName}' is available: ${currentVersion} → ${latestVersion}.`,
+                fixRecommendation: resolvesVulns 
+                    ? `UPGRADE RECOMMENDED: Version ${latestVersion} may resolve known vulnerabilities. Run: npm install ${packageName}@${latestVersion}`
+                    : `Run: npm install ${packageName}@${latestVersion} to update.`,
+                fixable: true
+            });
+        }
     }
 
   } catch (error) {

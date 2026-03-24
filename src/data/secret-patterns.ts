@@ -30,7 +30,7 @@ export const SECRET_PATTERNS = [
   { name: 'Perplexity API Key', regex: /pplx-[a-zA-Z0-9]{48}/ },
   { name: 'Together AI API Key', regex: /[a-f0-9]{64}/ },
   { name: 'GitLab Token', regex: /glpat-[a-zA-Z0-9\-]{20}/ },
-  { name: 'Bitbucket App Password', regex: /\b[a-zA-Z0-9]{20}\b/ },
+  { name: 'Bitbucket App Password', regex: /\b(?![a-zA-Z]{20})[a-zA-Z0-9]{20}\b/ },
   { name: 'NPM Token', regex: /\bnpm_[a-zA-Z0-9]{36}\b/ },
   { name: 'PyPI Token', regex: /\bpypi-[a-zA-Z0-9-_]{20,}\b/ },
   { name: 'Docker Hub Token', regex: /\bdckr_pat_[a-zA-Z0-9-_]{27}\b/ },
