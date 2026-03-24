@@ -1,7 +1,10 @@
 # Project State
 
-## Current Phase
-**Milestone Complete**
+## Current Position
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-23 — Milestone v2.0 — Acquisition Readiness started
 
 ## Phase Progress
 - [x] Task 1: Clean report nudge
