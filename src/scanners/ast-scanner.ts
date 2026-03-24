@@ -5,7 +5,7 @@ import { Finding } from '../types/scan-result.js';
  * Static analysis for reverse shells, eval() abuse, and data exfiltration.
  * Upgraded to include cross-origin exfiltration analysis.
  */
-export function scanAst(server: ResolvedServer): Finding[] {
+export function scanAst(server: ResolvedServer, allowedDomains: string[] = []): Finding[] {
   if (!server.command) return [];
   const findings: Finding[] = [];
   const argsArray = server.args ? (Array.isArray(server.args) ? server.args : Object.values(server.args)) : [];
@@ -40,7 +40,7 @@ export function scanAst(server: ResolvedServer): Finding[] {
     if (typeof arg !== 'string') continue;
     
     const hasIp = ipRegex.test(arg);
-    const hasExternalDomain = domainRegex.test(arg) && !arg.includes('localhost') && !arg.includes('127.0.0.1');
+    const hasExternalDomain = domainRegex.test(arg) && !arg.includes('localhost') && !arg.includes('127.0.0.1') && !allowedDomains.some(d => arg.includes(d));
     
     if (hasIp || hasExternalDomain) {
       hasNetworkEndpoint = true;
@@ -72,7 +72,7 @@ export function scanAst(server: ResolvedServer): Finding[] {
     typeof arg === 'string' && (arg === '/' || arg === '~' || arg.startsWith('/Users') || arg.startsWith('/home') || arg.includes('.ssh') || arg.includes('.env'))
   );
   
-  const hasNetworkAccess = hasNetworkEndpoint || /curl|wget|fetch|axios|http|https/i.test(fullCommand);
+  const hasNetworkAccess = hasNetworkEndpoint || (/curl|wget|fetch|axios|http|https/i.test(fullCommand) && !allowedDomains.some(d => fullCommand.includes(d)));
   
   if (hasFilesystemAccess && hasNetworkAccess) {
     findings.push({
