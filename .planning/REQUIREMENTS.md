@@ -3,15 +3,31 @@
 ## v1 Requirements (v1.0.3)
 
 ### Marketplace Integration
-- [ ] **MKT-01**: User sees a subtle ugig.net/mcp nudge when all servers are verified clean.
-- [ ] **MKT-02**: User can use `--ugig` flag to explicitly show the marketplace link.
-- [ ] **MKT-03**: The ugig.net link uses brand blue (#339DFF) and dim weight.
+- [x] **MKT-01**: User sees a subtle ugig.net/mcp nudge when all servers are verified clean.
+- [x] **MKT-02**: User can use `--ugig` flag to explicitly show the marketplace link.
+- [x] **MKT-03**: The ugig.net link uses brand blue (#339DFF) and dim weight.
 
 ### Documentation
-- [ ] **DOC-01**: CLI reference in README includes the new `--ugig` flag.
-- [ ] **DOC-02**: Integrations table in README is updated with detailed ugig.net information.
+- [x] **DOC-01**: CLI reference in README includes the new `--ugig` flag.
+- [x] **DOC-02**: Integrations table in README is updated with detailed ugig.net information.
 
-## v2 Requirements (Deferred)
+## v2 Requirements (Phase 3+)
+
+### Coverage Breadth
+- [ ] **COV-01**: Detect Zed config at `~/.config/zed/settings.json`.
+- [ ] **COV-02**: Detect Continue.dev config at `~/.continue/config.json`.
+- [ ] **COV-03**: Detect Cline config with glob support for versioned extension folders.
+- [ ] **COV-04**: Detect Roo Code config with glob support for versioned extension folders.
+- [ ] **COV-05**: Detect Amp config at `~/.amp/config.json`.
+- [ ] **COV-06**: Detect Plandex config at `~/.plandex/config.json`.
+- [ ] **COV-07**: Detect ChatGPT Desktop config (macOS) at `~/Library/Application Support/com.openai.chat/settings.json`.
+- [ ] **COV-08**: Detect GitHub Copilot config at `~/.config/github-copilot/apps.json`.
+- [ ] **COV-09**: Robust support for `.mcp.json` at project root.
+
+### CI/CD Integration
+- [ ] **CI-01**: `--ci` flag for `scan` command that exits 1 on any findings (Critical to Info).
+
+## Deferred
 - [ ] **MKT-04**: Automated server submission to ugig.net via API.
 
 ## Out of Scope
@@ -21,8 +37,18 @@
 ## Traceability
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| MKT-01 | Phase 2 | Pending |
-| MKT-02 | Phase 2 | Pending |
-| MKT-03 | Phase 2 | Pending |
-| DOC-01 | Phase 2 | Pending |
-| DOC-02 | Phase 2 | Pending |
+| MKT-01 | Phase 2 | Complete |
+| MKT-02 | Phase 2 | Complete |
+| MKT-03 | Phase 2 | Complete |
+| DOC-01 | Phase 2 | Complete |
+| DOC-02 | Phase 2 | Complete |
+| COV-01 | Phase 3 | Pending |
+| COV-02 | Phase 3 | Pending |
+| COV-03 | Phase 3 | Pending |
+| COV-04 | Phase 3 | Pending |
+| COV-05 | Phase 3 | Pending |
+| COV-06 | Phase 3 | Pending |
+| COV-07 | Phase 3 | Pending |
+| COV-08 | Phase 3 | Pending |
+| COV-09 | Phase 3 | Pending |
+| CI-01  | Phase 3 | Pending |

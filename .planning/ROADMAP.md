@@ -4,7 +4,7 @@
 
 ## Summary
 - **7 phases total**
-- **5 requirements mapped**
+- **15 requirements mapped**
 - All v1 requirements covered ✓
 
 ## Phases
@@ -13,7 +13,7 @@
 |---|-------|------|--------------|------------------|--------|
 | 1 | Premium Visuals | High-fidelity terminal output | CLI-01, SCAN-01, SCAN-02, UI-01, UI-02 | Visual match with spec | Complete |
 | 2 | Marketplace Integration | ugig.net marketplace nudge | MKT-01, MKT-02, MKT-03, DOC-01, DOC-02 | Nudge appears on clean scan | Complete |
-| 3 | Coverage Breadth | Detect more tools than any competitor. Add 8+ new AI tool config paths. Add .mcp.json project-root support. Add --ci flag for CI/CD exit codes. | (not defined yet) | mcp-scan detects Zed, Continue.dev, Cline, Roo Code, Amp, Plandex, ChatGPT Desktop, GitHub Copilot. `--ci` flag exits 1 on findings, 0 on clean. All existing tests pass. Build clean. | Not started |
+| 3 | Coverage Breadth | Detect more tools than any competitor. Add 8+ new AI tool config paths. Add .mcp.json project-root support. Add --ci flag for CI/CD exit codes. | COV-01, COV-02, COV-03, COV-04, COV-05, COV-06, COV-07, COV-08, COV-09, CI-01 | mcp-scan detects Zed, Continue.dev, Cline, Roo Code, Amp, Plandex, ChatGPT Desktop, GitHub Copilot. `--ci` flag exits 1 on findings, 0 on clean. All existing tests pass. Build clean. | Not started |
 | 4 | Scanner Depth | Find real security issues competitors miss. Add prompt injection scanner, OSV.dev CVE lookup, .env leak scanner, and protocol abuse scanner. | (not defined yet) | Prompt injection patterns detected in tool descriptions. OSV.dev API queried for npm packages — real CVEs surfaced as CRITICAL/HIGH findings. .env files with secrets in server working directories flagged. All new scanners have tests. Build clean. | Not started |
 | 5 | npm Library Export | Allow other tools to `import { runScan } from 'mcp-scan'` without CLI. Makes mcp-scan acquirable as a drop-in library. | (not defined yet) | `src/lib.ts` exports public API. package.json has `exports` field for both ESM and CJS. `node -e "const {runScan}=require('./dist/lib.cjs')"` works. README has Programmatic Usage section. | Not started |
 | 6 | GitHub Action + SARIF | Let developers add mcp-scan to any CI pipeline in one step. Build GitHub Action with SARIF output that feeds into GitHub Security tab. | (not defined yet) | `action.yml` exists AT THE REPO ROOT. `action/dist/action.js` exists as the compiled entry point. SARIF 2.1.0 output validates against schema. `--sarif` CLI flag works. Example workflow file exists at `.github/workflows/mcp-scan-example.yml`. Build clean. | Not started |
@@ -43,7 +43,10 @@
 ### Phase 3: Coverage Breadth
 **Status**: Not started
 **Goal**: Detect more tools than any competitor. Add 8+ new AI tool config paths. Add .mcp.json project-root support. Add --ci flag for CI/CD exit codes.
-**Requirements**: (not defined yet)
+**Requirements**: COV-01, COV-02, COV-03, COV-04, COV-05, COV-06, COV-07, COV-08, COV-09, CI-01
+**Plans:** 2 plans
+- [ ] 03-01-PLAN.md — Expanded Tool Coverage
+- [ ] 03-02-PLAN.md — Project-Level Improvements & CI Flag
 **Success Criteria**:
 1. mcp-scan detects Zed, Continue.dev, Cline, Roo Code, Amp, Plandex, ChatGPT Desktop, GitHub Copilot.
 2. `--ci` flag exits 1 on findings, 0 on clean.
