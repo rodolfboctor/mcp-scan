@@ -1,3 +1,4 @@
+import os from 'os';
 import fs from 'fs';
 import path from 'path';
 import { detectTools } from '../config/detector.js';
@@ -9,6 +10,8 @@ import { scanTyposquat } from '../scanners/typosquat-scanner.js';
 import { scanTransport } from '../scanners/transport-scanner.js';
 import { scanConfig } from '../scanners/config-scanner.js';
 import { scanAst } from '../scanners/ast-scanner.js';
+import { scanPromptInjection } from '../scanners/prompt-injection-scanner.js';
+import { scanEnvLeak } from '../scanners/env-leak-scanner.js';
 import { ScanReport, ServerScanResult } from '../types/scan-result.js';
 import { DetectedTool } from '../types/config.js';
 import { createSpinner } from '../utils/spinner.js';
@@ -89,6 +92,8 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
 
       const allFindings = [
         ...scanSecrets(server),
+        ...scanEnvLeak(server, tool.configPath), // Added env leak scanner
+        ...scanPromptInjection(server), // Added prompt injection scanner
         ...scanPermissions(server),
         ...scanRegistry(server),
         ...scanTyposquat(server),

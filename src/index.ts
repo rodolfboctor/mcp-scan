@@ -10,6 +10,7 @@ import { runLs } from './commands/ls.js';
 import { runInit } from './commands/init.js';
 import { runCi } from './commands/ci.js';
 import { listScanners } from './commands/scanners.js';
+import { submitToUgig } from './commands/submit.js';
 
 const pkgUrl = new URL('../package.json', import.meta.url);
 const pkg = JSON.parse(readFileSync(pkgUrl, 'utf8'));
@@ -30,6 +31,9 @@ program
   .option('--severity <level>', 'Filter by severity (low, medium, high, critical)', 'low')
   .option('-c, --config <path>', 'Path to a specific MCP config file to scan')
   .option('--ugig', 'Show ugig.net marketplace link for verified servers')
+  .option('--submit', 'Submit clean servers to ugig.net MCP marketplace after scan')
+  .option('--ugig-key <key>', 'ugig.net API key for --submit (or set UGIG_API_KEY env var)')
+  .option('--dry-run', 'Preview what would be submitted without sending (use with --submit)')
   .option('--ci', 'Enable CI mode (JSON output, strict exit codes)')
   .action(async (options) => {
     if (options.ci) {
@@ -39,6 +43,10 @@ program
     const report = await runScan({ ...options, version: pkg.version, ci: options.ci });
     if (report.criticalCount > 0 || report.highCount > 0) {
       process.exitCode = 1;
+    }
+    if (options.submit) {
+      const apiKey = options.ugigKey || process.env.UGIG_API_KEY;
+      await submitToUgig(report, { apiKey, dryRun: options.dryRun });
     }
   });
 
@@ -77,5 +85,18 @@ program
   .description('CI mode (JSON output, strict exit codes)')
   .option('--max-severity <level>', 'Maximum allowed severity (critical, high, medium, low)', 'high')
   .action(runCi);
+
+program
+  .command('submit')
+  .description('Scan and submit clean servers to ugig.net MCP marketplace')
+  .option('-c, --config <path>', 'Path to a specific MCP config file')
+  .option('--ugig-key <key>', 'ugig.net API key (or set UGIG_API_KEY env var)')
+  .option('--dry-run', 'Preview submissions without sending')
+  .option('--severity <level>', 'Minimum severity to report', 'low')
+  .action(async (options) => {
+    const report = await runScan({ ...options, version: pkg.version, silent: false });
+    const apiKey = options.ugigKey || process.env.UGIG_API_KEY;
+    await submitToUgig(report, { apiKey, dryRun: options.dryRun });
+  });
 
 program.parse();
