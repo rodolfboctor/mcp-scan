@@ -32,7 +32,7 @@ export function loadCustomRules(): CustomRule[] {
         }
       }
     }
-  } catch (error) {}
+  } catch (_error) {}
   return rules;
 }
 
@@ -75,7 +75,7 @@ export function evaluateCustomRules(server: ResolvedServer, rules: CustomRule[])
           fixRecommendation: rule.fixRecommendation
         });
       }
-    } catch (e: any) {
+    } catch (_e: any) {
       // Invalid regex, skip rule
     }
   }

@@ -1,7 +1,7 @@
 import blessed from 'blessed';
-// @ts-ignore
+// @ts-expect-error — no types for blessed-contrib
 import contrib from 'blessed-contrib';
-import { DashboardView, DashboardState } from '../types/dashboard.js';
+import { DashboardView } from '../types/dashboard.js';
 import { readAuditLog } from './audit-logger.js';
 
 export function createDashboard() {
@@ -16,14 +16,14 @@ export function createDashboard() {
   const grid = new contrib.grid({ rows: 12, cols: 12, screen: screen });
 
   // Header
-  const header = grid.set(0, 0, 1, 12, blessed.box, {
+  grid.set(0, 0, 1, 12, blessed.box, {
     content: '{center}{bold}{#339DFF-fg}MCP SCAN ENTERPRISE DASHBOARD{/|}{/center}',
     tags: true,
     style: { fg: 'white', bg: 'black' }
   });
 
   // Footer / Key bindings
-  const footer = grid.set(11, 0, 1, 12, blessed.box, {
+  grid.set(11, 0, 1, 12, blessed.box, {
     content: '{center}Keybindings: [Q] Quit  |  [H] History View  |  [P] Proxy View  |  [R] Refresh{/center}',
     tags: true,
     style: { fg: '#8B949E', bg: 'black' }

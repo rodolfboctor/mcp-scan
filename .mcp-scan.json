@@ -1,0 +1,28 @@
+{
+  "_comment": "mcp-scan project-level config. Commit this file to enforce security policy for your team.",
+  "policy": {
+    "failOn": ["critical", "high"],
+    "ignorePackages": [],
+    "allowedTransports": ["stdio", "https"],
+    "requireLicense": true
+  },
+  "scanners": {
+    "secrets": true,
+    "cve": true,
+    "permissions": true,
+    "transport": true,
+    "registry": true,
+    "license": true,
+    "supplyChain": false,
+    "typosquatting": true,
+    "toolPoisoning": true,
+    "exfiltration": true,
+    "ast": true,
+    "configValidation": true,
+    "promptInjection": true
+  },
+  "output": {
+    "format": "table",
+    "color": true
+  }
+}

@@ -48,7 +48,7 @@ export function logScan(report: ScanReport) {
     
     // Update fingerprints
     updateFingerprints(report.results);
-  } catch (error) {}
+  } catch (_error) {}
 }
 
 /**
@@ -74,7 +74,7 @@ export function checkFingerprints(results: ServerScanResult[]): Record<string, F
         }];
       }
     }
-  } catch (error) {}
+  } catch (_error) {}
   return mutationFindings;
 }
 
@@ -91,7 +91,7 @@ function updateFingerprints(results: ServerScanResult[]) {
     }
 
     fs.writeFileSync(FINGERPRINT_FILE, JSON.stringify(fingerprints, null, 2), 'utf8');
-  } catch (error) {}
+  } catch (_error) {}
 }
 
 function generateFingerprint(result: any): string {
@@ -112,7 +112,7 @@ export function readAuditLog(count: number = 20): any[] {
     const content = fs.readFileSync(AUDIT_LOG_FILE, 'utf8');
     const lines = content.trim().split('\n');
     return lines.slice(-count).reverse().map(line => JSON.parse(line));
-  } catch (error) {
+  } catch (_error) {
     return [];
   }
 }

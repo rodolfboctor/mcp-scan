@@ -10,7 +10,6 @@ Security scanner for MCP server configurations.
 <img src="https://img.shields.io/node/v/mcp-scan" alt="node version" />
 <img src="https://img.shields.io/github/stars/rodolfboctor/mcp-scan" alt="github stars" />
 
-<!-- TODO: replace with asciinema SVG recording -->
 
 </div>
 

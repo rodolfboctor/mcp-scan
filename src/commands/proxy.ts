@@ -25,7 +25,7 @@ class JsonRpcInterceptor extends Transform {
   _transform(chunk: any, encoding: string, callback: any) {
     this.buffer += chunk.toString();
     
-    let lines = this.buffer.split('\n');
+    const lines = this.buffer.split('\n');
     this.buffer = lines.pop() || ''; // Keep the incomplete line in buffer
 
     for (const line of lines) {
@@ -47,7 +47,7 @@ class JsonRpcInterceptor extends Transform {
           if (this.dashboardCallback) this.dashboardCallback(this.direction, finalMsg, piiMasked);
           
           this.push(finalMsg + '\n');
-        } catch (e) {
+        } catch (_e) {
           // If not valid JSON, just pass through and log as raw
           this.logStream.write(`[${this.direction} RAW] ${line}\n`);
           if (this.dashboardCallback) this.dashboardCallback(this.direction + ' RAW', line, false);

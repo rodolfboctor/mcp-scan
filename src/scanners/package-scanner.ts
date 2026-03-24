@@ -50,7 +50,7 @@ export async function scanPackageDeep(server: ResolvedServer, offline: boolean =
         }
       }
     }
-  } catch (error) {
+  } catch (_error) {
     logger.warn(`Network error fetching npm registry for ${packageName}. Switching to offline mode.`);
     return scanPackageOffline(packageName);
   }
@@ -89,7 +89,7 @@ export async function scanPackageDeep(server: ResolvedServer, offline: boolean =
                   cvssScore = parsedScore.baseScore;
                   break;
                 }
-              } catch (error) {}
+              } catch (_error) {}
             }
           }
         }
@@ -132,7 +132,7 @@ export async function scanPackageDeep(server: ResolvedServer, offline: boolean =
         }
     }
 
-  } catch (error) {
+  } catch (_error) {
     logger.warn(`OSV.dev API request for ${packageName} failed or timed out. Switching to offline snapshot.`);
     return [...findings, ...scanPackageOffline(packageName)];
   }
@@ -166,6 +166,6 @@ function scanPackageOffline(packageName: string): Finding[] {
         });
       }
     }
-  } catch (error) {}
+  } catch (_error) {}
   return findings;
 }

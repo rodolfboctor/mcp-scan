@@ -1,5 +1,5 @@
 import { ResolvedServer } from '../types/config.js';
-import { Finding, Severity } from '../types/scan-result.js';
+import { Finding } from '../types/scan-result.js';
 
 /**
  * Scanner for Tool Poisoning & Capability Injection attacks.
