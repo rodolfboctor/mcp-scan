@@ -157,6 +157,17 @@ program
   });
 
 program
+  .command('report')
+  .description('Scan all config files in a directory and produce unified report')
+  .option('--configs <dir>', 'Directory to search for config files')
+  .option('--html <path>', 'Output report in self-contained HTML format')
+  .option('--json', 'Output report in JSON format')
+  .action(async (options) => {
+    const { runMultiConfigReport } = await import('./commands/report.js');
+    await runMultiConfigReport(options);
+  });
+
+program
   .command('ls')
   .description('List all detected MCP servers')
   .action(async () => {
