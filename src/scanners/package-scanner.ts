@@ -1,6 +1,7 @@
 import { ResolvedServer } from '../types/config.js';
 import { Finding, FindingId } from '../types/scan-result.js';
 import { logger } from '../utils/logger.js';
+import { parseCvssVector } from 'vuln-vects';
 
 // This is a stub for package scanning (network calls) used during deep audits
 export async function scanPackageDeep(server: ResolvedServer): Promise<Finding[]> {
@@ -74,13 +75,15 @@ export async function scanPackageDeep(server: ResolvedServer): Promise<Finding[]
         if (vuln.severity && Array.isArray(vuln.severity)) {
           for (const severity of vuln.severity) {
             if (severity.type === 'CVSS_V3' && severity.score) {
-              const match = severity.score.match(/CVSS:3\.\d\/.*S:C.*\/AV:[NALP].*\/AC:[LH].*\/PR:[NLH].*\/UI:[NRA].*\/S:[UC].*\/C:[NLUH].*\/I:[NLUH].*\/A:[NLUH].*\/E:[XUHC].*\/RL:[XUTOWF].*\/RC:[XURCM].*\/CR:[XURCM].*\/IR:[XURCM].*\/AR:[XURCM].*\/MAV:[NALP].*\/MAC:[LH].*\/MPR:[NLH].*\/MUI:[NRA].*\/MS:[UC].*\/MC:[NLUH].*\/MI:[NLUH].*\/MA:[NLUH].*/);
-              if (match) {
-                  const score = parseFloat(severity.score.split('/')[0].split(':')[2]);
-                  if (!isNaN(score)) {
-                    cvssScore = score;
-                    break;
-                  }
+              try {
+                const parsedScore = parseCvssVector(severity.score);
+                if (parsedScore && typeof parsedScore.baseScore === 'number') {
+                  cvssScore = parsedScore.baseScore;
+                  break; // Found a valid CVSS_V3 score, no need to check further
+                }
+              } catch (error) {
+                logger.warn(`Failed to parse CVSS score '${severity.score}': ${error instanceof Error ? error.message : String(error)}`);
+                // Continue to next severity or default cvssScore to 0
               }
             }
           }
