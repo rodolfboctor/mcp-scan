@@ -21,6 +21,7 @@ import { createSpinner } from '../utils/spinner.js';
 import { printJsonReport } from '../utils/json-reporter.js';
 import { printReport } from '../utils/reporter.js';
 import { logScan, checkFingerprints } from '../utils/audit-logger.js';
+import { loadCustomRules, evaluateCustomRules } from '../utils/rule-engine.js';
 import { runFix } from './fix.js';
 import { SEVERITY_ORDER, Severity } from '../types/severity.js';
 import { logger } from '../utils/logger.js';
@@ -30,6 +31,7 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
   
   const policy = loadPolicy();
   const ignoreList = loadIgnoreList();
+  const customRules = loadCustomRules();
   if (policy && !options.silent) {
     logger.detail(`Applied security policy from .mcp-scan.json`);
   }
@@ -117,7 +119,8 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
         ...scanTyposquat(server),
         ...scanTransport(server, policy?.allowedDomains),
         ...scanConfig(server),
-        ...scanAst(server, policy?.allowedDomains)
+        ...scanAst(server, policy?.allowedDomains),
+        ...evaluateCustomRules(server, customRules)
       ];
 
       // Simple heuristic for package name from supply-chain-scanner
