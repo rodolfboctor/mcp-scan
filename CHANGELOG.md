@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-03-24
+
+### Added
+- Self-contained HTML security report output (`--html report.html`).
+- Tool Poisoning & Capability Injection scanner for MCP-specific attack classes.
+- Entropy-based secret detection for high-entropy strings in env/args.
+- CycloneDX v1.5 SBOM generation (`--sbom sbom.json`).
+- Scan report diff command (`mcp-scan diff old.json new.json`).
+- Webhook and Slack alerting integrations (`--webhook`, `--slack-webhook`).
+- License compliance scanner (GPL, AGPL, UNLICENSED detection).
+- Cross-origin exfiltration analysis in AST scanner.
+- Policy engine with `.mcp-scan.json` support (allowed/blocked packages, etc).
+- Persistent audit logging and scan history command (`mcp-scan audit`).
+- Offline mode with bundled CVE snapshot (`--offline`).
+- Remediation confidence scoring and auto-apply logic for fixes.
+- Finding suppression via `.mcp-scan-ignore` file.
+- Enhanced watch mode with live dashboard and delta reporting.
+- System diagnostic command (`mcp-scan doctor`).
+- Multi-config report aggregation command (`mcp-scan report --configs dir/`).
+- Upgrade Advisor for packages with newer versions or resolved vulnerabilities.
+
 ## [1.5.0] - 2026-03-24
 
 ### Added

@@ -109,7 +109,7 @@ export async function scanSupplyChain(server: ResolvedServer, offline: boolean =
 }
 
 function scanSupplyChainOffline(packageName: string): SupplyChainResult {
-  const result: SupplyChainResult = { findings: [], trustScore: 50, metadata: { source: 'npm', packageName } };
+  const result: SupplyChainResult = { findings: [], trustScore: 30, metadata: { source: 'npm', packageName } };
   try {
     if (!fs.existsSync(SNAPSHOT_PATH)) return result;
     const snapshot = JSON.parse(fs.readFileSync(SNAPSHOT_PATH, 'utf8'));
