@@ -1,3 +1,5 @@
+import fs from 'fs';
+import os from 'os';
 import { runScan } from './scan.js';
 import { scanPackageDeep } from '../scanners/package-scanner.js';
 import { printReport } from '../utils/reporter.js';
@@ -17,7 +19,7 @@ export async function runAudit(serverName?: string) {
 
   const spinner = createSpinner(`Deep auditing server '${serverName}'...`).start();
 
-  const tools = await detectTools();
+  const tools = await detectTools({ fs, os, process });
   let targetServer = null;
 
   for (const tool of tools) {
