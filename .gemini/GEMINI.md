@@ -8,7 +8,7 @@ You are running in **fully autonomous mode**. Do not ask questions. Do not use A
 
 ---
 
-## ZERO-INPUT RULE
+## ZERO-INPUT RULE — CRITICAL
 
 **NEVER call Ask User.** If a GSD workflow prompts you for input, answer it yourself from the context in this file. Every question has an answer here. If you truly cannot find an answer, make a reasonable decision and document it — do not pause.
 
