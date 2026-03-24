@@ -5,7 +5,6 @@ import chalk from 'chalk';
 import fs from 'fs';
 import os from 'os';
 import { execSync } from 'child_process';
-import path from 'path';
 
 /**
  * Runs a system diagnostic check.
@@ -53,7 +52,7 @@ export async function runDoctor() {
             // Check if in PATH
             try {
                 execSync(`which ${server.command}`, { stdio: 'ignore' });
-            } catch (e) {
+            } catch (_e) {
                 missingExecutables++;
             }
         }
@@ -82,8 +81,8 @@ export async function runDoctor() {
     } else {
         githubDetail = `GitHub API returned ${res.status}: ${res.statusText}`;
     }
-  } catch (e: any) {
-    githubDetail = `GitHub API unreachable: ${e.message}`;
+  } catch (_e: any) {
+    githubDetail = `GitHub API unreachable: ${_e.message}`;
   }
   check('External API (GitHub)', githubOk, githubDetail);
 
@@ -98,7 +97,7 @@ export async function runDoctor() {
         updateOk = true;
         updateDetail = `Latest version available on npm: ${latest}`;
     }
-  } catch (e) {}
+  } catch (_e) {}
   check('Update check (npm)', updateOk, updateDetail);
 
   logger.divider();

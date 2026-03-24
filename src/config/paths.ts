@@ -1,4 +1,4 @@
-import os from 'os';
+
 import path from 'path';
 import fg from 'fast-glob';
 

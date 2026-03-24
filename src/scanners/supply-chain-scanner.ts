@@ -33,7 +33,7 @@ export interface SupplyChainResult {
 export async function scanSupplyChain(server: ResolvedServer, offline: boolean = false): Promise<SupplyChainResult> {
   const findings: Finding[] = [];
   let trustScore = 50; // Neutral starting point
-  let metadata: SupplyChainResult['metadata'] = { source: 'local' };
+  const metadata: SupplyChainResult['metadata'] = { source: 'local' };
 
   let packageName = '';
   if (server.command === 'npx' || server.command === 'npm') {
@@ -100,7 +100,7 @@ export async function scanSupplyChain(server: ResolvedServer, offline: boolean =
         logger.detail(`Supply Chain: Owner mismatch detected between npm maintainers and GitHub owner for ${packageName}.`);
     }
 
-  } catch (error) {
+  } catch (_error) {
     logger.warn(`Supply Chain: Error during scan for ${packageName}: ${error instanceof Error ? error.message : String(error)}. Switching to offline mode.`);
     return scanSupplyChainOffline(packageName);
   }
@@ -119,7 +119,7 @@ function scanSupplyChainOffline(packageName: string): SupplyChainResult {
       result.metadata!.license = pkgData.license;
       result.trustScore = 100; // Assume trusted if in our top-500 snapshot
     }
-  } catch (error) {}
+  } catch (_error) {}
   return result;
 }
 
@@ -166,7 +166,7 @@ async function fetchGitHubMetadata(repoUrl: string): Promise<RepoMetadata | null
       contributorCount: 0, // Requires another API call, skipping for now to save rate limit
       owner: data.owner.login
     };
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }

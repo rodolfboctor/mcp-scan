@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 import chalk from 'chalk';
 import { ScanReport, ServerScanResult, Finding } from '../types/scan-result.js';
 import { logger } from '../utils/logger.js';
@@ -96,7 +95,7 @@ export async function runDiff(oldPath: string, newPath: string) {
       logger.emptyLine();
     }
 
-    const hasCriticalOrHighRegressions = regressions.some(r => r.finding.severity === 'CRITICAL' || r.finding.severity === 'HIGH');
+    const _hasCriticalOrHighRegressions = regressions.some(r => r.finding.severity === 'CRITICAL' || r.finding.severity === 'HIGH');
 
     if (regressions.length > 0) {
       logger.high(`Scan Failed: ${regressions.length} new findings detected.`);
