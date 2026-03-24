@@ -41,10 +41,12 @@ program
   .option('--sbom <path>', 'Output Software Bill of Materials (SBOM) in CycloneDX format')
   .option('--webhook <url>', 'POST scan results to a webhook URL')
   .option('--slack-webhook <url>', 'POST scan results to a Slack webhook URL')
+  .option('--offline', 'Skip all external network calls and use bundled CVE snapshot')
   .addHelpText('after', `
 Examples:
   $ mcp-scan
   $ mcp-scan --severity high
+  $ mcp-scan --offline
   $ mcp-scan --config ~/.cursor/mcp.json
   $ mcp-scan --json > report.json
   $ mcp-scan --html report.html
