@@ -23,6 +23,11 @@ import { logger } from '../utils/logger.js';
 
 export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string, ugig?: boolean, ci?: boolean } = {}): Promise<ScanReport> {
   const startTime = Date.now();
+  
+  // Initialize logger based on options
+  if (options.silent) logger.isSilent = true;
+  if (options.verbose) logger.isVerbose = true;
+
   const spinner = !options.silent ? createSpinner('Detecting MCP configurations...', !options.ci).start() : null;
 
   if (options.verbose && spinner) {
@@ -131,10 +136,12 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
     spinner.succeed(`Scan complete in ${report.totalDurationMs}ms`);
   }
 
-  if (options.json) {
-    printJsonReport(report);
-  } else {
-    printReport(report, { ugig: options.ugig });
+  if (!options.silent) {
+    if (options.json) {
+      printJsonReport(report);
+    } else {
+      printReport(report, { ugig: options.ugig });
+    }
   }
   
   if (options.fix) {
