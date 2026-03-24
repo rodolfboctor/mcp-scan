@@ -17,7 +17,11 @@ export type FindingId =
   | 'missing-referenced-env-var'
   | 'duplicate-server'
   | 'supply-chain-low-trust'
-  | 'supply-chain-rug-pull';
+  | 'supply-chain-rug-pull'
+  | 'hidden-instruction-risk'
+  | 'capability-escalation-risk'
+  | 'tool-exfiltration-risk'
+  | 'env-var-scope-leak';
 
 export const FINDING_IDS: FindingId[] = [
   'no-malicious-package',
@@ -37,6 +41,10 @@ export const FINDING_IDS: FindingId[] = [
   'duplicate-server',
   'supply-chain-low-trust',
   'supply-chain-rug-pull',
+  'hidden-instruction-risk',
+  'capability-escalation-risk',
+  'tool-exfiltration-risk',
+  'env-var-scope-leak',
 ];
 
 export interface Finding {
