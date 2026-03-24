@@ -1,6 +1,12 @@
 import { ResolvedServer } from '../types/config.js';
 import { Finding } from '../types/scan-result.js';
 import { logger } from '../utils/logger.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const SNAPSHOT_PATH = path.join(__dirname, '../data/cve-snapshot.json');
 
 interface RepoMetadata {
   stars: number;
@@ -24,18 +30,22 @@ export interface SupplyChainResult {
   };
 }
 
-export async function scanSupplyChain(server: ResolvedServer): Promise<SupplyChainResult> {
+export async function scanSupplyChain(server: ResolvedServer, offline: boolean = false): Promise<SupplyChainResult> {
   const findings: Finding[] = [];
   let trustScore = 50; // Neutral starting point
   let metadata: SupplyChainResult['metadata'] = { source: 'local' };
 
   let packageName = '';
   if (server.command === 'npx' || server.command === 'npm') {
-    const pkgArg = server.args?.find(a => !a.startsWith('-'));
-    if (pkgArg) packageName = pkgArg;
+    const pkgArg = (Array.isArray(server.args) ? server.args : (server.args ? Object.values(server.args) : [])).find(a => typeof a === 'string' && !a.startsWith('-'));
+    if (pkgArg) packageName = pkgArg as string;
   }
 
   if (!packageName) return { findings, trustScore: 100, metadata };
+
+  if (offline) {
+    return scanSupplyChainOffline(packageName);
+  }
 
   metadata.source = 'npm';
   metadata.packageName = packageName;
@@ -43,9 +53,8 @@ export async function scanSupplyChain(server: ResolvedServer): Promise<SupplyCha
   try {
     const npmRes = await fetch(`https://registry.npmjs.org/${encodeURIComponent(packageName)}`);
     if (!npmRes.ok) {
-      logger.warn(`Supply Chain: Failed to fetch npm registry data for ${packageName}.`);
-      metadata.source = 'unknown';
-      return { findings, trustScore: 30, metadata };
+      logger.warn(`Supply Chain: Failed to fetch npm registry data for ${packageName}. Switching to offline snapshot.`);
+      return scanSupplyChainOffline(packageName);
     }
 
     const npmData = await npmRes.json() as any;
@@ -92,10 +101,26 @@ export async function scanSupplyChain(server: ResolvedServer): Promise<SupplyCha
     }
 
   } catch (error) {
-    logger.warn(`Supply Chain: Error during scan for ${packageName}: ${error instanceof Error ? error.message : String(error)}`);
+    logger.warn(`Supply Chain: Error during scan for ${packageName}: ${error instanceof Error ? error.message : String(error)}. Switching to offline mode.`);
+    return scanSupplyChainOffline(packageName);
   }
 
   return { findings, trustScore, metadata };
+}
+
+function scanSupplyChainOffline(packageName: string): SupplyChainResult {
+  const result: SupplyChainResult = { findings: [], trustScore: 50, metadata: { source: 'npm', packageName } };
+  try {
+    if (!fs.existsSync(SNAPSHOT_PATH)) return result;
+    const snapshot = JSON.parse(fs.readFileSync(SNAPSHOT_PATH, 'utf8'));
+    const pkgData = snapshot.packages[packageName];
+    if (pkgData) {
+      result.metadata!.version = pkgData.version;
+      result.metadata!.license = pkgData.license;
+      result.trustScore = 100; // Assume trusted if in our top-500 snapshot
+    }
+  } catch (error) {}
+  return result;
 }
 
 function extractRepoUrl(npmData: any): string | null {
