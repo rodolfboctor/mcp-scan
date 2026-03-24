@@ -26,6 +26,21 @@ npm install -g mcp-scan
 npx mcp-scan
 ```
 
+## Programmatic Usage
+
+`mcp-scan` can be used as a library in your Node.js projects (ESM and CJS supported).
+
+```javascript
+import { runScan } from 'mcp-scan';
+
+const report = await runScan({
+  silent: true,
+  severity: 'high'
+});
+
+console.log(`Scan complete. Found ${report.criticalCount} critical issues.`);
+```
+
 ## Demo
 
 Here's what a scan looks like when it finds some common issues:
