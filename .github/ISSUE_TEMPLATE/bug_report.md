@@ -1,25 +1,35 @@
 ---
 name: Bug report
-about: Something isn't working right
+about: Create a report to help us improve mcp-scan
 labels: bug
 ---
 
-**What happened?**
+## Summary
+Brief description of the issue.
 
-**What did you expect?**
+## Environment details
+- **mcp-scan version**: Run `npx mcp-scan --version`.
+- **Operating system**: e.g. macOS 14.4.
+- **Node.js version**: e.g. v20.11.0.
+- **AI client**: e.g. Claude Desktop, Cursor.
 
-**Steps to reproduce:**
+## Steps to reproduce
 1.
 2.
 3.
 
-**mcp-scan version:** `npx mcp-scan --version`
+## Expected behavior
+What should have happened?
 
-**OS and Node version:**
+## Actual behavior
+What actually happened?
 
-**Config file (remove any secrets):**
+## Relevant logs or config
+Paste any relevant output or your configuration file here. Remove all API keys and secrets before posting.
+
 ```json
-
+// Config or output here
 ```
 
-**Full output:**
+## Potential solution
+If you have a suggested fix, please share it here.
