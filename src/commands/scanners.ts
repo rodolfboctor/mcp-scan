@@ -12,6 +12,7 @@ const SCANNERS = [
   { name: 'env-leak-scanner', description: 'Scans for secrets leaking through environment variable passthrough.' },
   { name: 'ast-scanner', description: 'Static analysis for reverse shells, eval() abuse, and data exfiltration.' },
   { name: 'package-scanner', description: 'Deep package audit with OSV.dev CVE lookup and version verification.' },
+  { name: 'tool-poisoning-scanner', description: 'Detects tool poisoning and capability injection via natural language instructions.' },
 ];
 
 export function listScanners() {
