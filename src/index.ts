@@ -105,7 +105,11 @@ Examples:
     }
     if (options.submit) {
       const apiKey = options.ugigKey || process.env.UGIG_API_KEY;
-      await submitToUgig(report, { apiKey, dryRun: options.dryRun });
+      await submitToUgig(report, { 
+        apiKey, 
+        dryRun: options.dryRun,
+        silent: options.json || options.ci || options.silent 
+      });
     }
   });
 
@@ -203,9 +207,9 @@ program
   .option('--ugig-key <key>', 'ugig.net API key')
   .option('--dry-run', 'Preview what would be submitted')
   .action(async (options) => {
-    const report = await runScan({ ...options, version: pkg.version, silent: false });
+    const report = await runScan({ ...options, version: pkg.version, silent: false, submit: true });
     const apiKey = options.ugigKey || process.env.UGIG_API_KEY;
-    await submitToUgig(report, { apiKey, dryRun: options.dryRun });
+    await submitToUgig(report, { apiKey, dryRun: options.dryRun, silent: false });
   });
 
 program
