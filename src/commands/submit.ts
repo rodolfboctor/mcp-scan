@@ -18,20 +18,75 @@ export interface SubmitOptions {
 
 export interface SubmitResult {
   submitted: number;
+  previewed: number;
   skipped: number;
   failed: number;
   listings: Array<{ serverName: string; slug?: string; url?: string; error?: string }>;
 }
 
 function isCleanServer(result: ServerScanResult): boolean {
+  // Skip duplicate entries (they have no real scan data or connection info)
+  if (result.findings.some(f => f.id === 'duplicate-server')) {
+    return false;
+  }
   return result.findings.filter(f =>
     f.severity === 'CRITICAL' || f.severity === 'HIGH'
   ).length === 0;
 }
 
+function deriveTransportType(result: ServerScanResult): string {
+  // Explicit type field from config
+  const configType = result.connection?.type || '';
+  if (configType === 'http' || configType === 'streamable-http') return 'streamable-http';
+  if (configType === 'sse') return 'sse';
+
+  // URL-based server (no command)
+  const url = result.connection?.url || '';
+  if (url) {
+    if (url.includes('/sse')) return 'sse';
+    return 'streamable-http';
+  }
+
+  const args = result.connection?.args || [];
+  const allArgs = args.join(' ');
+
+  // SSE or HTTP transport if args contain a URL
+  if (allArgs.match(/https?:\/\//)) {
+    if (allArgs.includes('/sse')) return 'sse';
+    return 'streamable-http';
+  }
+
+  // Default for npx/uvx/node/python commands is stdio
+  return 'stdio';
+}
+
+function deriveServerUrl(result: ServerScanResult): string {
+  // URL-based transport (http, sse)
+  const url = result.connection?.url || '';
+  if (url) return url;
+
+  const cmd = result.connection?.command || '';
+  const args = result.connection?.args || [];
+
+  // For SSE/HTTP servers, the URL is in the args
+  for (const arg of args) {
+    if (arg.match(/^https?:\/\//)) return arg;
+  }
+
+  // For npx/uvx, build a runnable command string
+  if (cmd && args.length > 0) {
+    return `${cmd} ${args.join(' ')}`;
+  }
+  if (cmd) return cmd;
+
+  return '';
+}
+
 function buildListingPayload(result: ServerScanResult) {
-  const tools: string[] = [];
-  // Extract tool info from server name and findings
+  const sourceUrl = result.metadata?.repositoryUrl || '';
+  const transportType = deriveTransportType(result);
+  const serverUrl = deriveServerUrl(result);
+
   return {
     title: result.serverName,
     tagline: `MCP server verified by mcp-scan`,
@@ -40,9 +95,15 @@ function buildListingPayload(result: ServerScanResult) {
     category: 'other',
     tags: ['mcp', 'verified', 'mcp-scan', result.toolName.toLowerCase()],
     status: 'active',
-    source_url: '',
-    transport_type: 'stdio',
-    supported_tools: tools,
+    source_url: sourceUrl,
+    server_url: serverUrl,
+    transport_type: transportType,
+    connection: result.connection ? {
+      ...(result.connection.command ? { command: result.connection.command } : {}),
+      ...(result.connection.args?.length ? { args: result.connection.args } : {}),
+      ...(result.connection.url ? { url: result.connection.url } : {}),
+      ...(result.connection.type ? { type: result.connection.type } : {}),
+    } : undefined,
     scan_report: {
       scanned_at: new Date().toISOString(),
       findings_count: result.findings.length,
@@ -61,7 +122,7 @@ export async function submitToUgig(
   report: ScanReport,
   options: SubmitOptions = {}
 ): Promise<SubmitResult> {
-  const result: SubmitResult = { submitted: 0, skipped: 0, failed: 0, listings: [] };
+  const result: SubmitResult = { submitted: 0, previewed: 0, skipped: 0, failed: 0, listings: [] };
 
   const cleanServers = report.results.filter(isCleanServer);
   const dirtyServers = report.results.filter(r => !isCleanServer(r));
@@ -110,7 +171,7 @@ export async function submitToUgig(
         logger.log(`  ${dim('[dry-run]')} Would submit: ${chalk.white.bold(server.serverName)}`);
         logger.log(dim('  ' + JSON.stringify(payload, null, 2).split('\n').join('\n  ')));
       }
-      result.submitted++;
+      result.previewed++;
       result.listings.push({ serverName: server.serverName });
       continue;
     }
@@ -156,6 +217,9 @@ export async function submitToUgig(
     logger.emptyLine();
     if (result.submitted > 0) {
       logger.log(green(`  ✓ ${result.submitted} server(s) submitted to ugig.net/mcp`));
+    }
+    if (result.previewed > 0) {
+      logger.log(brand(`  ℹ Would submit: ${result.previewed} server(s) (dry-run)`));
     }
     if (result.failed > 0) {
       logger.log(red(`  ✗ ${result.failed} submission(s) failed`));

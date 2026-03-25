@@ -77,6 +77,14 @@ export interface ServerScanResult {
   findings: Finding[];
   scanDurationMs: number;
   trustScore?: number;
+  /** Original server connection details from MCP config */
+  connection?: {
+    command?: string;
+    args?: string[];
+    url?: string;
+    type?: string;
+    env?: string[]; // Sorted keys for fingerprinting
+  };
   metadata?: {
     packageName?: string;
     version?: string;

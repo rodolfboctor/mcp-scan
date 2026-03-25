@@ -27,7 +27,7 @@ import { runFix } from './fix.js';
 import { SEVERITY_ORDER, Severity } from '../types/severity.js';
 import { logger } from '../utils/logger.js';
 
-export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string, ugig?: boolean, ci?: boolean, sbom?: string, offline?: boolean } = {}): Promise<ScanReport> {
+export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string, ugig?: boolean, ci?: boolean, sbom?: string, offline?: boolean, submit?: boolean } = {}): Promise<ScanReport> {
   const startTime = Date.now();
   
   const policy = loadPolicy();
@@ -51,7 +51,11 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
   let tools: DetectedTool[];
 
   if (options.config) {
-    const configPath = path.resolve(options.config);
+    let resolvedPath = options.config;
+    if (resolvedPath.startsWith('~')) {
+      resolvedPath = path.join(os.homedir(), resolvedPath.slice(1));
+    }
+    const configPath = path.resolve(resolvedPath);
     const exists = fs.existsSync(configPath);
     const toolName = path.basename(configPath, path.extname(configPath));
     tools = [{ name: toolName, configPath, exists }];
@@ -89,7 +93,9 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
     for (const server of activeServers) {
       const serverStartTime = Date.now();
       
-      const serverKey = `${server.command} ${server.args?.join(' ') || ''}`;
+      const serverKey = server.url
+        ? server.url
+        : `${server.command} ${server.args?.join(' ') || ''}`;
       if (seenServers.has(serverKey)) {
         // Just note duplicate, not a full re-scan
         report.results.push({
@@ -157,7 +163,7 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
 
       let trustScore: number | undefined;
       let metadata: any;
-      if (options.verbose || options.sbom || options.ci) {
+      if (options.verbose || options.sbom || options.ci || options.submit) {
         const packageFindings = await scanPackageDeep(server, options.offline);
         allFindings.push(...packageFindings);
 
@@ -205,6 +211,13 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
         findings,
         scanDurationMs: Date.now() - serverStartTime,
         trustScore,
+        connection: {
+          command: server.command || undefined,
+          args: server.args,
+          url: server.url || undefined,
+          type: server.type || undefined,
+          env: server.env ? Object.keys(server.env).sort() : undefined,
+        },
         metadata
       };
 

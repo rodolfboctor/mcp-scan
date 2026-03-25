@@ -95,12 +95,13 @@ function updateFingerprints(results: ServerScanResult[]) {
   } catch (_error) {}
 }
 
-function generateFingerprint(result: any): string {
-  // Use a subset of fields for fingerprinting
+function generateFingerprint(result: ServerScanResult): string {
   const data = {
-    command: result.command,
-    args: result.args,
-    envKeys: result.env ? Object.keys(result.env).sort() : [],
+    command: result.connection?.command,
+    args: result.connection?.args,
+    url: result.connection?.url,
+    type: result.connection?.type,
+    env: result.connection?.env, // Already sorted in scan.ts
     packageName: result.metadata?.packageName,
     version: result.metadata?.version
   };

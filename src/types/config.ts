@@ -1,6 +1,8 @@
 export interface McpServerEntry {
-  command: string;
+  command?: string;
   args?: string[];
+  url?: string;
+  type?: string;
   env?: Record<string, string>;
   disabled?: boolean;
   description?: string;

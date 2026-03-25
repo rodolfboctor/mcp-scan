@@ -6,7 +6,11 @@ export function scanConfig(server: ResolvedServer): Finding[] {
   
   if (server.args) {
     for (const arg of server.args) {
-      if (/\$\{.*\}|\$\(.*\)|`.*`/.test(arg)) {
+      // Flag $(command) or `command` or complex ${...} but allow simple ${VAR}
+      const isSimpleEnvVar = /^\$\{[A-Z0-9_]+\}$/.test(arg);
+      const hasInjection = /\$\(.*\)|`.*`/.test(arg) || (/\$\{.*\}/.test(arg) && !isSimpleEnvVar);
+      
+      if (hasInjection) {
         findings.push({
           id: 'shell-injection-risk',
           severity: 'CRITICAL',
