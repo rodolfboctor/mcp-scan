@@ -1,5 +1,4 @@
 import blessed from 'blessed';
-// @ts-expect-error — no types for blessed-contrib
 import contrib from 'blessed-contrib';
 import { DashboardView } from '../types/dashboard.js';
 import { readAuditLog } from './audit-logger.js';

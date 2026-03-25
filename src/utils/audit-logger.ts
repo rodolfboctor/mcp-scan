@@ -60,7 +60,10 @@ export function checkFingerprints(results: ServerScanResult[]): Record<string, F
   try {
     if (!fs.existsSync(FINGERPRINT_FILE)) return mutationFindings;
     
-    const knownFingerprints = JSON.parse(fs.readFileSync(FINGERPRINT_FILE, 'utf8'));
+    let knownFingerprints: Record<string, string> = {};
+    try {
+      knownFingerprints = JSON.parse(fs.readFileSync(FINGERPRINT_FILE, 'utf8'));
+    } catch (_e) {}
     
     for (const result of results) {
       const key = `${result.toolName}:${result.serverName}`;
@@ -113,7 +116,9 @@ export function readAuditLog(count: number = 20): any[] {
     if (!fs.existsSync(AUDIT_LOG_FILE)) return [];
     const content = fs.readFileSync(AUDIT_LOG_FILE, 'utf8');
     const lines = content.trim().split('\n');
-    return lines.slice(-count).reverse().map(line => JSON.parse(line));
+    return lines.slice(-count).reverse().map(line => {
+      try { return JSON.parse(line); } catch (e) { return null; }
+    }).filter(Boolean);
   } catch (_error) {
     return [];
   }

@@ -32,10 +32,15 @@ export async function scanPackageDeep(server: ResolvedServer, offline: boolean =
   try {
     const npmController = new AbortController();
     const npmTimeoutId = setTimeout(() => npmController.abort(), 8000);
-    const res = await fetch(`https://registry.npmjs.org/${encodeURIComponent(packageName)}`, {
-      signal: npmController.signal,
-    });
-    clearTimeout(npmTimeoutId);
+    let res;
+    try {
+      res = await fetch(`https://registry.npmjs.org/${encodeURIComponent(packageName)}`, {
+        signal: npmController.signal,
+      });
+    } finally {
+      clearTimeout(npmTimeoutId);
+    }
+    
     if (!res.ok) {
       logger.warn(`Failed to fetch package info for ${packageName} from npm registry.`);
     } else {
@@ -65,14 +70,17 @@ export async function scanPackageDeep(server: ResolvedServer, offline: boolean =
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
   try {
-    const osvRes = await fetch('https://api.osv.dev/v1/query', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ package: { name: packageName, ecosystem: 'npm' } }),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
+    let osvRes;
+    try {
+      osvRes = await fetch('https://api.osv.dev/v1/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ package: { name: packageName, ecosystem: 'npm' } }),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!osvRes.ok) {
       logger.warn(`OSV.dev API request failed for ${packageName}.`);
@@ -121,7 +129,7 @@ export async function scanPackageDeep(server: ResolvedServer, offline: boolean =
 
     // Upgrade Advisor Logic
     if (latestVersion) {
-        const currentVersion = server.metadata?.version;
+        const currentVersion = (server as any).metadata?.version;
         if (currentVersion && semver.valid(currentVersion) && semver.valid(latestVersion) && semver.gt(latestVersion, currentVersion)) {
             const resolvesVulns = vulns.some((v: any) => v.fixed_in?.includes(latestVersion) || !v.affected?.some((a: any) => a.ranges?.some((r: any) => r.type === 'SEMVER' && r.events?.some((e: any) => e.fixed === latestVersion))));
             
@@ -150,7 +158,13 @@ function scanPackageOffline(packageName: string): Finding[] {
   try {
     if (!fs.existsSync(SNAPSHOT_PATH)) return findings;
     
-    const snapshot = JSON.parse(fs.readFileSync(SNAPSHOT_PATH, 'utf8'));
+    let snapshot;
+    try {
+      snapshot = JSON.parse(fs.readFileSync(SNAPSHOT_PATH, 'utf8'));
+    } catch (parseError) {
+      logger.warn(`Failed to parse offline CVE snapshot: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+      return findings;
+    }
     
     // Check if snapshot is stale (> 30 days)
     const updatedAt = new Date(snapshot.updatedAt);

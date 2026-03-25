@@ -13,7 +13,7 @@ export function scanRegistry(server: ResolvedServer): Finding[] {
     const pkgArg = (Array.isArray(server.args) ? server.args : (server.args ? Object.values(server.args) : [])).find(a => typeof a === 'string' && !a.startsWith('-'));
     if (pkgArg) packageName = pkgArg as string;
   } else {
-    packageName = server.command;
+    packageName = server.command || '';
   }
 
   // Guard: no package name means nothing to scan
