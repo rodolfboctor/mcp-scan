@@ -82,15 +82,16 @@ function deriveServerUrl(result: ServerScanResult): string {
   return '';
 }
 
-function buildListingPayload(result: ServerScanResult) {
+function buildListingPayload(result: ServerScanResult, reportVersion: string = '1.x') {
   const sourceUrl = result.metadata?.repositoryUrl || '';
   const transportType = deriveTransportType(result);
   const serverUrl = deriveServerUrl(result);
+  const displayName = result.metadata?.packageName || result.serverName;
 
   return {
     title: result.serverName,
     tagline: `MCP server verified by mcp-scan`,
-    description: `Security-scanned MCP server. Passed mcp-scan v1.x with no critical or high severity findings. Config detected from ${result.toolName}.`,
+    description: `Security-scanned MCP server '${displayName}'. Passed mcp-scan v${reportVersion} with no critical or high severity findings. Config detected from ${result.toolName}.`,
     price_sats: 0,
     category: 'other',
     tags: ['mcp', 'verified', 'mcp-scan', result.toolName.toLowerCase()],
@@ -117,6 +118,8 @@ function buildListingPayload(result: ServerScanResult) {
     }
   };
 }
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function submitToUgig(
   report: ScanReport,
@@ -163,8 +166,9 @@ export async function submitToUgig(
     return result;
   }
 
-  for (const server of cleanServers) {
-    const payload = buildListingPayload(server);
+  for (let i = 0; i < cleanServers.length; i++) {
+    const server = cleanServers[i];
+    const payload = buildListingPayload(server, report.version);
 
     if (options.dryRun) {
       if (!options.silent) {
@@ -175,6 +179,9 @@ export async function submitToUgig(
       result.listings.push({ serverName: server.serverName });
       continue;
     }
+
+    // Rate limiting: 300ms delay between calls
+    if (i > 0) await sleep(300);
 
     try {
       const response = await fetch(UGIG_API, {
@@ -199,8 +206,21 @@ export async function submitToUgig(
         const errText = await response.text();
         result.failed++;
         result.listings.push({ serverName: server.serverName, error: `HTTP ${response.status}: ${errText.substring(0, 100)}` });
+        
         if (!options.silent) {
-          logger.log(red(`  ✗ Failed: ${server.serverName} — HTTP ${response.status}`));
+          if (response.status === 401) {
+            const maskedKey = options.apiKey.substring(0, 8) + '...';
+            const source = process.env.UGIG_API_KEY === options.apiKey ? 'UGIG_API_KEY env var' : '--ugig-key flag';
+            logger.log(red(`  ✗ Unauthorized (401): Invalid API key`));
+            logger.log(dim(`    Key: ${maskedKey} (from ${source})`));
+            logger.log(dim(`    Fix: Check your key at https://ugig.net/settings/api-keys`));
+          } else if (response.status === 429) {
+            logger.log(red(`  ✗ Rate Limited (429): Too many requests`));
+            logger.log(dim(`    Fix: Please wait a moment and try again.`));
+          } else {
+            logger.log(red(`  ✗ Failed: ${server.serverName} — HTTP ${response.status}`));
+            if (errText) logger.log(dim(`    Error: ${errText.substring(0, 200)}`));
+          }
         }
       }
     } catch (err) {

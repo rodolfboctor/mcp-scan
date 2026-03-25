@@ -25,6 +25,18 @@ export function scanTransport(server: ResolvedServer, allowedDomains: string[] =
     });
   }
 
+  // Check for insecure URL-based server
+  if (server.url?.startsWith('http://')) {
+    findings.push({
+      id: 'http-transport-no-auth',
+      severity: 'HIGH',
+      description: `Server uses insecure http:// protocol for connection.`,
+      fixRecommendation: `Change the URL to use https://.`,
+      fixable: true,
+      remediationConfidence: 95
+    });
+  }
+
   // Check for deprecated transport mentioned in args
   if (server.args?.includes('--transport=sse')) {
      findings.push({

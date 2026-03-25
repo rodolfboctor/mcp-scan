@@ -51,7 +51,12 @@ export async function scanSupplyChain(server: ResolvedServer, offline: boolean =
   metadata.packageName = packageName;
 
   try {
-    const npmRes = await fetch(`https://registry.npmjs.org/${encodeURIComponent(packageName)}`);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+    const npmRes = await fetch(`https://registry.npmjs.org/${encodeURIComponent(packageName)}`, { signal: controller.signal });
+    clearTimeout(timeout);
+
     if (!npmRes.ok) {
       logger.warn(`Supply Chain: Failed to fetch npm registry data for ${packageName}. Switching to offline snapshot.`);
       return scanSupplyChainOffline(packageName);
@@ -100,7 +105,11 @@ export async function scanSupplyChain(server: ResolvedServer, offline: boolean =
         logger.detail(`Supply Chain: Owner mismatch detected between npm maintainers and GitHub owner for ${packageName}.`);
     }
 
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      logger.warn(`Supply Chain: Fetch timed out for ${packageName}. Switching to offline mode.`);
+      return scanSupplyChainOffline(packageName);
+    }
     logger.warn(`Supply Chain: Error during scan for ${packageName}: ${error instanceof Error ? error.message : String(error)}. Switching to offline mode.`);
     return scanSupplyChainOffline(packageName);
   }
@@ -155,7 +164,11 @@ async function fetchGitHubMetadata(repoUrl: string): Promise<RepoMetadata | null
       headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
     }
 
-    const res = await fetch(apiUrl, { headers });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const res = await fetch(apiUrl, { headers, signal: controller.signal });
+    clearTimeout(timeout);
+    
     if (!res.ok) return null;
 
     const data = await res.json() as any;
