@@ -1,6 +1,6 @@
 {
   "name": "mcp-scan",
-  "version": "1.7.4",
+  "version": "1.7.5",
   "description": "Security scanner for MCP servers.",
   "type": "module",
   "main": "./dist/lib.js",
@@ -77,6 +77,7 @@
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.57.1",
     "@typescript-eslint/parser": "^8.57.1",
+    "@vitest/coverage-v8": "^4.1.1",
     "eslint": "^10.1.0",
     "execa": "^9.6.1",
     "globals": "^17.4.0",

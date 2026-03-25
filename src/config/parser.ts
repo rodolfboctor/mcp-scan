@@ -4,6 +4,27 @@ import * as toml from 'smol-toml';
 import { McpConfig, ResolvedServer, McpScanPolicy } from '../types/config.js';
 import { logger } from '../utils/logger.js';
 
+function parseJsonC(content: string) {
+  // Remove BOM
+  let json = content.replace(/^\uFEFF/, '');
+  // Remove block comments /* */
+  json = json.replace(/\/\*[\s\S]*?\*\//g, '');
+  // Remove line comments // (be careful not to remove in strings like http:// - basic heuristic)
+  // A perfect JSONC parser is complex, but this handles standard config comments
+  json = json.split('\n').map(line => {
+    const commentIdx = line.indexOf('//');
+    if (commentIdx === -1) return line;
+    // Check if it's inside a string (very basic check)
+    const before = line.substring(0, commentIdx);
+    const quotes = (before.match(/"/g) || []).length;
+    if (quotes % 2 !== 0) return line; // Inside a string
+    return before;
+  }).join('\n');
+  // Remove trailing commas
+  json = json.replace(/,\s*([\]}])/g, '$1');
+  return JSON.parse(json);
+}
+
 export function parseConfig(configPath: string): McpConfig | null {
   try {
     const content = fs.readFileSync(configPath, 'utf8');
@@ -16,7 +37,7 @@ export function parseConfig(configPath: string): McpConfig | null {
        return { mcpServers } as McpConfig;
     }
 
-    return JSON.parse(content) as McpConfig;
+    return parseJsonC(content) as McpConfig;
   } catch (error: any) {
     if (error.code !== 'ENOENT') {
       logger.warn(`Failed to parse config at ${configPath}: ${error.message}`);
@@ -46,7 +67,7 @@ export function loadPolicy(cwd: string = process.cwd()): McpScanPolicy | null {
   try {
     if (fs.existsSync(policyPath)) {
       const content = fs.readFileSync(policyPath, 'utf8');
-      return JSON.parse(content) as McpScanPolicy;
+      return parseJsonC(content) as McpScanPolicy;
     }
   } catch (error: any) {
     logger.warn(`Failed to parse policy at ${policyPath}: ${error.message}`);

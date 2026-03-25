@@ -7,11 +7,14 @@ import { logger } from './logger.js';
  * @param report The scan report.
  */
 export async function sendWebhook(url: string, report: ScanReport) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(report)
+      body: JSON.stringify(report),
+      signal: controller.signal
     });
 
     if (!response.ok) {
@@ -21,6 +24,8 @@ export async function sendWebhook(url: string, report: ScanReport) {
     }
   } catch (error) {
     logger.error(`Webhook: Error sending report to ${url}: ${error instanceof Error ? error.message : String(error)}`);
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -91,11 +96,15 @@ export async function sendSlackWebhook(url: string, report: ScanReport) {
       ]
     };
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       logger.error(`Slack Webhook: Failed to send to ${url}. Status: ${response.status} ${response.statusText}`);

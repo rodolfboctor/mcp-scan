@@ -30,7 +30,7 @@ export function scanTyposquat(server: ResolvedServer): Finding[] {
     const pkgArg = server.args?.find(a => !a.startsWith('-'));
     if (pkgArg) packageName = pkgArg;
   } else {
-    packageName = server.command;
+    packageName = server.command || '';
   }
 
   if (!packageName) return findings;

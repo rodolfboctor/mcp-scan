@@ -71,9 +71,17 @@ export async function runDoctor() {
   let githubOk = false;
   let githubDetail = '';
   try {
-    const res = await fetch('https://api.github.com/zen', {
-        headers: { 'User-Agent': 'mcp-scan-doctor' }
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    let res;
+    try {
+      res = await fetch('https://api.github.com/zen', {
+        headers: { 'User-Agent': 'mcp-scan-doctor' },
+        signal: controller.signal
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
     if (res.ok) {
         githubOk = true;
         const rateLimit = res.headers.get('x-ratelimit-remaining');
@@ -90,12 +98,18 @@ export async function runDoctor() {
   let updateOk = false;
   let updateDetail = '';
   try {
-    const res = await fetch('https://registry.npmjs.org/mcp-scan/latest');
-    if (res.ok) {
-        const data = await res.json() as any;
-        const latest = data.version;
-        updateOk = true;
-        updateDetail = `Latest version available on npm: ${latest}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    try {
+      const res = await fetch('https://registry.npmjs.org/mcp-scan/latest', { signal: controller.signal });
+      if (res.ok) {
+          const data = await res.json() as any;
+          const latest = data.version;
+          updateOk = true;
+          updateDetail = `Latest version available on npm: ${latest}`;
+      }
+    } finally {
+      clearTimeout(timeoutId);
     }
   } catch (_e) {}
   check('Update check (npm)', updateOk, updateDetail);

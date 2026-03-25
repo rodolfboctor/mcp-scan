@@ -10,9 +10,24 @@ import { SEVERITY_ORDER } from '../types/severity.js';
  * @param newPath Path to the newer scan report JSON.
  */
 export async function runDiff(oldPath: string, newPath: string) {
+  let oldReport: ScanReport;
+  let newReport: ScanReport;
+
   try {
-    const oldReport: ScanReport = JSON.parse(fs.readFileSync(oldPath, 'utf8'));
-    const newReport: ScanReport = JSON.parse(fs.readFileSync(newPath, 'utf8'));
+    oldReport = JSON.parse(fs.readFileSync(oldPath, 'utf8'));
+  } catch (e: any) {
+    logger.error(`Failed to parse old report: ${e.message}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  try {
+    newReport = JSON.parse(fs.readFileSync(newPath, 'utf8'));
+  } catch (e: any) {
+    logger.error(`Failed to parse new report: ${e.message}`);
+    process.exitCode = 1;
+    return;
+  }
 
     logger.brand(`Diffing scan reports:`);
     logger.detail(`Old: ${oldPath} (${oldReport.totalScanned} servers)`);
@@ -105,9 +120,4 @@ export async function runDiff(oldPath: string, newPath: string) {
     } else {
       logger.pass(`No changes detected between reports.`);
     }
-
-  } catch (error) {
-    logger.error(`Failed to diff reports: ${error instanceof Error ? error.message : String(error)}`);
-    process.exitCode = 1;
-  }
 }

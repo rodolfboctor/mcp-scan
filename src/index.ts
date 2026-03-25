@@ -14,7 +14,12 @@ import { submitToUgig } from './commands/submit.js';
 import { runProxy } from './commands/proxy.js';
 
 const pkgUrl = new URL('../package.json', import.meta.url);
-const pkg = JSON.parse(readFileSync(pkgUrl, 'utf8'));
+let pkg: any = { version: 'unknown' };
+try {
+  pkg = JSON.parse(readFileSync(pkgUrl, 'utf8'));
+} catch (e) {
+  // Ignore
+}
 
 const program = new Command();
 
