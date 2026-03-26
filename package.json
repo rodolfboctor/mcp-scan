@@ -1,6 +1,6 @@
 {
   "name": "mcp-scan",
-  "version": "1.7.5",
+  "version": "1.7.6",
   "description": "Security scanner for MCP servers.",
   "type": "module",
   "main": "./dist/lib.js",
@@ -54,7 +54,7 @@
   "bugs": {
     "url": "https://github.com/rodolfboctor/mcp-scan/issues"
   },
-  "homepage": "https://github.com/rodolfboctor/mcp-scan#readme",
+  "homepage": "https://thynkq.com/products/mcp-scan",
   "dependencies": {
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.11.0",
