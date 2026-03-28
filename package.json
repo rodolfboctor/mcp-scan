@@ -1,6 +1,6 @@
 {
   "name": "mcp-scan",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Open-source security scanner for Model Context Protocol (MCP) servers. Audits Claude Desktop, VS Code, Cursor, Windsurf, and 16+ AI tools for secrets, prompt injection, supply-chain risks, and 17+ security checks.",
   "type": "module",
   "main": "./dist/lib.js",
