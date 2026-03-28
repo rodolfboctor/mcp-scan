@@ -1,0 +1,10 @@
+// This is a comment
+{
+  /* block comment */
+  "mcpServers": {
+    "test": {
+      "command": "node",
+      "args": ["a", "b"], // trailing comma next
+    },
+  }
+}
