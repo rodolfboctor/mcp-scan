@@ -1,53 +1,61 @@
 **Twitter/X Thread:**
 
-1/ We're excited to launch mcp-scan v2.0! We've transformed it from a simple scanner into a full-fledged security platform for the MCP ecosystem. Know where your data goes.
+1/ mcp-scan v2.0 is out. It went from a config scanner to a full security platform for MCP servers. 4 new scanners, compliance mapping, SBOM generation, and a YAML policy engine.
 
-2/ The headline feature is our new Data Flow Analyzer. It statically analyzes your MCP servers to trace data from sensitive sources (like your files) to external sinks (like third-party APIs).
+2/ The big one: Data Flow Analyzer. It traces where your data goes. If an MCP server reads your files and also has network access, you'll know about it before it phones home.
 
-3/ We've also added a Network Egress Monitor to detect and report all external network endpoints an MCP server communicates with. No more surprise phone-homes.
+3/ Network Egress Monitor flags every outbound endpoint your servers talk to. Raw IPs, obfuscated URLs, known telemetry domains. All surfaced.
 
-4/ Compliance just got easier. `mcp-scan privacy` generates a privacy impact assessment, and `mcp-scan compliance` maps findings to SOC 2, GDPR, HIPAA, and more.
+4/ `mcp-scan compliance --framework soc2` maps your findings to SOC 2, GDPR, HIPAA, PCI-DSS, and NIST controls. `mcp-scan privacy` generates a privacy impact report.
 
-5/ For our enterprise users, we've added a Policy Engine to enforce custom security rules and SBOM generation for both CycloneDX and SPDX formats.
+5/ Policy Engine: define your security rules in `.mcp-scan-policy.yml`. Block packages, suppress rules, set severity thresholds. SBOM output in CycloneDX v1.5 and SPDX 2.3.
 
-6/ And of course, we've upgraded our GitHub Action to support SARIF uploads, so you can get findings directly in your GitHub Security tab.
+6/ GitHub Action now supports SARIF upload. Findings show up directly in the Security tab.
 
-7/ Upgrade today with `npx mcp-scan@latest` and let us know what you think!
+7/ `npx mcp-scan@latest` to try it. GitHub: github.com/rodolfboctor/mcp-scan
 
 **LinkedIn Post:**
 
-I'm thrilled to announce the release of mcp-scan v2.0, a major leap forward in security for the Model Context Protocol ecosystem.
+mcp-scan v2.0 is live.
 
-When I started mcp-scan, the goal was simple: provide basic security scanning for MCP configurations. But as the ecosystem has grown, so have the risks. It's no longer enough to just check for hardcoded secrets. We need to understand where our data is going.
+When I built the first version, it checked MCP configs for hardcoded secrets and known malicious packages. Useful, but limited. The real question was always: where does my data actually go when I connect an AI tool to an MCP server?
 
-That's why we've rebuilt mcp-scan from the ground up as a comprehensive security platform. Our new Data Flow Analyzer provides unprecedented visibility into how your MCP servers handle your data. Our Network Egress Monitor tells you exactly who your servers are talking to. And our new compliance and policy engines help you enforce your security requirements at scale.
+v2.0 answers that. The new Data Flow Analyzer maps source-to-sink paths in your MCP server configs. If a server can read your filesystem and also make HTTP requests, that gets flagged. If credential env vars are exposed to a network-capable server, that's a CRITICAL finding.
 
-This is a huge step forward for MCP security, and I'm incredibly proud of what our team has built. I'm excited to see how the community uses these new tools to build amazing things with MCP, securely.
+What else is new:
+- Network Egress Monitor: detects all outbound endpoints
+- Compliance mapping: SOC 2, GDPR, HIPAA, PCI-DSS, NIST
+- Policy engine: custom rules in YAML
+- SBOM generation: CycloneDX + SPDX
+- Privacy impact assessments
 
-Check out the full announcement here: [link to blog post]
+17 scanners total. 200+ tests. Free and open source.
 
-\#MCP #AI #Security #OpenSource #DevSecOps
+github.com/rodolfboctor/mcp-scan
+
+#MCP #Security #OpenSource
 
 **Reddit Post (r/cybersecurity):**
 
-**Title:** I built an open-source security platform for the Model Context Protocol (MCP) - looking for feedback
+**Title:** mcp-scan v2.0: open-source security platform for MCP servers (data flow analysis, compliance mapping, SBOM)
 
-Hey r/cybersecurity,
+I maintain mcp-scan, an open-source security scanner for Model Context Protocol servers. Just shipped v2.0.
 
-I'm the creator of mcp-scan, an open-source security scanner for the Model Context Protocol (MCP), a new protocol for AI development tools.
+The short version: MCP lets AI tools (Claude, Cursor, Windsurf, etc.) connect to external servers that can read your files, run commands, and make network requests. mcp-scan tells you what those servers are actually doing with your data.
 
-I just released v2.0, which transforms the tool from a simple config scanner into a more comprehensive security platform. I'd love to get your feedback.
+New in v2.0:
 
-Some of the new features:
+* **Data Flow Analyzer** - traces paths from sensitive sources (filesystem, env vars) to external sinks (HTTP endpoints). Flags read-and-send patterns.
+* **Network Egress Monitor** - lists every outbound endpoint. Catches raw IPs, obfuscated URLs, known telemetry.
+* **Compliance mapping** - maps findings to SOC 2, GDPR, HIPAA, PCI-DSS, NIST control IDs.
+* **Policy engine** - `.mcp-scan-policy.yml` for custom rules (block packages, suppress findings, enforce severity thresholds).
+* **SBOM generation** - CycloneDX v1.5 and SPDX 2.3.
+* **Privacy command** - PII detection and privacy impact reports.
 
-*   **Data Flow Analysis**: Statically analyzes MCP servers to trace data from sensitive sources to external sinks.
-*   **Network Egress Monitoring**: Detects all outbound network connections from MCP servers.
-*   **Compliance Mapping**: Maps findings to SOC 2, GDPR, HIPAA, etc.
-*   **Policy Engine**: Lets you define custom security rules in YAML.
-*   **SBOM Generation**: Creates CycloneDX and SPDX SBOMs.
+17 scanners, 200+ tests, zero telemetry. MIT licensed.
 
-The goal is to bring some much-needed security and visibility to the rapidly growing AI development ecosystem. You can check it out on GitHub: [link]
+Interested in feedback on the data flow analysis specifically. The static analysis is heuristic-based right now (matching known package names and config patterns). Considering adding actual AST traversal of server source code for v2.1.
 
-I'm particularly interested in feedback on the data flow analysis and compliance mapping features. What other security challenges are you seeing in the AI/ML development world?
+GitHub: [link]
 
-Thanks!
+`npx mcp-scan` to try it.
