@@ -1,211 +1,69 @@
-<div align="center">
+# mcp-scan v2.0 - Now with Data Controls
 
-# mcp-scan
+![CI](https://github.com/rodolfboctor/mcp-scan/actions/workflows/ci.yml/badge.svg)
+[![npm version](https://badge.fury.io/js/mcp-scan.svg)](https://badge.fury.io/js/mcp-scan)
+[![npm downloads](https://img.shields.io/npm/dw/mcp-scan)](https://www.npmjs.com/package/mcp-scan)
+![License](https://img.shields.io/npm/l/mcp-scan)
 
-Security scanner for MCP server configurations.
+Know where your data goes. MCP servers run with full access to your filesystem,
+API keys, and network. mcp-scan v2.0 maps data flows, monitors network egress,
+generates privacy assessments, and enforces custom security policies.
 
-<img src="https://img.shields.io/npm/v/mcp-scan" alt="npm version" />
-<img src="https://img.shields.io/npm/dm/mcp-scan" alt="npm downloads" />
-<img src="https://img.shields.io/npm/l/mcp-scan" alt="license" />
-<img src="https://img.shields.io/node/v/mcp-scan" alt="node version" />
-<img src="https://img.shields.io/github/stars/rodolfboctor/mcp-scan" alt="github stars" />
+## New in v2.0
+- **Data Flow Analysis**: Trace where your data goes after MCP processes it.
+- **Network Egress Monitor**: See every endpoint your servers contact.
+- **Privacy Assessment**: One-command PII and compliance report.
+- **Policy Engine**: Custom security rules in `.mcp-scan-policy.yml`.
+- **Compliance Mapping**: SOC 2, GDPR, HIPAA, PCI-DSS, NIST 800-53.
+- **SBOM Generation**: CycloneDX and SPDX output.
+- **GitHub Action**: Scan on every PR with SARIF upload.
+- **17+ Scanners**: Secrets, supply chain, prompt injection, data flow, and more.
 
-
-</div>
-
-### Why this exists
-MCP servers run with full filesystem and network access. Most users install them without auditing what they are actually running. mcp-scan scans your configurations automatically and surfaces what needs attention.
-
-### Quick start
+## Quick Start
 ```bash
-npx mcp-scan
+npx mcp-scan@latest
 ```
 
-```text
-$ npx mcp-scan
+## What It Catches
+| Check | Severity | Description |
+|---|---|---|
+| Data Exfiltration | CRITICAL | Detects when a tool reads from the filesystem and sends data to a network location. |
+| Credential Relay | CRITICAL | Finds tools that pass environment variables or other secrets to external APIs. |
+| Known Malicious Package | CRITICAL | Checks against a list of known malicious MCP servers. |
+| Exposed Secret | CRITICAL | Finds hardcoded API keys and other secrets in your configuration. |
+| ...and many more | | |
 
-  ┌ Claude Desktop › filesystem
-  │ /Users/rodolf/Library/Application Support/Claude/claude_desktop_config.json
-  │
-  │   HIGH       exposed-secret
-  │            Environment variable GITHUB_TOKEN contains a hardcoded secret.
-  │            Move the value to a .env file and reference it as ${GITHUB_TOKEN}.
-  │
-  └────────────────────────────────────────────────
-
-  ✓ Claude Desktop › github         0 issues
-  ✓ Claude Desktop › slack          0 issues
-
-  ────────────────────────────────────────────────
-   Scanned 3 servers across 1 client in 45ms
-    0 critical    1 high    0 medium    0 low
-  ────────────────────────────────────────────────
-```
-
-### What gets scanned
-| Client | Config location | Platform |
-|:-------|:----------------|:---------|
-| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` | macOS |
-| Cursor | `~/.cursor/mcp.json` | macOS, Linux |
-| VS Code | `~/.vscode/mcp.json` | macOS, Linux |
-| Claude Code | `~/.claude.json` | macOS, Linux |
-| Windsurf | `~/.codeium/windsurf/mcp_config.json` | macOS, Linux |
-| Gemini CLI | `~/.gemini/settings.json` | macOS, Linux |
-| Codex CLI | `~/.codex/config.toml` | macOS, Linux |
-| Zed | `~/.config/zed/settings.json` | macOS, Linux |
-| Continue.dev | `~/.continue/config.json` | macOS, Linux |
-| Cline | VS Code extension settings | macOS, Linux |
-| Roo Code | VS Code extension settings | macOS, Linux |
-| Amp | `~/.amp/config.json` | macOS, Linux |
-| Plandex | `~/.plandex/config.json` | macOS, Linux |
-| GitHub Copilot | `~/.config/github-copilot/apps.json` | macOS, Linux |
-| ChatGPT Desktop | `~/Library/Application Support/com.openai.chat/settings.json` | macOS |
-| Project local | `.mcp.json`, `.cursor/mcp.json`, `.vscode/mcp.json` | All |
-
-Windows paths are automatically detected using `%APPDATA%` and `%USERPROFILE%`.
-
-### Scanners
-| Scanner | What it detects | Severity range |
-|:--------|:----------------|:---------------|
-| **secret** | Hardcoded API keys and tokens in env vars or args | HIGH - CRITICAL |
-| **registry** | Packages on the known malicious blocklist | CRITICAL |
-| **typosquat** | Package names that closely resemble official servers | HIGH |
-| **permission** | Overly broad filesystem paths like `/`, `~`, or `.ssh` | MEDIUM - HIGH |
-| **transport** | HTTP without auth or deprecated SSE transport | LOW - MEDIUM |
-| **ast** | Suspicious execution patterns like `eval` or `exec` | HIGH - CRITICAL |
-| **prompt-injection** | Malicious instructions in server descriptions | MEDIUM - HIGH |
-| **tool-poisoning** | Capability injection and cross-tool manipulation | HIGH |
-| **env-leak** | Secrets in `.env` files exposed to server process | HIGH |
-| **package** | Known CVEs via OSV.dev API or bundled snapshot | MEDIUM - CRITICAL |
-| **supply-chain** | Low trust scores based on npm and GitHub metadata | LOW - MEDIUM |
-| **license** | Copyleft licenses or missing license fields | LOW |
-| **config** | Shell injection patterns in argument strings | HIGH |
-
-### Severity levels
-| Level | Meaning |
-|:------|:--------|
-| **CRITICAL** | Immediate risk. Stop using until resolved. |
-| **HIGH** | Significant risk. Fix before next session. |
-| **MEDIUM** | Risk present. Fix in current sprint. |
-| **LOW** | Minor issue. Fix when convenient. |
-| **INFO** | Informational. No action required. |
-
-### CLI reference
-<details>
-<summary>Click to view all commands and flags</summary>
-
-#### Commands
+## All Commands
 | Command | Description |
-|:--------|:------------|
-| `scan` | Default scan of all detected AI tool configs |
-| `audit` | View scan history or deep audit a specific server |
-| `fix` | Interactive auto-fix for secrets and permissions |
-| `watch` | Continuous monitoring of config files |
-| `ls` | List all detected MCP servers |
-| `scanners` | List all available security scanners |
-| `diff` | Compare two scan reports and show changes |
-| `submit` | Scan and submit clean servers to ugig.net marketplace |
-| `ci` | CI mode with JSON output and strict exit codes |
-| `dashboard` | Launch the interactive TUI dashboard |
-| `history` | Show scan history trends and statistics |
-| `doctor` | Run system diagnostic check |
-| `report` | Scan all configs in a directory for a unified report |
-| `init` | Create `.mcp-scan.json` policy config |
-| `proxy` | Run local proxy to intercept MCP server traffic |
+|---|---|
+| `scan` | Full security scan of all detected AI tool configs. |
+| `privacy` | Generate a privacy impact assessment and data map. |
+| `compliance` | Generate compliance reports (SOC 2, GDPR, etc.). |
+| `sbom` | Generate Software Bill of Materials (SBOM). |
+| `policy` | Validate custom security policies. |
+| `...` | |
 
-#### Flags
-| Flag | What it does | Default |
-|:-----|:-------------|:--------|
-| `--json` | Output report in JSON format | `false` |
-| `--sarif <path>` | Output SARIF report for GitHub Security | `undefined` |
-| `--html <path>` | Output self-contained HTML report | `undefined` |
-| `--sbom <path>` | Output CycloneDX SBOM | `undefined` |
-| `--offline` | Skip network calls, use bundled CVE snapshot | `false` |
-| `--severity <level>` | Filter by minimum severity | `low` |
-| `--config <path>` | Scan a specific config file | `undefined` |
-| `--ugig` | Show ugig.net links for verified servers | `false` |
-| `--fix` | Automatically apply fixes where possible | `false` |
-| `--submit` | Submit clean servers to ugig.net | `false` |
-| `--ugig-key <key>` | ugig.net API key | `process.env.UGIG_API_KEY` |
-| `--webhook <url>` | POST scan results to a webhook | `undefined` |
-| `--slack-webhook <url>` | POST scan results to Slack | `undefined` |
-| `--ci` | Enable CI mode | `false` |
-| `--verbose` | Enable verbose output | `false` |
-| `--dry-run` | Preview submission without sending | `false` |
+## Supported AI Tools
+mcp-scan automatically detects configurations for over 16 AI tools, including VS Code, Cursor, Claude Desktop, and more.
 
-</details>
-
-### Output formats
-- **CLI table**: Default color-coded output for terminal use.
-- **JSON**: Use `--json` for machine-readable output.
-- **SARIF**: Use `--sarif results.sarif` to import into GitHub Security tab.
-- **HTML report**: Use `--html report.html` for a self-contained visual report.
-- **SBOM**: Use `--sbom sbom.json` for CycloneDX v1.5 Software Bill of Materials.
-
-### CI/CD integration
-
-#### GitHub Action example
+## GitHub Action
 ```yaml
-name: MCP Security Scan
-on: [push, pull_request]
-
-jobs:
-  scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: rodolfboctor/mcp-scan@v1
-        with:
-          severity: high
-          sarif-output: results.sarif
-      - uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: results.sarif
+- uses: rodolfboctor/mcp-scan@v2
+  with:
+    severity-threshold: MEDIUM
+    sarif-upload: true
 ```
 
-### Library usage
-```typescript
-import { runScan } from 'mcp-scan';
+## Coming Soon
+- **v2.1**: Runtime Monitoring
+- **v2.2**: Sandboxed Execution
+- **v2.3**: Real-Time Alerting
 
-const report = await runScan({
-  severity: 'high',
-  offline: true
-});
+## Contributing
+Contributions are welcome! Please open an issue or PR.
 
-console.log(`Found ${report.totalFindings} issues.`);
-```
-
-### Integrations
-- **ugig.net**: MCP marketplace integration. Run `mcp-scan submit --ugig-key YOUR_KEY`.
-- **GitHub Security**: Upload SARIF reports to see findings in your repository security tab.
-- **Slack**: Send alerts to your team using `--slack-webhook <url>`.
-- **Custom webhooks**: Integrate with any system using `--webhook <url>`.
-
-### Troubleshooting
-- **Rate limits**: If you see GitHub API errors, set `GITHUB_TOKEN` in your environment.
-- **Config not detected**: Use `mcp-scan --config path/to/config.json` to scan a specific file.
-- **Node version**: Ensure you are using Node.js 18 or higher.
-
-### Architecture
-<details>
-<summary>Click to view pipeline details</summary>
-
-1. **Detection**: Automatically locates configuration files for 15+ AI clients.
-2. **Parsing**: Reads JSON, JSONC, and TOML formats into a unified internal model.
-3. **Scanning**: Runs a pipeline of 13 specialized security scanners.
-4. **Reporting**: Aggregates findings and generates output in multiple formats.
-</details>
-
-### Contributing
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and contribution guidelines.
-
-### License
-MIT. See [LICENSE](LICENSE) for details.
+## License
+MIT
 
 ---
-
-<div align="center">
-  <sub>
-    Development by <a href="https://thynkq.com" target="_blank" rel="noopener">ThynkQ</a>.
-  </sub>
-</div>
+Built by [Abanoub Rodolf Boctor](https://linkedin.com/in/abanoubrodolf) and [ThynkQ](https://thynkq.com).

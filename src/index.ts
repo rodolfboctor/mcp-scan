@@ -235,4 +235,43 @@ program
     await runProxy(options);
   });
 
+program
+  .command('sbom')
+  .description('Generate Software Bill of Materials (SBOM)')
+  .option('--format <format>', 'SBOM format (cyclonedx or spdx)', 'cyclonedx')
+  .option('--output <path>', 'Output file path', 'sbom.json')
+  .option('--include-deps', 'Include full dependency trees')
+  .action(async (options) => {
+    const { runSbom } = await import('./commands/sbom.js');
+    await runSbom(options);
+  });
+
+program
+  .command('privacy')
+  .description('Generate a privacy impact assessment for all detected MCP servers')
+  .option('--format <format>', 'Output format (text or json)', 'text')
+  .option('--retention', 'Include data retention analysis')
+  .action(async (options) => {
+    const { runPrivacy } = await import('./commands/privacy.js');
+    await runPrivacy(options);
+  });
+
+program
+  .command('compliance')
+  .description('Map scan findings to compliance frameworks (SOC2, GDPR, HIPAA, PCI-DSS, NIST)')
+  .option('--framework <name>', 'Framework to map against (soc2, gdpr, hipaa, pci-dss, nist, all)', 'all')
+  .option('--output <path>', 'Save report to file')
+  .action(async (options) => {
+    const { runCompliance } = await import('./commands/compliance.js');
+    await runCompliance(options);
+  });
+
+program
+  .command('policy <action> [file]')
+  .description('Manage custom security policies (validate, show)')
+  .action(async (action, file) => {
+    const { runPolicyAction } = await import('./commands/policy.js');
+    await runPolicyAction(action, file);
+  });
+
 program.parse();
