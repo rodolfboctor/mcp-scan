@@ -43,9 +43,10 @@ describe('Data Controls Scanner', () => {
     expect(findings.find(f => f.id === 'data-controls-retention-gap')).toBeUndefined();
   });
 
-  it('5. Server with no retention config -> gap flagged', () => {
+  it('5. Server handling PII with no retention config -> gap flagged', () => {
     const server: ResolvedServer = {
-      name: 'basic', toolName: 'test', configPath: '/test'
+      name: 'basic', toolName: 'test', configPath: '/test',
+      description: 'collects user email addresses'
     };
     const findings = scanDataControls(server);
     expect(findings.find(f => f.id === 'data-controls-retention-gap')).toBeDefined();

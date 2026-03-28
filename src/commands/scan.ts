@@ -16,6 +16,9 @@ import { scanEnvLeak } from '../scanners/env-leak-scanner.js';
 import { scanSupplyChain } from '../scanners/supply-chain-scanner.js';
 import { scanPackageDeep } from '../scanners/package-scanner.js';
 import { scanLicense } from '../scanners/license-scanner.js';
+import { scanDataFlow } from '../scanners/data-flow-scanner.js';
+import { scanNetworkEgress } from '../scanners/network-egress-scanner.js';
+import { scanDataControls } from '../scanners/data-controls-scanner.js';
 import { ScanReport, ServerScanResult } from '../types/scan-result.js';
 import { DetectedTool } from '../types/config.js';
 import { createSpinner } from '../utils/spinner.js';
@@ -127,7 +130,10 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
         ...scanTransport(server, policy?.allowedDomains),
         ...scanConfig(server),
         ...scanAst(server, policy?.allowedDomains),
-        ...evaluateCustomRules(server, customRules)
+        ...evaluateCustomRules(server, customRules),
+        ...scanDataFlow(server),
+        ...scanNetworkEgress(server),
+        ...scanDataControls(server),
       ];
 
       // Simple heuristic for package name from supply-chain-scanner

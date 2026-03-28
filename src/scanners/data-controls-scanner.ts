@@ -50,34 +50,38 @@ export function scanDataControls(server: ResolvedServer, performRetentionScan: b
       }
   }
   
-  const hasRetention = serverStr.includes('ttl') || serverStr.includes('expire') || serverStr.includes('cleanup') || serverStr.includes('retention');
-  if (!hasRetention) {
-     findings.push({
-        id: 'data-controls-retention-gap',
-        severity: 'MEDIUM',
-        description: `No data retention policy or cleanup mechanism detected.`,
-        fixRecommendation: 'Implement data retention policies (e.g., TTL, auto-cleanup).'
-     });
-  }
-  
-  const hasDeletion = serverStr.includes('delete') || serverStr.includes('remove') || serverStr.includes('forget') || serverStr.includes('destroy');
-  if (!hasDeletion) {
-     findings.push({
-        id: 'data-controls-deletion-gap',
-        severity: 'MEDIUM',
-        description: `No user data deletion capability detected.`,
-        fixRecommendation: 'Add an endpoint or tool to allow user data deletion.'
-     });
-  }
+  // Only flag retention/deletion/encryption gaps when PII is actually present.
+  // Without PII, these checks produce false positives on every server.
+  if (detectedPii.size > 0) {
+    const hasRetention = serverStr.includes('ttl') || serverStr.includes('expire') || serverStr.includes('cleanup') || serverStr.includes('retention');
+    if (!hasRetention) {
+       findings.push({
+          id: 'data-controls-retention-gap',
+          severity: 'MEDIUM',
+          description: `Server handles PII but no data retention policy or cleanup mechanism detected.`,
+          fixRecommendation: 'Implement data retention policies (e.g., TTL, auto-cleanup).'
+       });
+    }
 
-  const hasEncryption = serverStr.includes('encrypt') || serverStr.includes('aes') || serverStr.includes('kms') || serverStr.includes('crypto');
-  if (!hasEncryption) {
-     findings.push({
-        id: 'data-controls-encryption-gap',
-        severity: 'MEDIUM',
-        description: `No encryption at rest detected for stored data.`,
-        fixRecommendation: 'Encrypt sensitive data before storing it.'
-     });
+    const hasDeletion = serverStr.includes('delete') || serverStr.includes('remove') || serverStr.includes('forget') || serverStr.includes('destroy');
+    if (!hasDeletion) {
+       findings.push({
+          id: 'data-controls-deletion-gap',
+          severity: 'MEDIUM',
+          description: `Server handles PII but no user data deletion capability detected.`,
+          fixRecommendation: 'Add an endpoint or tool to allow user data deletion.'
+       });
+    }
+
+    const hasEncryption = serverStr.includes('encrypt') || serverStr.includes('aes') || serverStr.includes('kms') || serverStr.includes('crypto');
+    if (!hasEncryption) {
+       findings.push({
+          id: 'data-controls-encryption-gap',
+          severity: 'MEDIUM',
+          description: `Server handles PII but no encryption at rest detected for stored data.`,
+          fixRecommendation: 'Encrypt sensitive data before storing it.'
+       });
+    }
   }
   
   if (serverStr.includes('log') && (serverStr.includes('prompt') || serverStr.includes('query') || serverStr.includes('interaction'))) {
