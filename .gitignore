@@ -9,3 +9,12 @@ CODEX_PROMPT.md
 echo-server.js
 test-proxy.js
 test-proxy.cjs
+
+# Proprietary workflow - never commit
+.planning/
+.claude/commands/
+.claude/settings.json
+.claude/settings.local.json
+CLAUDE.md
+GEMINI.md
+AGENTS.md
