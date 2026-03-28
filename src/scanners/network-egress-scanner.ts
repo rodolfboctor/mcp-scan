@@ -77,7 +77,7 @@ export function scanNetworkEgress(server: ResolvedServer): Finding[] {
         continue;
      }
 
-     if (ipRegex.test(endpoint)) {
+     if (/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/.test(endpoint)) {
         findings.push({
            id: 'network-egress-raw-ip',
            severity: 'HIGH',

@@ -28,7 +28,26 @@ export type FindingId =
   | 'blocked-package-policy'
   | 'env-var-prefix-risk'
   | 'server-mutation'
-  | 'upgrade-available';
+  | 'upgrade-available'
+  | 'data-exfiltration-risk'
+  | 'credential-relay-risk'
+  | 'cross-server-flow'
+  | 'temp-storage-risk'
+  | 'network-egress-suspicious'
+  | 'network-egress-non-standard-port'
+  | 'network-egress-obfuscated'
+  | 'network-egress-raw-ip'
+  | 'network-egress-telemetry'
+  | 'network-egress-api'
+  | 'network-egress-unknown'
+  | 'data-controls-pii'
+  | 'data-controls-consent-gap'
+  | 'data-controls-retention-gap'
+  | 'data-controls-deletion-gap'
+  | 'data-controls-encryption-gap'
+  | 'data-controls-prompt-logging'
+  | 'data-controls-sharing'
+  | 'data-controls-old-temp-files';
 
 export const FINDING_IDS: FindingId[] = [
   'no-malicious-package',
@@ -59,6 +78,25 @@ export const FINDING_IDS: FindingId[] = [
   'env-var-prefix-risk',
   'server-mutation',
   'upgrade-available',
+  'data-exfiltration-risk',
+  'credential-relay-risk',
+  'cross-server-flow',
+  'temp-storage-risk',
+  'network-egress-suspicious',
+  'network-egress-non-standard-port',
+  'network-egress-obfuscated',
+  'network-egress-raw-ip',
+  'network-egress-telemetry',
+  'network-egress-api',
+  'network-egress-unknown',
+  'data-controls-pii',
+  'data-controls-consent-gap',
+  'data-controls-retention-gap',
+  'data-controls-deletion-gap',
+  'data-controls-encryption-gap',
+  'data-controls-prompt-logging',
+  'data-controls-sharing',
+  'data-controls-old-temp-files',
 ];
 
 export interface Finding {
