@@ -18,3 +18,7 @@ test-proxy.cjs
 CLAUDE.md
 GEMINI.md
 AGENTS.md
+GEMINI_AUDIT.md
+coverage/
+*.sarif
+test-runner*.js
