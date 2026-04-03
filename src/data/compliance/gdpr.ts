@@ -1,11 +1,11 @@
 export const GDPR_MAPPING = {
   id: 'gdpr',
-  name: 'GDPR',
+  name: 'GDPR (General Data Protection Regulation)',
   controls: [
-    { id: 'Article 5', description: 'Principles relating to processing of personal data', findingIds: ['data-controls-retention-gap', 'data-controls-old-temp-files'] },
-    { id: 'Article 6', description: 'Lawfulness of processing', findingIds: ['data-controls-consent-gap'] },
-    { id: 'Article 25', description: 'Data protection by design and by default', findingIds: ['data-controls-pii', 'data-controls-sharing'] },
-    { id: 'Article 32', description: 'Security of processing', findingIds: ['data-controls-encryption-gap', 'exposed-secret', 'data-exfiltration-risk'] },
-    { id: 'Article 35', description: 'Data protection impact assessment', findingIds: ['data-controls-deletion-gap'] }
+    { id: 'Art.5', description: 'Data Minimization', findingIds: ['data-controls-minimization-risk', 'data-controls-pii', 'temp-storage-risk'] },
+    { id: 'Art.17', description: 'Right to Erasure', findingIds: ['data-controls-deletion-gap', 'data-controls-retention-gap'] },
+    { id: 'Art.25', description: 'Privacy by Design', findingIds: ['data-controls-consent-gap', 'data-controls-encryption-gap', 'data-controls-prompt-logging'] },
+    { id: 'Art.32', description: 'Security of Processing', findingIds: ['data-exfiltration-risk', 'network-egress-obfuscated', 'credential-relay-risk', 'exposed-secret'] },
+    { id: 'Art.44', description: 'Cross-Border Transfers', findingIds: ['network-egress-unknown', 'network-egress-suspicious', 'network-egress-raw-ip'] }
   ]
 };
