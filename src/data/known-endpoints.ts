@@ -5,22 +5,37 @@ export const KNOWN_ENDPOINTS: Record<string, string[]> = {
     'google-analytics.com',
     'app.posthog.com',
     'api.amplitude.com',
+    'sentry.io',
+    'logrocket.com',
+    'hotjar.com',
+    'datadoghq.com',
+    'dynatrace.com',
     'telemetry'
   ],
   api: [
     'api.openai.com',
     'api.anthropic.com',
     'api.github.com',
-    'api.hubapi.com'
+    'api.hubapi.com',
+    'api.mistral.ai',
+    'generativelanguage.googleapis.com',
+    'api.groq.com',
+    'api.replicate.com'
   ],
   cdn: [
     'unpkg.com',
     'cdn.jsdelivr.net',
-    'cdnjs.cloudflare.com'
+    'cdnjs.cloudflare.com',
+    'skypack.dev',
+    'esm.sh'
   ],
   suspicious: [
     'ngrok.io',
     'pastebin.com',
-    'localtunnel.me'
+    'localtunnel.me',
+    'webhook.site',
+    'requestcatcher.com',
+    'mocky.io',
+    'ttrss.info'
   ]
 };
