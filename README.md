@@ -32,17 +32,23 @@ mcp-scan was built after analyzing hundreds of publicly available MCP server con
 
 | Check | Severity | Description |
 |-------|----------|-------------|
-| Data Exfiltration | CRITICAL | Tool reads filesystem and sends data to a network endpoint |
-| Credential Relay | CRITICAL | Environment variables or secrets passed to external APIs |
+| Data Exfiltration | CRITICAL | Tool reads filesystem/DB/clipboard and sends data to a network endpoint |
+| Credential Relay | CRITICAL | Environment variables or secrets passed to external APIs or processes |
 | Known Malicious Package | CRITICAL | Config references packages on the known-bad list |
 | Exposed Secret | CRITICAL | Hardcoded API keys, tokens, or passwords in config |
 | Prompt Injection | HIGH | Instructions embedded in tool names or descriptions |
+| Obfuscated Network | HIGH | Server uses base64, hex, or reversed URLs to hide endpoints |
+| Data-in-URL Exfil | HIGH | Potential exfiltration via long strings in URL query parameters |
 | Typosquatting | HIGH | Package name closely resembles a trusted popular package |
 | Supply Chain Risk | HIGH | Low-trust package with no history, stars, or maintainers |
-| Outdated Package with CVEs | MEDIUM | Package has known vulnerabilities in the installed version |
+| PII Exposure | HIGH | Server handles sensitive personal data without proper controls |
+| Outdated Package | MEDIUM | Package has known vulnerabilities in the installed version |
 | Overly Broad Permissions | MEDIUM | Server requests filesystem or shell access it does not need |
+| Telemetry Tracking | MEDIUM | Server contacts known analytics or tracking domains |
+| Privacy Gaps | MEDIUM | Missing data retention, deletion, or encryption-at-rest policies |
 | Unverified Source | LOW | Package not from a verified registry or organization |
-| Missing Transport Security | LOW | MCP server communicates over unencrypted transport |
+| Data Minimization | LOW | Tool requests significantly more data fields than necessary |
+| Missing Transport | LOW | MCP server communicates over unencrypted transport |
 
 ---
 
