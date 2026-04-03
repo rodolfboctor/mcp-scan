@@ -3,26 +3,35 @@ import { Finding } from '../types/scan-result.js';
 import { PII_PATTERNS } from '../data/pii-patterns.js';
 import fs from 'fs';
 import os from 'os';
-import path from 'path';
 
+/**
+ * Scanner for data controls, privacy, and PII handling.
+ * Evaluates if a server follows best practices for data retention, encryption, and consent.
+ */
 export function scanDataControls(server: ResolvedServer, performRetentionScan: boolean = false): Finding[] {
   const findings: Finding[] = [];
   const serverStr = JSON.stringify(server).toLowerCase();
   
   const detectedPii = new Set<string>();
   
+  // 1. Pattern-based PII detection
   for (const pattern of PII_PATTERNS) {
       if (pattern.regex.test(JSON.stringify(server))) {
           detectedPii.add(pattern.name);
       }
   }
   
-  const piiTerms = {
+  // 2. Keyword-based PII detection
+  const piiTerms: Record<string, string[]> = {
       'Email': ['email', 'e-mail'],
       'Phone Number': ['phone number', 'telephone', 'mobile number'],
-      'Credit Card': ['credit card', 'ccnum', 'card number', 'stripe_key'],
+      'Credit Card': ['credit card', 'ccnum', 'card number'],
       'SSN': ['ssn', 'social security'],
-      'IPv4 Address': ['ipv4', 'client ip']
+      'IPv4 Address': ['ipv4', 'client ip'],
+      'Password': ['password', 'pwd', 'passphrase'],
+      'API Key': ['api_key', 'apikey', 'secret_key', 'token'],
+      'Address': ['street address', 'residential address', 'home address'],
+      'PII': ['pii', 'personal data', 'personally identifiable']
   };
   
   for (const [name, terms] of Object.entries(piiTerms)) {
@@ -33,92 +42,108 @@ export function scanDataControls(server: ResolvedServer, performRetentionScan: b
 
   if (detectedPii.size > 0) {
       const piiList = Array.from(detectedPii).join(', ');
+      const isHighRisk = detectedPii.has('Credit Card') || detectedPii.has('SSN') || 
+                         detectedPii.has('Password') || detectedPii.has('API Key');
+
       findings.push({
          id: 'data-controls-pii',
-         severity: detectedPii.has('Credit Card') || detectedPii.has('SSN') ? 'CRITICAL' : 'HIGH',
-         description: `Server handles PII: ${piiList}`,
-         fixRecommendation: 'Ensure proper consent and minimization for PII data.'
+         severity: isHighRisk ? 'CRITICAL' : 'HIGH',
+         description: `Server handles PII/Sensitive data: ${piiList}`,
+         fixRecommendation: 'Implement strict data minimization. Ensure all PII is encrypted and handled according to privacy policies.'
       });
       
-      if (!serverStr.includes('consent') && !serverStr.includes('opt-in') && !serverStr.includes('agree')) {
+      // Consent Check
+      const hasConsentKeywords = /consent|opt-in|agree|policy|permission/i.test(serverStr);
+      if (!hasConsentKeywords) {
          findings.push({
             id: 'data-controls-consent-gap',
             severity: 'MEDIUM',
-            description: `Server handles PII but no consent mechanism is detected.`,
-            fixRecommendation: 'Implement explicit user consent for PII processing.'
+            description: `Server handles PII but no consent mechanism or privacy policy reference detected.`,
+            fixRecommendation: 'Implement explicit user consent for PII processing and link to a privacy policy.'
          });
+      }
+
+      // Retention Check
+      const hasRetention = /ttl|expire|cleanup|retention|auto-delete|purge/i.test(serverStr);
+      if (!hasRetention) {
+         findings.push({
+            id: 'data-controls-retention-gap',
+            severity: 'MEDIUM',
+            description: `Server handles PII but no data retention policy or auto-cleanup detected.`,
+            fixRecommendation: 'Implement data retention policies (e.g., TTL, automatic cleanup of old records).'
+         });
+      }
+
+      // Deletion Check
+      const hasDeletion = /delete|remove|forget|destroy|wipe|unlink/i.test(serverStr);
+      if (!hasDeletion) {
+         findings.push({
+            id: 'data-controls-deletion-gap',
+            severity: 'MEDIUM',
+            description: `Server handles PII but no user-initiated data deletion capability detected.`,
+            fixRecommendation: 'Provide a tool or endpoint that allows users to request the deletion of their personal data.'
+         });
+      }
+
+      // Encryption Check
+      const hasEncryption = /encrypt|aes|kms|crypto|vault|sealed/i.test(serverStr);
+      if (!hasEncryption) {
+         findings.push({
+            id: 'data-controls-encryption-gap',
+            severity: 'HIGH',
+            description: `Server handles PII but no encryption at rest detected for stored data.`,
+            fixRecommendation: 'Encrypt sensitive data at rest using strong cryptographic standards (e.g., AES-256).'
+         });
+      }
+
+      // Data Minimization Check (Heuristic)
+      // If a tool has many properties (>10) and handles PII, it might be over-collecting.
+      const tools = server.schema?.tools || [];
+      for (const tool of tools) {
+          const props = tool.inputSchema?.properties ? Object.keys(tool.inputSchema.properties) : [];
+          if (props.length > 10 && JSON.stringify(tool).toLowerCase().includes('pii')) {
+              findings.push({
+                  id: 'data-controls-minimization-risk',
+                  severity: 'LOW',
+                  description: `Tool '${tool.name}' requests a large number of properties and handles PII.`,
+                  fixRecommendation: 'Audit tool properties and remove any that are not strictly necessary for the intended function.'
+              });
+          }
       }
   }
   
-  // Only flag retention/deletion/encryption gaps when PII is actually present.
-  // Without PII, these checks produce false positives on every server.
-  if (detectedPii.size > 0) {
-    const hasRetention = serverStr.includes('ttl') || serverStr.includes('expire') || serverStr.includes('cleanup') || serverStr.includes('retention');
-    if (!hasRetention) {
-       findings.push({
-          id: 'data-controls-retention-gap',
-          severity: 'MEDIUM',
-          description: `Server handles PII but no data retention policy or cleanup mechanism detected.`,
-          fixRecommendation: 'Implement data retention policies (e.g., TTL, auto-cleanup).'
-       });
-    }
-
-    const hasDeletion = serverStr.includes('delete') || serverStr.includes('remove') || serverStr.includes('forget') || serverStr.includes('destroy');
-    if (!hasDeletion) {
-       findings.push({
-          id: 'data-controls-deletion-gap',
-          severity: 'MEDIUM',
-          description: `Server handles PII but no user data deletion capability detected.`,
-          fixRecommendation: 'Add an endpoint or tool to allow user data deletion.'
-       });
-    }
-
-    const hasEncryption = serverStr.includes('encrypt') || serverStr.includes('aes') || serverStr.includes('kms') || serverStr.includes('crypto');
-    if (!hasEncryption) {
-       findings.push({
-          id: 'data-controls-encryption-gap',
-          severity: 'MEDIUM',
-          description: `Server handles PII but no encryption at rest detected for stored data.`,
-          fixRecommendation: 'Encrypt sensitive data before storing it.'
-       });
-    }
-  }
-  
-  if (serverStr.includes('log') && (serverStr.includes('prompt') || serverStr.includes('query') || serverStr.includes('interaction'))) {
+  // Prompt Logging Check
+  const isLoggingPrompts = /log/i.test(serverStr) && /(prompt|query|interaction|message|chat)/i.test(serverStr);
+  if (isLoggingPrompts) {
      findings.push({
         id: 'data-controls-prompt-logging',
         severity: 'MEDIUM',
-        description: `Server appears to log user prompts/queries.`,
-        fixRecommendation: 'Anonymize or disable prompt logging to protect user privacy.'
+        description: `Server appears to log raw user prompts or interactions.`,
+        fixRecommendation: 'Anonymize logs, remove PII before logging, or provide a way to disable prompt logging.'
      });
   }
 
-  if (serverStr.includes('http') || serverStr.includes('api.')) {
-     findings.push({
-        id: 'data-controls-sharing',
-        severity: 'LOW',
-        description: `Server may share data with third-party endpoints.`,
-        fixRecommendation: 'Document all third-party data sharing in a privacy policy.'
-     });
-  }
-
+  // Retention Scan (Optional disk check)
   if (performRetentionScan) {
       const tmpPaths = [os.tmpdir(), '/tmp'];
-      let foundOld = false;
+      let foundTempFiles = false;
       for (const t of tmpPaths) {
           try {
               if (fs.existsSync(t)) {
-                  foundOld = true;
-                  break;
+                  const files = fs.readdirSync(t);
+                  if (files.length > 100) { // Arbitrary threshold for "many temp files"
+                      foundTempFiles = true;
+                      break;
+                  }
               }
           } catch(e) {}
       }
-      if (foundOld) {
+      if (foundTempFiles) {
           findings.push({
-              id: 'data-controls-old-temp-files',
-              severity: 'MEDIUM',
-              description: `Found potentially old temp files that lack garbage collection.`,
-              fixRecommendation: 'Run a cleanup script or implement automatic rotation.'
+              id: 'data-controls-stale-temp-files',
+              severity: 'LOW',
+              description: `System contains a large number of temporary files, which may indicate a lack of proper cleanup.`,
+              fixRecommendation: 'Verify that temporary files created by the server are properly cleaned up after use.'
           });
       }
   }
