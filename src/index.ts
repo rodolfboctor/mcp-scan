@@ -42,6 +42,7 @@ program
   .option('--dry-run', 'Preview what would be submitted without sending (use with --submit)')
   .option('--ci', 'Enable CI mode (JSON output, strict exit codes)')
   .option('--sarif <path>', 'Output report in SARIF format for GitHub Security Scanning')
+  .option('--policy <path>', 'Use custom security policy from YAML file')
   .option('--html <path>', 'Output report in self-contained HTML format')
   .option('--sbom <path>', 'Output Software Bill of Materials (SBOM) in CycloneDX format')
   .option('--webhook <url>', 'POST scan results to a webhook URL')

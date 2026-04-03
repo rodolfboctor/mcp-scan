@@ -20,6 +20,7 @@ import { scanDataFlow } from '../scanners/data-flow-scanner.js';
 import { scanNetworkEgress } from '../scanners/network-egress-scanner.js';
 import { scanDataControls } from '../scanners/data-controls-scanner.js';
 import { writeSarifReport } from '../utils/sarif-reporter.js';
+import { applyPolicy, loadYamlPolicy } from '../policy/engine.js';
 import { ScanReport, ServerScanResult } from '../types/scan-result.js';
 import { DetectedTool } from '../types/config.js';
 import { createSpinner } from '../utils/spinner.js';
@@ -31,7 +32,7 @@ import { runFix } from './fix.js';
 import { SEVERITY_ORDER, Severity } from '../types/severity.js';
 import { logger } from '../utils/logger.js';
 
-export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string, ugig?: boolean, ci?: boolean, sbom?: string, sarif?: string, offline?: boolean, submit?: boolean } = {}): Promise<ScanReport> {
+export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string, ugig?: boolean, ci?: boolean, sbom?: string, sarif?: string, policy?: string, offline?: boolean, submit?: boolean } = {}): Promise<ScanReport> {
   const startTime = Date.now();
   
   const policy = loadPolicy();
@@ -247,10 +248,32 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
     const serverKey = `${result.toolName}:${result.serverName}`;
     if (mutations[serverKey]) {
       result.findings.push(...mutations[serverKey]);
-      for (const f of mutations[serverKey]) {
-        if (f.severity === 'LOW') report.lowCount++;
-        else if (f.severity === 'MEDIUM') report.mediumCount++;
-      }
+    }
+  }
+
+  // 18. Apply YAML Policy
+  const yamlPolicy = loadYamlPolicy(options.policy);
+  if (yamlPolicy) {
+    applyPolicy(report.results, yamlPolicy);
+    if (!options.silent) {
+      logger.detail(`Applied security policy from ${options.policy || '.mcp-scan-policy.yml'}`);
+    }
+  }
+
+  // 19. Recalculate summary counts after policy application
+  report.criticalCount = 0;
+  report.highCount = 0;
+  report.mediumCount = 0;
+  report.lowCount = 0;
+  report.infoCount = 0;
+
+  for (const result of report.results) {
+    for (const finding of result.findings) {
+      if (finding.severity === 'CRITICAL') report.criticalCount++;
+      else if (finding.severity === 'HIGH') report.highCount++;
+      else if (finding.severity === 'MEDIUM') report.mediumCount++;
+      else if (finding.severity === 'LOW') report.lowCount++;
+      else if (finding.severity === 'INFO') report.infoCount++;
     }
   }
 

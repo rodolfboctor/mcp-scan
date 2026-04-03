@@ -7,10 +7,18 @@ import chalk from 'chalk';
 
 export interface PolicyRule {
   id: string;
-  scanner: string;
+  description?: string;
+  scanner?: string;
   action: 'block' | 'warn' | 'skip' | 'override-severity';
   severity?: string;
-  match: Record<string, any>;
+  match?: {
+      server_name?: string | string[];
+      finding_id?: string | string[];
+      severity?: string | string[];
+      category?: string | string[];
+      license_type?: string | string[];
+      pii_types?: string | string[];
+  };
 }
 
 export interface SecurityPolicy {
@@ -58,9 +66,6 @@ export function validatePolicy(policyPath: string): boolean {
         console.error(chalk.red(`Rule missing required fields (id, action): ${JSON.stringify(rule)}`));
         return false;
       }
-      if (rule.scanner && typeof rule.scanner !== 'string') {
-        console.warn(chalk.yellow(`Rule ${rule.id} has an invalid scanner type.`));
-      }
     }
     console.log(chalk.green(`Policy file ${policyPath} is valid.`));
     return true;
@@ -81,23 +86,27 @@ export function applyPolicy(results: ServerScanResult[], policy: SecurityPolicy 
       
       for (const rule of policy.rules) {
         let matches = true;
+        
         if (rule.match) {
-           for (const [key, val] of Object.entries(rule.match)) {
-               if (key === 'server_name') {
-                   const sNames = Array.isArray(val) ? val : [val];
-                   if (!sNames.includes(result.serverName)) matches = false;
-               } else if (key === 'category' || key === 'license_type' || key === 'pii_types') {
-                   const arr = Array.isArray(val) ? val : [val];
-                   if (!arr.some(v => finding.description.toLowerCase().includes(String(v).toLowerCase()))) {
-                       matches = false;
-                   }
-               }
+           if (rule.match.server_name) {
+               const sNames = Array.isArray(rule.match.server_name) ? rule.match.server_name : [rule.match.server_name];
+               if (!sNames.includes(result.serverName)) matches = false;
            }
-        } else {
-           matches = false;
+           if (matches && rule.match.finding_id) {
+               const fIds = Array.isArray(rule.match.finding_id) ? rule.match.finding_id : [rule.match.finding_id];
+               if (!fIds.includes(finding.id)) matches = false;
+           }
+           if (matches && rule.match.severity) {
+               const sevs = Array.isArray(rule.match.severity) ? rule.match.severity : [rule.match.severity];
+               if (!sevs.map(s => s.toUpperCase()).includes(finding.severity.toUpperCase())) matches = false;
+           }
+           if (matches && rule.match.category) {
+               const cats = Array.isArray(rule.match.category) ? rule.match.category : [rule.match.category];
+               if (!cats.some(c => finding.description.toLowerCase().includes(String(c).toLowerCase()))) matches = false;
+           }
         }
 
-        if (rule.scanner) {
+        if (matches && rule.scanner) {
            if (!finding.id.includes(rule.scanner)) matches = false;
         }
 
@@ -111,14 +120,14 @@ export function applyPolicy(results: ServerScanResult[], policy: SecurityPolicy 
            }
            if (rule.action === 'warn') {
                finding.severity = 'MEDIUM'; 
-               if (!finding.description.startsWith('[WARN')) {
-                   finding.description = `[WARN POLICY] ${finding.description}`;
+               if (!finding.description.startsWith('[POLICY WARN]')) {
+                   finding.description = `[POLICY WARN] ${finding.description}`;
                }
            }
            if (rule.action === 'block') {
                finding.severity = 'CRITICAL';
-               if (!finding.description.startsWith('[BLOCKED')) {
-                   finding.description = `[BLOCKED BY POLICY] ${finding.description}`;
+               if (!finding.description.startsWith('[POLICY BLOCK]')) {
+                   finding.description = `[POLICY BLOCK] ${finding.description}`;
                }
            }
         }

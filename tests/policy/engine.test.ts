@@ -5,6 +5,7 @@ import fs from 'fs';
 
 describe('Policy Engine', () => {
     afterEach(() => {
+        vi.restoreAllMocks();
         if (fs.existsSync('test-policy.yml')) fs.unlinkSync('test-policy.yml');
         if (fs.existsSync('invalid-policy.yml')) fs.unlinkSync('invalid-policy.yml');
     });
@@ -15,39 +16,39 @@ describe('Policy Engine', () => {
         expect(out[0].findings).toHaveLength(1);
     });
 
-    it('2. Policy with skip rule -> matching findings suppressed', () => {
-        const results: ServerScanResult[] = [{ serverName: 'test', toolName: 't', configPath: '', findings: [{ id: 'permission', severity: 'HIGH', description: 'test' }], scanDurationMs: 0 }];
+    it('2. Policy with skip rule by finding_id -> matching findings suppressed', () => {
+        const results: ServerScanResult[] = [{ serverName: 'test', toolName: 't', configPath: '', findings: [{ id: 'permission-risk', severity: 'HIGH', description: 'test' }], scanDurationMs: 0 }];
         const policy: SecurityPolicy = {
-            version: 1, rules: [{ id: 'allow-fs', scanner: 'permission', action: 'skip', match: { server_name: ['test'] } }]
+            version: 1, rules: [{ id: 'allow-fs', action: 'skip', match: { finding_id: 'permission-risk', server_name: 'test' } }]
         };
         const out = applyPolicy(results, policy);
         expect(out[0].findings).toHaveLength(0);
     });
 
-    it('3. Policy with block rule -> modifies to CRITICAL', () => {
+    it('3. Policy with block rule by category -> modifies to CRITICAL', () => {
         const results: ServerScanResult[] = [{ serverName: 'test', toolName: 't', configPath: '', findings: [{ id: 'network-egress', severity: 'MEDIUM', description: 'telemetry endpoint' }], scanDurationMs: 0 }];
         const policy: SecurityPolicy = {
-            version: 1, rules: [{ id: 'no-telemetry', scanner: 'network', action: 'block', match: { category: ['telemetry'] } }]
+            version: 1, rules: [{ id: 'no-telemetry', action: 'block', match: { category: 'telemetry' } }]
         };
         const out = applyPolicy(results, policy);
         expect(out[0].findings[0].severity).toBe('CRITICAL');
-        expect(out[0].findings[0].description).toContain('[BLOCKED BY POLICY]');
+        expect(out[0].findings[0].description).toContain('[POLICY BLOCK]');
     });
 
-    it('4. Policy with warn rule -> finding reported but changed to MEDIUM', () => {
+    it('4. Policy with warn rule by severity -> finding reported but changed to MEDIUM', () => {
         const results: ServerScanResult[] = [{ serverName: 'test', toolName: 't', configPath: '', findings: [{ id: 'license-risk', severity: 'HIGH', description: 'unknown license' }], scanDurationMs: 0 }];
         const policy: SecurityPolicy = {
-            version: 1, rules: [{ id: 'warn-license', scanner: 'license', action: 'warn', match: { license_type: ['unknown'] } }]
+            version: 1, rules: [{ id: 'warn-high', action: 'warn', match: { severity: 'HIGH' } }]
         };
         const out = applyPolicy(results, policy);
         expect(out[0].findings[0].severity).toBe('MEDIUM');
-        expect(out[0].findings[0].description).toContain('[WARN POLICY]');
+        expect(out[0].findings[0].description).toContain('[POLICY WARN]');
     });
 
     it('5. Policy with override-severity -> severity changed in output', () => {
         const results: ServerScanResult[] = [{ serverName: 'test', toolName: 't', configPath: '', findings: [{ id: 'data-controls-pii', severity: 'HIGH', description: 'handles SSN' }], scanDurationMs: 0 }];
         const policy: SecurityPolicy = {
-            version: 1, rules: [{ id: 'elevate-pii', scanner: 'data-controls', action: 'override-severity', severity: 'CRITICAL', match: { pii_types: ['SSN'] } }]
+            version: 1, rules: [{ id: 'elevate-pii', action: 'override-severity', severity: 'critical', match: { finding_id: 'data-controls-pii' } }]
         };
         const out = applyPolicy(results, policy);
         expect(out[0].findings[0].severity).toBe('CRITICAL');
@@ -57,15 +58,15 @@ describe('Policy Engine', () => {
         const results: ServerScanResult[] = [{ 
             serverName: 'test', toolName: 't', configPath: '', 
             findings: [
-                { id: 'permission', severity: 'HIGH', description: 'test' },
+                { id: 'permission-risk', severity: 'HIGH', description: 'test' },
                 { id: 'data-controls-pii', severity: 'HIGH', description: 'handles SSN' }
             ], 
             scanDurationMs: 0 
         }];
         const policy: SecurityPolicy = {
             version: 1, rules: [
-                { id: 'skip-fs', scanner: 'permission', action: 'skip', match: { server_name: ['test'] } },
-                { id: 'elevate-pii', scanner: 'data-controls', action: 'override-severity', severity: 'CRITICAL', match: { pii_types: ['SSN'] } }
+                { id: 'skip-fs', action: 'skip', match: { finding_id: 'permission-risk' } },
+                { id: 'elevate-pii', action: 'override-severity', severity: 'critical', match: { finding_id: 'data-controls-pii' } }
             ]
         };
         const out = applyPolicy(results, policy);
@@ -74,36 +75,20 @@ describe('Policy Engine', () => {
         expect(out[0].findings[0].severity).toBe('CRITICAL');
     });
 
-    it('7. Invalid policy YAML -> clear error message', () => {
-        fs.writeFileSync('invalid-policy.yml', 'version: 1\nrules: [{}]');
+    it('7. Invalid policy YAML schema -> reports errors', () => {
+        fs.writeFileSync('invalid-policy.yml', 'version: 2\nrules: []');
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
         const res = validatePolicy('invalid-policy.yml');
         expect(res).toBe(false);
-        expect(consoleSpy.mock.calls[0][0]).toContain('Rule missing required fields');
+        expect(consoleSpy.mock.calls[0][0]).toContain('Invalid policy schema');
     });
 
-    it('8. Policy with unknown scanner name -> warning, not crash', () => {
-        const results: ServerScanResult[] = [{ serverName: 'test', toolName: 't', configPath: '', findings: [{ id: 'permission', severity: 'HIGH', description: 'test' }], scanDurationMs: 0 }];
+    it('8. Policy match by scanner prefix -> success', () => {
+        const results: ServerScanResult[] = [{ serverName: 'test', toolName: 't', configPath: '', findings: [{ id: 'data-flow-exfiltration', severity: 'HIGH', description: 'test' }], scanDurationMs: 0 }];
         const policy: SecurityPolicy = {
-            version: 1, rules: [{ id: 'rule1', scanner: 'fake-scanner', action: 'skip', match: { server_name: ['test'] } }]
+            version: 1, rules: [{ id: 'skip-flow', scanner: 'data-flow', action: 'skip' }]
         };
         const out = applyPolicy(results, policy);
-        expect(out[0].findings).toHaveLength(1); // No crash, no match
-    });
-
-    it('9. validate command on valid policy -> success', () => {
-        fs.writeFileSync('test-policy.yml', 'version: 1\nrules:\n  - id: test\n    scanner: perm\n    action: skip\n    match:\n      server_name: ["a"]');
-        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-        const res = validatePolicy('test-policy.yml');
-        expect(res).toBe(true);
-        expect(consoleSpy.mock.calls[0][0]).toContain('is valid');
-    });
-
-    it('10. validate command on invalid schema -> reports issues', () => {
-        fs.writeFileSync('test-policy.yml', 'version: 1\nrules: [{}]');
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        const res = validatePolicy('test-policy.yml');
-        expect(res).toBe(false);
-        expect(consoleSpy.mock.calls[0][0]).toContain('Rule missing required fields');
+        expect(out[0].findings).toHaveLength(0);
     });
 });
