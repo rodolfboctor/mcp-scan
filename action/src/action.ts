@@ -20,6 +20,7 @@ async function run() {
       silent: true,
       severity: severity,
       version: pkg.version,
+      sarif: sarifOutput
     };
 
     if (configPath) {
@@ -38,7 +39,6 @@ async function run() {
 
     if (sarifOutput) {
       const resolvedSarifPath = path.resolve(process.cwd(), sarifOutput);
-      writeSarifReport(report, resolvedSarifPath);
       core.info(`SARIF report written to ${resolvedSarifPath}`);
       core.setOutput('sarif-path', resolvedSarifPath);
     }

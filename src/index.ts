@@ -68,11 +68,6 @@ Examples:
     }
     const report = await runScan({ ...options, version: pkg.version, ci: options.ci });
 
-    if (options.sarif) {
-      const { writeSarifReport } = await import('./utils/sarif-reporter.js');
-      writeSarifReport(report, options.sarif);
-    }
-
     if (options.html) {
       const { generateHtmlReport } = await import('./utils/html-reporter.js');
       const { writeFileSync } = await import('fs');

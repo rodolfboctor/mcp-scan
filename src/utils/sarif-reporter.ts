@@ -2,6 +2,42 @@ import { ScanReport } from '../types/scan-result.js';
 import fs from 'fs';
 import path from 'path';
 
+/**
+ * Common security rules metadata for SARIF reporting.
+ */
+const SARIF_RULES: Record<string, { short: string, full: string, helpUri?: string }> = {
+  'exposed-secret': {
+     short: 'Exposed secret detected',
+     full: 'A hardcoded secret, API key, or credential was found in the configuration.',
+     helpUri: 'https://thynkq.com/docs/mcp-scan/rules/exposed-secret'
+  },
+  'data-exfiltration-risk': {
+     short: 'Data exfiltration risk',
+     full: 'A tool has both local read and external network egress capabilities.',
+     helpUri: 'https://thynkq.com/docs/mcp-scan/rules/data-exfiltration-risk'
+  },
+  'credential-relay-risk': {
+     short: 'Credential relay risk',
+     full: 'Server forwards sensitive environment variables or credentials to an external sink.',
+     helpUri: 'https://thynkq.com/docs/mcp-scan/rules/credential-relay-risk'
+  },
+  'network-egress-suspicious': {
+     short: 'Suspicious network egress',
+     full: 'The server contacts a known suspicious or malicious endpoint.',
+     helpUri: 'https://thynkq.com/docs/mcp-scan/rules/network-egress-suspicious'
+  },
+  'prompt-injection-pattern': {
+     short: 'Prompt injection risk',
+     full: 'Potential for prompt injection through user-controlled inputs.',
+     helpUri: 'https://thynkq.com/docs/mcp-scan/rules/prompt-injection'
+  },
+  'malicious-package': {
+     short: 'Known malicious package',
+     full: 'The server uses a package that has been flagged as malicious.',
+     helpUri: 'https://thynkq.com/docs/mcp-scan/rules/malicious-package'
+  }
+};
+
 export function generateSarif(report: ScanReport) {
   const sarif = {
     $schema: 'https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json',
@@ -11,7 +47,8 @@ export function generateSarif(report: ScanReport) {
         tool: {
           driver: {
             name: 'mcp-scan',
-            version: report.version || 'unknown',
+            fullName: 'MCP Security Scanner',
+            version: report.version || '2.0.0',
             informationUri: 'https://github.com/rodolfboctor/mcp-scan',
             rules: [] as any[],
           },
@@ -26,21 +63,28 @@ export function generateSarif(report: ScanReport) {
   for (const result of report.results) {
     for (const finding of result.findings) {
       if (!rulesMap.has(finding.id)) {
+        const metadata = SARIF_RULES[finding.id];
         rulesMap.set(finding.id, {
           id: finding.id,
+          name: finding.id.replace(/-/g, '_'),
           shortDescription: {
-            text: finding.description,
+            text: metadata?.short || finding.description.split('\n')[0],
           },
-          help: {
-            text: finding.fixRecommendation || finding.description,
+          fullDescription: {
+            text: metadata?.full || finding.description,
           },
+          helpUri: metadata?.helpUri || 'https://thynkq.com/docs/mcp-scan/rules',
           properties: {
             precision: 'high',
+            problem: {
+              severity: mapSeverityToSarifProblemSeverity(finding.severity),
+            },
           },
         });
       }
 
       const level = mapSeverityToSarifLevel(finding.severity);
+      const artifactPath = path.relative(process.cwd(), result.configPath);
 
       sarif.runs[0].results.push({
         ruleId: finding.id,
@@ -52,10 +96,12 @@ export function generateSarif(report: ScanReport) {
           {
             physicalLocation: {
               artifactLocation: {
-                uri: path.relative(process.cwd(), result.configPath),
+                uri: artifactPath,
+                uriBaseId: '%SRCROOT%',
               },
-              // We don't have exact line numbers for JSON/TOML keys easily without a full parser
-              // But we can just point to the file
+              region: {
+                startLine: 1, // point to the top of the config file
+              },
             },
           },
         ],
@@ -79,6 +125,18 @@ function mapSeverityToSarifLevel(severity: string): string {
     case 'INFO':
     default:
       return 'note';
+  }
+}
+
+function mapSeverityToSarifProblemSeverity(severity: string): string {
+  switch (severity.toUpperCase()) {
+    case 'CRITICAL':
+    case 'HIGH':
+      return 'error';
+    case 'MEDIUM':
+      return 'warning';
+    default:
+      return 'recommendation';
   }
 }
 

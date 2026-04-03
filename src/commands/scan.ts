@@ -19,6 +19,7 @@ import { scanLicense } from '../scanners/license-scanner.js';
 import { scanDataFlow } from '../scanners/data-flow-scanner.js';
 import { scanNetworkEgress } from '../scanners/network-egress-scanner.js';
 import { scanDataControls } from '../scanners/data-controls-scanner.js';
+import { writeSarifReport } from '../utils/sarif-reporter.js';
 import { ScanReport, ServerScanResult } from '../types/scan-result.js';
 import { DetectedTool } from '../types/config.js';
 import { createSpinner } from '../utils/spinner.js';
@@ -30,7 +31,7 @@ import { runFix } from './fix.js';
 import { SEVERITY_ORDER, Severity } from '../types/severity.js';
 import { logger } from '../utils/logger.js';
 
-export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string, ugig?: boolean, ci?: boolean, sbom?: string, offline?: boolean, submit?: boolean } = {}): Promise<ScanReport> {
+export async function runScan(options: { silent?: boolean, json?: boolean, verbose?: boolean, severity?: string, fix?: boolean, config?: string, version?: string, ugig?: boolean, ci?: boolean, sbom?: string, sarif?: string, offline?: boolean, submit?: boolean } = {}): Promise<ScanReport> {
   const startTime = Date.now();
   
   const policy = loadPolicy();
@@ -271,6 +272,13 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
   
   if (options.fix) {
     await runFix();
+  }
+
+  if (options.sarif) {
+    writeSarifReport(report, options.sarif);
+    if (!options.silent) {
+      logger.info(`SARIF report written to ${options.sarif}`);
+    }
   }
 
   return report;
