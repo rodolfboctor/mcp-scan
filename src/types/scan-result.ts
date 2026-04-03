@@ -39,7 +39,10 @@ export type FindingId =
   | 'network-egress-raw-ip'
   | 'network-egress-telemetry'
   | 'network-egress-api'
+  | 'network-egress-cdn'
   | 'network-egress-unknown'
+  | 'network-egress-data-in-url'
+  | 'network-egress-bypass-attempt'
   | 'data-controls-pii'
   | 'data-controls-consent-gap'
   | 'data-controls-retention-gap'
@@ -47,7 +50,9 @@ export type FindingId =
   | 'data-controls-encryption-gap'
   | 'data-controls-prompt-logging'
   | 'data-controls-sharing'
-  | 'data-controls-old-temp-files';
+  | 'data-controls-old-temp-files'
+  | 'data-controls-minimization-risk'
+  | 'data-controls-stale-temp-files';
 
 export const FINDING_IDS: FindingId[] = [
   'no-malicious-package',
@@ -88,7 +93,10 @@ export const FINDING_IDS: FindingId[] = [
   'network-egress-raw-ip',
   'network-egress-telemetry',
   'network-egress-api',
+  'network-egress-cdn',
   'network-egress-unknown',
+  'network-egress-data-in-url',
+  'network-egress-bypass-attempt',
   'data-controls-pii',
   'data-controls-consent-gap',
   'data-controls-retention-gap',
@@ -97,6 +105,8 @@ export const FINDING_IDS: FindingId[] = [
   'data-controls-prompt-logging',
   'data-controls-sharing',
   'data-controls-old-temp-files',
+  'data-controls-minimization-risk',
+  'data-controls-stale-temp-files',
 ];
 
 export interface Finding {
@@ -129,6 +139,7 @@ export interface ServerScanResult {
     license?: string;
     repositoryUrl?: string;
     author?: string;
+    integrity?: string;
     source?: 'npm' | 'local' | 'unknown';
   };
 }

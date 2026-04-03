@@ -237,6 +237,7 @@ program
   .option('--format <format>', 'SBOM format (cyclonedx or spdx)', 'cyclonedx')
   .option('--output <path>', 'Output file path', 'sbom.json')
   .option('--include-deps', 'Include full dependency trees')
+  .option('--include-findings', 'Include scan findings as vulnerabilities in SBOM')
   .action(async (options) => {
     const { runSbom } = await import('./commands/sbom.js');
     await runSbom(options);
