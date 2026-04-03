@@ -1,10 +1,19 @@
 import { ResolvedServer } from '../types/config.js';
 import { Finding } from '../types/scan-result.js';
+import { 
+  FILESYSTEM_SOURCES, 
+  NETWORK_SINKS, 
+  TEMP_STORAGE_PATTERNS, 
+  CREDENTIAL_ENV_PATTERNS,
+  DataFlowSource,
+  DataFlowSink
+} from '../data/data-flow-patterns.js';
 
 interface DataNode {
   type: 'source' | 'transform' | 'sink';
   name: string;
-  category: 'filesystem' | 'network' | 'env' | 'clipboard' | 'memory' | 'unknown';
+  category: 'filesystem' | 'network' | 'env' | 'clipboard' | 'database' | 'process' | 'unknown';
+  description: string;
 }
 
 interface DataEdge {
@@ -12,92 +21,118 @@ interface DataEdge {
   to: string;
 }
 
+/**
+ * Scan for potentially dangerous data flows in tool definitions.
+ * Heuristically maps sources (FS, Env, DB) to sinks (Network, Process, Websocket).
+ */
 export function scanDataFlow(server: ResolvedServer, allServers: ResolvedServer[] = []): Finding[] {
   const findings: Finding[] = [];
   
   const tools = server.schema?.tools;
   if (!tools || !Array.isArray(tools)) {
-    return findings; // Empty tool list -> 0 findings
+    return findings;
   }
 
   for (const tool of tools) {
     if (!tool || typeof tool !== 'object') continue;
     
     const toolName = tool.name || 'unknown_tool';
+    const toolDescription = tool.description || '';
+    const toolProperties = tool.inputSchema?.properties ? JSON.stringify(tool.inputSchema.properties) : '';
+    const combinedStr = `${toolName} ${toolDescription} ${toolProperties}`.toLowerCase();
+    
     let nodes: DataNode[] = [];
-    let edges: DataEdge[] = [];
     
-    // Simple heuristic parser for data flow based on tool definition and properties
-    const toolStr = JSON.stringify(tool).toLowerCase();
-    
-    // Sources
-    if (toolStr.includes('readfile') || toolStr.includes('read_file') || toolStr.includes('filesystem') || toolStr.includes('path')) {
-      nodes.push({ type: 'source', name: 'fs_read', category: 'filesystem' });
+    // 1. Identify Sources
+    for (const source of FILESYSTEM_SOURCES) {
+       if (source.patterns.some(p => p.test(combinedStr)) || 
+           source.packages.some(pkg => server.name.includes(pkg))) {
+          nodes.push({ 
+            type: 'source', 
+            name: source.name, 
+            category: source.name.includes('filesystem') ? 'filesystem' : 
+                      source.name.includes('env') ? 'env' :
+                      source.name.includes('clipboard') ? 'clipboard' :
+                      source.name.includes('database') ? 'database' : 'unknown',
+            description: source.description
+          });
+       }
     }
-    if (toolStr.includes('env') || toolStr.includes('process.env') || toolStr.includes('credential')) {
-      nodes.push({ type: 'source', name: 'env_read', category: 'env' });
+
+    // 2. Identify Sinks
+    for (const sink of NETWORK_SINKS) {
+       if (sink.patterns.some(p => p.test(combinedStr)) || 
+           sink.packages.some(pkg => server.name.includes(pkg))) {
+          nodes.push({ 
+            type: 'sink', 
+            name: sink.name, 
+            category: sink.name.includes('http') || sink.name.includes('websocket') ? 'network' : 
+                      sink.name.includes('process') ? 'process' : 'unknown',
+            description: sink.description
+          });
+       }
     }
     
-    // Sinks
-    if (toolStr.includes('fetch') || toolStr.includes('http') || toolStr.includes('post') || toolStr.includes('network') || toolStr.includes('api')) {
-      nodes.push({ type: 'sink', name: 'net_write', category: 'network' });
-    }
-    
-    // Temp storage
-    if (toolStr.includes('temp') || toolStr.includes('/tmp') || toolStr.includes('tmpdir')) {
-      if (!toolStr.includes('cleanup') && !toolStr.includes('delete') && !toolStr.includes('rm') && !toolStr.includes('unlink')) {
+    // 3. Special Case: Temp Storage Risk
+    if (TEMP_STORAGE_PATTERNS.some(p => p.test(combinedStr))) {
+      const isCleanup = /cleanup|delete|rm|unlink|remove/i.test(combinedStr);
+      if (!isCleanup) {
          findings.push({
             id: 'temp-storage-risk',
             severity: 'MEDIUM',
-            description: `Tool '${toolName}' stores data in temp directories without apparent cleanup.`,
-            fixRecommendation: 'Implement cleanup for temporary files.'
+            description: `Tool '${toolName}' stores data in temporary directories without apparent cleanup.`,
+            fixRecommendation: 'Implement cleanup for temporary files or use memory-based storage.'
          });
       }
     }
 
-    // Build edges (assume all sources flow to all sinks within the same tool for static analysis)
+    // 4. Build edges and generate findings based on source/sink pairs
     const sources = nodes.filter(n => n.type === 'source');
     const sinks = nodes.filter(n => n.type === 'sink');
     
     for (const src of sources) {
       for (const sink of sinks) {
-        edges.push({ from: src.name, to: sink.name });
-        
-        // Path checks
-        if (src.category === 'filesystem' && sink.category === 'network') {
-           // False positive check: is it sanitized?
-           if (toolStr.includes('sanitize') || toolStr.includes('anonymize') || toolStr.includes('strip')) {
-               continue; 
-           }
+        // Exfiltration: Any local source -> Any external sink
+        if ((src.category === 'filesystem' || src.category === 'database' || src.category === 'clipboard') && 
+            (sink.category === 'network' || sink.category === 'process')) {
+           
+           // Heuristic for "read-and-send" pattern
+           const isSanitized = /sanitize|anonymize|strip|filter|mask/i.test(combinedStr);
+           if (isSanitized) continue;
+
            findings.push({
               id: 'data-exfiltration-risk',
               severity: 'HIGH',
-              description: `Tool '${toolName}' reads local filesystem and has network egress capability.\nData path: filesystem -> tool handler -> network`,
-              fixRecommendation: 'Restrict filesystem access to specific directories. Audit network calls.'
+              description: `Tool '${toolName}' reads from ${src.category} (${src.description}) and has egress via ${sink.category} (${sink.description}).`,
+              fixRecommendation: `Restrict tool capabilities or implement strict filtering for ${src.category} data before transmission.`
            });
         }
         
-        if (src.category === 'env' && sink.category === 'network') {
+        // Credential Relay: Env -> Network/Process
+        if (src.category === 'env' && (sink.category === 'network' || sink.category === 'process')) {
+           // Check if it's likely a credential being passed
+           const isCredential = CREDENTIAL_ENV_PATTERNS.some(p => p.test(combinedStr));
+           
            findings.push({
               id: 'credential-relay-risk',
-              severity: 'CRITICAL',
-              description: `Tool '${toolName}' forwards environment variables/credentials to an external API.`,
-              fixRecommendation: 'Avoid passing credentials directly to external APIs through tools.'
+              severity: isCredential ? 'CRITICAL' : 'HIGH',
+              description: `Tool '${toolName}' forwards environment variables/credentials to an external sink (${sink.description}).`,
+              fixRecommendation: 'Avoid passing secrets directly through tools. Use secure credential managers.'
            });
         }
       }
     }
     
-    // Cross-server data flow detection (heuristic)
-    if (allServers.length > 1) {
+    // 5. Cross-server data flow detection (heuristic)
+    if (allServers.length > 0) {
        for (const otherServer of allServers) {
            if (otherServer.name === server.name) continue;
-           if (toolStr.includes(otherServer.name.toLowerCase())) {
+           if (combinedStr.includes(otherServer.name.toLowerCase())) {
                findings.push({
                   id: 'cross-server-flow',
                   severity: 'MEDIUM',
-                  description: `Cross-server data sharing detected: '${server.name}' references '${otherServer.name}'.`,
-                  fixRecommendation: 'Ensure cross-server data flows do not leak sensitive information.'
+                  description: `Potential cross-server data flow: '${server.name}' references '${otherServer.name}'.`,
+                  fixRecommendation: 'Audit interactions between servers to prevent unintentional data leakage.'
                });
            }
        }

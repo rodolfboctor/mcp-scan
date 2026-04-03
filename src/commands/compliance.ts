@@ -4,9 +4,9 @@ import chalk from 'chalk';
 import fs from 'fs';
 
 export async function runCompliance(options: { framework: string, output?: string }) {
-    const frameworksToRun = options.framework === 'all' 
+    const frameworksToRun = (options.framework === 'all' 
         ? COMPLIANCE_FRAMEWORKS 
-        : [getFramework(options.framework)].filter(Boolean);
+        : [getFramework(options.framework)]).filter((fw): fw is NonNullable<typeof fw> => !!fw);
 
     if (frameworksToRun.length === 0) {
         console.error(chalk.red(`Error: Unknown framework '${options.framework}'.`));
@@ -61,7 +61,7 @@ export async function runCompliance(options: { framework: string, output?: strin
              const jsonObj = frameworksToRun.map(fw => {
                  return {
                      name: fw.name,
-                     controls: fw.controls.map(c => {
+                     controls: fw.controls.map((c: any) => {
                          const matching = allFindings.filter((f: any) => c.findingIds.includes(f.id));
                          return {
                              id: c.id,

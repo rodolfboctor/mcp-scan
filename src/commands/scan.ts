@@ -131,7 +131,7 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
         ...scanConfig(server),
         ...scanAst(server, policy?.allowedDomains),
         ...evaluateCustomRules(server, customRules),
-        ...scanDataFlow(server),
+        ...scanDataFlow(server, activeServers),
         ...scanNetworkEgress(server),
         ...scanDataControls(server),
       ];

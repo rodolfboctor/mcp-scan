@@ -130,9 +130,9 @@ export const NETWORK_SINKS: DataFlowSink[] = [
 ];
 
 export const TEMP_STORAGE_PATTERNS: RegExp[] = [
-  /\/tmp\//,
-  /\/var\/tmp\//,
-  /\/var\/folders\//,
+  /\/tmp\b/,
+  /\/var\/tmp\b/,
+  /\/var\/folders\b/,
   /os\.tmpdir/i,
   /temp(?:orary)?[-_]?(?:dir|file|path)/i,
 ];
