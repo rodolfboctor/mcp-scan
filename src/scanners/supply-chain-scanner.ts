@@ -188,14 +188,16 @@ async function fetchGitHubMetadata(repoUrl: string): Promise<RepoMetadata | null
 function calculateTrustScore(meta: RepoMetadata): number {
   let score = 0;
 
-  // Stars: up to 40 points
-  if (meta.stars > 1000) score += 40;
-  else if (meta.stars > 100) score += 20;
-  else if (meta.stars > 10) score += 10;
+  // Stars: up to 30 points
+  if (meta.stars > 5000) score += 30;
+  else if (meta.stars > 1000) score += 25;
+  else if (meta.stars > 100) score += 15;
+  else if (meta.stars > 10) score += 5;
 
   // Forks: up to 20 points
-  if (meta.forks > 100) score += 20;
-  else if (meta.forks > 10) score += 10;
+  if (meta.forks > 500) score += 20;
+  else if (meta.forks > 100) score += 15;
+  else if (meta.forks > 10) score += 8;
 
   // Activity (pushed in last 6 months): 40 points
   const lastPush = new Date(meta.pushedAt);
