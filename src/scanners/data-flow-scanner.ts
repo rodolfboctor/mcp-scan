@@ -75,15 +75,25 @@ export function scanDataFlow(server: ResolvedServer, allServers: ResolvedServer[
     
     // 3. Special Case: Temp Storage Risk
     if (TEMP_STORAGE_PATTERNS.some(p => p.test(combinedStr))) {
-      const isCleanup = /cleanup|delete|rm|unlink|remove/i.test(combinedStr);
+      const isCleanup = /cleanup|delete|rm|unlink|remove|purge|sweep/i.test(combinedStr);
       if (!isCleanup) {
          findings.push({
             id: 'temp-storage-risk',
             severity: 'MEDIUM',
             description: `Tool '${toolName}' stores data in temporary directories without apparent cleanup.`,
-            fixRecommendation: 'Implement cleanup for temporary files or use memory-based storage.'
+            fixRecommendation: 'Implement cleanup for temporary files (use try/finally or OS-managed temp dirs) or use in-memory storage.'
          });
       }
+    }
+
+    // 3b. Screen capture data flowing to network sink
+    if (/screenshot|screen.?capture/i.test(combinedStr) && sinks.some(s => s.category === 'network')) {
+      findings.push({
+        id: 'screen-data-egress',
+        severity: 'HIGH',
+        description: `Tool '${toolName}' captures screen data and has a network egress path — potential privacy violation.`,
+        fixRecommendation: 'Ensure screen capture data is only processed locally and never transmitted without explicit user consent.',
+      });
     }
 
     // 4. Build edges and generate findings based on source/sink pairs
