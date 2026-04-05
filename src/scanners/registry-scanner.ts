@@ -43,10 +43,14 @@ export function scanRegistry(server: ResolvedServer): Finding[] {
       description: `Server '${packageName}' is a widely trusted community package.`,
     });
   } else if (!packageName.startsWith('@modelcontextprotocol/') && (server.command === 'npx' || server.command === 'npm')) {
+    const isScoped = packageName.startsWith('@');
     findings.push({
       id: 'unverified-source',
-      severity: 'HIGH',
-      description: `Server '${packageName}' is from an unverified source outside @modelcontextprotocol.`,
+      severity: isScoped ? 'MEDIUM' : 'HIGH',
+      description: isScoped
+        ? `Server '${packageName}' is a scoped package from an unverified publisher.`
+        : `Server '${packageName}' is an unscoped package from an unverified source — higher typosquatting risk.`,
+      fixRecommendation: `Verify the publisher of '${packageName}' on npmjs.com before trusting this server.`,
     });
   }
 
