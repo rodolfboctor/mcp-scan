@@ -1,5 +1,5 @@
 /**
- * LAST_UPDATED: 2026-03-23
+ * LAST_UPDATED: 2026-04-04
  * 
  * Confirmed malicious MCP server packages.
  * This list is community-sourced. Users can report suspicious packages via GitHub issues.
