@@ -12,20 +12,22 @@ export function scanAst(server: ResolvedServer, allowedDomains: string[] = []): 
   const fullCommand = [server.command, ...argsArray].join(' ');
 
   // 1. Detect suspicious shells and execution patterns
-  if (/(bash|sh|zsh)\s+-c/i.test(fullCommand) || /\b(eval|exec)\b/i.test(fullCommand)) {
+  if (/(bash|sh|zsh|fish|ksh|csh)\s+-c/i.test(fullCommand) || /\b(eval|exec)\b/i.test(fullCommand)) {
     findings.push({
       id: 'suspicious-execution',
       severity: 'HIGH',
       description: `Command contains suspicious execution patterns (e.g., bash -c, eval, exec).`,
+      fixRecommendation: 'Avoid shell -c patterns. Use direct process execution with explicit arguments instead.',
     });
   }
 
   // 2. Detect data exfiltration tools
-  if (/\|\s*(curl|wget)/i.test(fullCommand) || /\b(curl|wget)\b.*\|/i.test(fullCommand)) {
+  if (/\|\s*(curl|wget|nc|netcat|socat)/i.test(fullCommand) || /\b(curl|wget)\b.*\|/i.test(fullCommand)) {
     findings.push({
       id: 'data-exfiltration-risk',
       severity: 'CRITICAL',
-      description: `Command pipes data to or from a network request tool (curl, wget), posing an exfiltration risk.`,
+      description: `Command pipes data to or from a network transfer tool (curl, wget, nc, netcat, socat) — high exfiltration risk.`,
+      fixRecommendation: 'Never pipe sensitive data to network tools. Use authenticated HTTPS APIs instead.',
     });
   }
 
