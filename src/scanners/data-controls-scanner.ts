@@ -24,13 +24,16 @@ export function scanDataControls(server: ResolvedServer, performRetentionScan: b
   // 2. Keyword-based PII detection
   const piiTerms: Record<string, string[]> = {
       'Email': ['email', 'e-mail'],
-      'Phone Number': ['phone number', 'telephone', 'mobile number'],
-      'Credit Card': ['credit card', 'ccnum', 'card number'],
-      'SSN': ['ssn', 'social security'],
-      'IPv4 Address': ['ipv4', 'client ip'],
-      'Password': ['password', 'pwd', 'passphrase'],
+      'Phone Number': ['phone number', 'telephone', 'mobile number', 'cell phone'],
+      'Credit Card': ['credit card', 'ccnum', 'card number', 'cvv', 'expiry'],
+      'SSN': ['ssn', 'social security', 'tax id', 'national id'],
+      'IPv4 Address': ['ipv4', 'client ip', 'ip address'],
+      'Password': ['password', 'pwd', 'passphrase', 'pin code'],
       'API Key': ['api_key', 'apikey', 'secret_key', 'token'],
-      'Address': ['street address', 'residential address', 'home address'],
+      'Address': ['street address', 'residential address', 'home address', 'mailing address'],
+      'Date of Birth': ['date of birth', 'dob', 'birthday', 'birth date'],
+      'Health Data': ['diagnosis', 'medical record', 'prescription', 'health data', 'phi', 'hipaa'],
+      'Biometric': ['fingerprint', 'face id', 'biometric', 'retina scan'],
       'PII': ['pii', 'personal data', 'personally identifiable']
   };
   
