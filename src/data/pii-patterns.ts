@@ -75,4 +75,19 @@ export const PII_PATTERNS: PiiPattern[] = [
     regex: /\b[A-Z][0-9]{7}\b|\b[0-9]{9}\b/g,
     mask: '[DL_MASKED]'
   },
+  {
+    name: 'NPI Number',
+    regex: /\b[0-9]{10}\b/g,
+    mask: '[NPI_MASKED]'
+  },
+  {
+    name: 'UK National Insurance Number',
+    regex: /\b[A-Z]{2}[0-9]{6}[ABCD]\b/g,
+    mask: '[NINO_MASKED]'
+  },
+  {
+    name: 'AWS Account ID',
+    regex: /\b\d{4}-\d{4}-\d{4}\b/g,
+    mask: '[AWS_ACCOUNT_MASKED]'
+  },
 ];
