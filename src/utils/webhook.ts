@@ -2,6 +2,55 @@ import { ScanReport } from '../types/scan-result.js';
 import { logger } from './logger.js';
 
 /**
+ * Sends a summary of the scan report to a Microsoft Teams incoming webhook.
+ */
+export async function sendTeamsWebhook(url: string, report: ScanReport) {
+  try {
+    const totalFindings = report.criticalCount + report.highCount + report.mediumCount + report.lowCount;
+    const isAllClear = totalFindings === 0;
+    const themeColor = report.criticalCount > 0 ? 'FF0000' : report.highCount > 0 ? 'FF8C00' : report.mediumCount > 0 ? 'FFD700' : '00AA00';
+
+    const payload = {
+      "@type": "MessageCard",
+      "@context": "http://schema.org/extensions",
+      "themeColor": themeColor,
+      "summary": `mcp-scan: ${isAllClear ? 'All Clear' : `${totalFindings} findings detected`}`,
+      "sections": [
+        {
+          "activityTitle": `mcp-scan Security Report`,
+          "activitySubtitle": `${report.results.length} servers scanned`,
+          "facts": [
+            { "name": "Critical", "value": String(report.criticalCount) },
+            { "name": "High", "value": String(report.highCount) },
+            { "name": "Medium", "value": String(report.mediumCount) },
+            { "name": "Low", "value": String(report.lowCount) }
+          ],
+          "markdown": true
+        }
+      ]
+    };
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      logger.error(`Teams Webhook: Failed to send to ${url}. Status: ${response.status} ${response.statusText}`);
+    } else {
+      logger.pass(`Teams Webhook: Notification successfully sent.`);
+    }
+  } catch (error) {
+    logger.error(`Teams Webhook: Error sending to ${url}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
  * Sends the scan report to a generic webhook URL.
  * @param url The webhook URL.
  * @param report The scan report.
