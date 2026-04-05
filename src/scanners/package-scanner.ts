@@ -123,6 +123,14 @@ export async function scanPackageDeep(server: ResolvedServer, offline: boolean =
             fixRecommendation: `Upgrade package or remove it.`,
             fixable: true,
           });
+        } else if (cvssScore >= 4.0) {
+          findings.push({
+            id: 'known-vulnerability-medium' as FindingId,
+            severity: 'MEDIUM',
+            description: `Medium vulnerability found in '${packageName}': ${vuln.id} - ${vuln.summary || vuln.details}`,
+            fixRecommendation: `Consider upgrading package to a patched version.`,
+            fixable: true,
+          });
         }
       }
     }
