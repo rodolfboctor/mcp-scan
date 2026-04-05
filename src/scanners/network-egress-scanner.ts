@@ -9,6 +9,9 @@ export function scanNetworkEgress(server: ResolvedServer): Finding[] {
   const urlRegex = /https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/[^\s"']*)?/g;
   const ipRegex = /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g;
   
+  // IPv6 addresses
+  const ipv6Regex = /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b/g;
+
   // 2. Obfuscation Patterns
   // base64 encoded 'http...' or 'https...'
   const b64UrlRegex = /aHR0c[A-Za-z0-9+/=]+|c2h0dH[A-Za-z0-9+/=]+/g; 
@@ -23,6 +26,11 @@ export function scanNetworkEgress(server: ResolvedServer): Finding[] {
       const urls = str.match(urlRegex);
       if (urls) urls.forEach(u => endpoints.add(u));
       
+      const ipv6s = str.match(ipv6Regex);
+      if (ipv6s) {
+          ipv6s.forEach(ip => endpoints.add(`ipv6:${ip}`));
+      }
+
       const ips = str.match(ipRegex);
       if (ips) {
           ips.forEach(ip => {
@@ -96,6 +104,16 @@ export function scanNetworkEgress(server: ResolvedServer): Finding[] {
   }
 
   for (const endpoint of endpoints) {
+     if (endpoint.startsWith('ipv6:')) {
+        findings.push({
+           id: 'network-egress-raw-ip',
+           severity: 'HIGH',
+           description: `Server connects to raw IPv6 address: ${endpoint.slice(5)}`,
+           fixRecommendation: 'Use domain names instead of raw IP addresses for better auditability.'
+        });
+        continue;
+     }
+
      if (endpoint.startsWith('obfuscated:')) {
         findings.push({
            id: 'network-egress-obfuscated',
