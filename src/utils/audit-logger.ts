@@ -72,8 +72,8 @@ export function checkFingerprints(results: ServerScanResult[]): Record<string, F
       if (knownFingerprints[key] && knownFingerprints[key] !== currentFingerprint) {
         mutationFindings[key] = [{
           id: 'server-mutation',
-          severity: 'LOW',
-          description: `Server configuration has changed since the last scan.`,
+          severity: 'MEDIUM',
+          description: `Server '${result.serverName}' configuration has changed since the last scan. This may indicate unauthorized modification.`,
           fixRecommendation: 'Review the changes to ensure they are intentional and secure.'
         }];
       }
