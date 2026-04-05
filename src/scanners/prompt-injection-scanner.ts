@@ -7,14 +7,21 @@ export function scanPromptInjection(server: ResolvedServer): Finding[] {
 
   const stringPatterns = [
     'ignore previous instructions', 'ignore all prior', 'you are now',
-    'disregard', 'forget your instructions', 'override your'
+    'disregard', 'forget your instructions', 'override your',
+    'act as', 'pretend you are', 'new persona', 'roleplay as',
+    'simulate being', 'jailbreak', 'dan mode', 'developer mode',
+    'your true self', 'bypass your', 'disable safety',
   ];
   // Unicode patterns with descriptions
   const unicodePatterns = [
     { char: '\u200B', name: 'U+200B (Zero Width Space)' },
     { char: '\uFEFF', name: 'U+FEFF (Byte Order Mark)' },
     { char: '\u202E', name: 'U+202E (Right-to-Left Override)' },
-    { char: '\u00AD', name: 'U+00AD (Soft Hyphen)' }
+    { char: '\u00AD', name: 'U+00AD (Soft Hyphen)' },
+    { char: '\u2060', name: 'U+2060 (Word Joiner)' },
+    { char: '\u180E', name: 'U+180E (Mongolian Vowel Separator)' },
+    { char: '\u200C', name: 'U+200C (Zero Width Non-Joiner)' },
+    { char: '\u200D', name: 'U+200D (Zero Width Joiner)' },
   ];
   const toolNamePatterns = [
     'bash', 'python', 'eval', 'exec', 'shell', 'terminal', 'run', 'system'
