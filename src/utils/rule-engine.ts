@@ -70,6 +70,15 @@ export function evaluateCustomRules(server: ResolvedServer, rules: CustomRule[])
            matchFound = true;
            matchSource = `environment variable '${matchingKey}'`;
         }
+      } else if (rule.target === 'url') {
+        const url = (server as any).url || '';
+        if (url && regex.test(url)) {
+          matchFound = true;
+          matchSource = `url '${url}'`;
+        }
+      } else if (rule.target === 'name' && regex.test(server.name)) {
+        matchFound = true;
+        matchSource = `server name '${server.name}'`;
       }
 
       if (matchFound) {
