@@ -15,10 +15,19 @@ export async function runMultiConfigReport(options: { configs?: string, html?: s
   const targetDir = options.configs || process.cwd();
   logger.brand(`Aggregating reports from: ${targetDir}`);
 
-  const configFiles = await glob(['**/*.json', '**/*.toml'], {
+  const configFiles = await glob(['**/*.json', '**/*.toml', '**/*.yaml', '**/*.yml'], {
     cwd: targetDir,
     absolute: true,
-    ignore: ['**/node_modules/**', '**/package.json', '**/package-lock.json', '**/tsconfig.json', '**/.mcp-scan.json']
+    ignore: [
+      '**/node_modules/**',
+      '**/package.json',
+      '**/package-lock.json',
+      '**/tsconfig.json',
+      '**/.mcp-scan.json',
+      '**/.mcp-scan-policy.yml',
+      '**/.github/**',
+      '**/dist/**',
+    ]
   });
 
   if (configFiles.length === 0) {
