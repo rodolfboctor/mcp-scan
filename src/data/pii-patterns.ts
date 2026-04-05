@@ -65,4 +65,14 @@ export const PII_PATTERNS: PiiPattern[] = [
     regex: /\b(?:[0-9a-fA-F]{2}[:\-]){5}[0-9a-fA-F]{2}\b/g,
     mask: '[MAC_MASKED]'
   },
+  {
+    name: 'Passport Number',
+    regex: /\b[A-Z]{1,2}[0-9]{6,9}\b/g,
+    mask: '[PASSPORT_MASKED]'
+  },
+  {
+    name: 'US Driver License',
+    regex: /\b[A-Z][0-9]{7}\b|\b[0-9]{9}\b/g,
+    mask: '[DL_MASKED]'
+  },
 ];
