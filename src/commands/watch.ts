@@ -95,10 +95,12 @@ export async function runWatch(options: { webhook?: string, slackWebhook?: strin
     }
   }
   
-  process.on('SIGINT', () => {
+  const onExit = () => {
     logger.info('Stopping watch mode.');
     process.exit(0);
-  });
+  };
+  process.on('SIGINT', onExit);
+  process.on('SIGTERM', onExit);
 }
 
 function diffReports(oldReport: ScanReport, newReport: ScanReport) {
