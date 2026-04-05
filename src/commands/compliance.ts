@@ -8,9 +8,10 @@ export async function runCompliance(options: { framework: string, output?: strin
         ? COMPLIANCE_FRAMEWORKS 
         : [getFramework(options.framework)]).filter((fw): fw is NonNullable<typeof fw> => !!fw);
 
+    const AVAILABLE_FRAMEWORKS = ['soc2', 'gdpr', 'hipaa', 'pci-dss', 'nist', 'all'];
     if (frameworksToRun.length === 0) {
         console.error(chalk.red(`Error: Unknown framework '${options.framework}'.`));
-        console.log(`Available: soc2, gdpr, hipaa, pci-dss, nist, all`);
+        console.log(`Available: ${AVAILABLE_FRAMEWORKS.join(', ')}`);
         process.exitCode = 1;
         return;
     }
