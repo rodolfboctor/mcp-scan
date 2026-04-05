@@ -110,10 +110,11 @@ export async function runDiff(oldPath: string, newPath: string) {
       logger.emptyLine();
     }
 
-    const _hasCriticalOrHighRegressions = regressions.some(r => r.finding.severity === 'CRITICAL' || r.finding.severity === 'HIGH');
+    const hasCriticalOrHighRegressions = regressions.some(r => r.finding.severity === 'CRITICAL' || r.finding.severity === 'HIGH');
 
     if (regressions.length > 0) {
-      logger.high(`Scan Failed: ${regressions.length} new findings detected.`);
+      const severity = hasCriticalOrHighRegressions ? 'CRITICAL/HIGH' : 'MEDIUM/LOW';
+      logger.high(`Scan Failed: ${regressions.length} new findings (${severity}) detected.`);
       process.exitCode = 1;
     } else if (resolved.length > 0 || addedServers.length > 0 || removedServers.length > 0) {
       logger.pass(`Scan Succeeded: No new findings, some changes detected.`);
