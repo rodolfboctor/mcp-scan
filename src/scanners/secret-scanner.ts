@@ -40,7 +40,21 @@ export function scanSecrets(server: ResolvedServer): Finding[] {
   const findings: Finding[] = [];
   
   const scanValue = (value: string, source: string, key?: string) => {
-    // 1. Check for environment variable references (e.g., ${VAR} or $VAR)
+    // 1. Check for environment variable references (e.g., ${VAR} or $VAR or %VAR%)
+    const windowsEnvRef = value.match(/^%([A-Z0-9_]+)%$/);
+    if (windowsEnvRef) {
+      const varName = windowsEnvRef[1];
+      if (!(varName in process.env)) {
+        findings.push({
+          id: 'missing-referenced-env-var',
+          severity: 'MEDIUM',
+          description: `Windows-style environment variable reference '%${varName}%' found in ${source}${key ? ` '${key}'` : ''}, but it is not set in the system.`,
+          fixRecommendation: `Ensure '${varName}' is set in your environment before running the AI tool.`,
+        });
+      }
+      return;
+    }
+
     const envRefMatch = value.match(/^\$\{([A-Z0-9_]+)\}$|^\$([A-Z0-9_]+)$/);
     if (envRefMatch) {
       const varName = envRefMatch[1] || envRefMatch[2];
