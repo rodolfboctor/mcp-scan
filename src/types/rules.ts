@@ -6,5 +6,7 @@ export interface CustomRule {
   description: string;
   fixRecommendation?: string;
   pattern: string; // regex string
-  target: 'env' | 'args' | 'command';
+  target: 'env' | 'args' | 'command' | 'url' | 'name';
+  /** If true, the rule matches when the pattern does NOT match (inverted logic) */
+  negate?: boolean;
 }
