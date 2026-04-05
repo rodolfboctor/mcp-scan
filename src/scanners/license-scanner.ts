@@ -22,8 +22,8 @@ export function scanLicense(metadata: SupplyChainResult['metadata']): Finding[] 
     return findings;
   }
 
-  const copyleftLicenses = ['GPL', 'AGPL', 'LGPL', 'CC-BY-SA'];
-  const permissiveLicenses = ['MIT', 'APACHE-2.0', 'BSD', 'ISC', 'UNLICENSE', 'WTFPL'];
+  const copyleftLicenses = ['GPL', 'AGPL', 'LGPL', 'CC-BY-SA', 'EUPL', 'OSL', 'CDDL', 'MPL'];
+  const permissiveLicenses = ['MIT', 'APACHE-2.0', 'BSD', 'ISC', 'UNLICENSE', 'WTFPL', '0BSD', 'ZLIB', 'ARTISTIC-2.0', 'PYTHON-2.0'];
 
   const isCopyleft = copyleftLicenses.some(l => license.includes(l));
   const isPermissive = permissiveLicenses.some(l => license.includes(l));
