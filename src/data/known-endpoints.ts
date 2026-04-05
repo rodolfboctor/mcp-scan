@@ -20,7 +20,15 @@ export const KNOWN_ENDPOINTS: Record<string, string[]> = {
     'api.mistral.ai',
     'generativelanguage.googleapis.com',
     'api.groq.com',
-    'api.replicate.com'
+    'api.replicate.com',
+    'api.together.xyz',
+    'api.cohere.ai',
+    'api.perplexity.ai',
+    'api.deepseek.com',
+    'api.fireworks.ai',
+    'api.voyageai.com',
+    'api.stability.ai',
+    'api.elevenlabs.io',
   ],
   cdn: [
     'unpkg.com',
