@@ -108,9 +108,12 @@ export function getProjectLevelPaths(dependencies: { cwd: () => string }) {
   const cwd = dependencies.cwd();
   return [
     path.join(cwd, '.mcp.json'),
+    path.join(cwd, 'mcp.json'),
     path.join(cwd, '.cursor', 'mcp.json'),
     path.join(cwd, '.vscode', 'mcp.json'),
     path.join(cwd, '.gemini', 'settings.json'),
-    path.join(cwd, '.codex', 'config.toml')
+    path.join(cwd, '.codex', 'config.toml'),
+    path.join(cwd, '.amp', 'config.json'),
+    path.join(cwd, '.continue', 'config.json'),
   ];
 }
