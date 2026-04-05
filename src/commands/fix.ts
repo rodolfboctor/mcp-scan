@@ -85,6 +85,20 @@ export async function runFix() {
                  return arg;
               });
            }
+           // 4. Fix insecure WebSocket ws:// → wss://
+           else if (finding.id === 'insecure-transport' && server.args) {
+              server.args = server.args.map(arg => {
+                 if (typeof arg === 'string' && arg.startsWith('ws://')) {
+                    changed = true;
+                    return arg.replace('ws://', 'wss://');
+                 }
+                 return arg;
+              });
+              if (!changed && server.url?.startsWith('ws://')) {
+                 (server as any).url = server.url.replace('ws://', 'wss://');
+                 changed = true;
+              }
+           }
 
            if (changed) {
               atomicWriteConfig(result.configPath, JSON.stringify(config, null, 2));
