@@ -4,12 +4,17 @@ import { OFFICIAL_SERVERS, TRUSTED_COMMUNITY_SERVERS } from '../data/official-se
 import { levenshteinDistance } from '../utils/levenshtein.js';
 
 const HOMOGLYPHS: Record<string, string[]> = {
-  'a': ['\u0430', '\u03b1'], // cyrillic a, greek alpha
-  'e': ['\u0435', '\u03b5'], // cyrillic e, greek epsilon
-  'i': ['1', 'l', '!', '\u00ec', '\u00ed'],
-  'o': ['0', '\u03bf', '\u043e'], // zero, greek omicron, cyrillic o
-  's': ['5', '$'],
-  't': ['7'],
+  'a': ['\u0430', '\u03b1', '\u00e0', '\u00e1', '\u00e2'], // cyrillic a, greek alpha, accented
+  'c': ['\u00e7', '\u0441'], // cedilla, cyrillic c
+  'e': ['\u0435', '\u03b5', '\u00e8', '\u00e9', '\u00ea'], // cyrillic e, greek epsilon, accented
+  'i': ['1', 'l', '!', '\u00ec', '\u00ed', '\u00ee', '\u0456'], // cyrillic i
+  'n': ['\u00f1', '\u0144'], // ñ, ń
+  'o': ['0', '\u03bf', '\u043e', '\u00f8', '\u00f3', '\u00f4'], // zero, greek omicron, cyrillic o
+  'p': ['\u0440'], // cyrillic r (looks like p)
+  's': ['5', '$', '\u0455'], // cyrillic s
+  't': ['7', '\u0074'],
+  'u': ['\u00fc', '\u00fa', '\u00fb', '\u03c5'], // accented u, greek upsilon
+  'v': ['\u03bd'], // greek nu
 };
 
 function normalizeHomoglyphs(str: string): string {
