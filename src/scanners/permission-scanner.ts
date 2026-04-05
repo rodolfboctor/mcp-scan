@@ -1,9 +1,9 @@
 import { ResolvedServer } from '../types/config.js';
 import { Finding } from '../types/scan-result.js';
 
-const DANGEROUS_PATHS = ['/', '~'];
-const SENSITIVE_PATHS = ['.ssh', '.aws', '.gnupg', '.env'];
-const BROAD_PATHS = ['/Users', '/home'];
+const DANGEROUS_PATHS = ['/', '~', '/etc', '/var', '/usr'];
+const SENSITIVE_PATHS = ['.ssh', '.aws', '.gnupg', '.env', '.kube', '.docker', '.npmrc', '.netrc', '.config', 'credentials', 'id_rsa', 'id_ed25519'];
+const BROAD_PATHS = ['/Users', '/home', '/root'];
 
 export function scanPermissions(server: ResolvedServer): Finding[] {
   const findings: Finding[] = [];
