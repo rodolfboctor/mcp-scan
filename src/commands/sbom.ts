@@ -14,16 +14,21 @@ export async function runSbom(options: {
 }) {
   const report = await runScan({ silent: true });
 
-  if (options.format === 'cyclonedx') {
-    const sbom = await generateSbom(report, { includeFindings: options.includeFindings });
-    fs.writeFileSync(options.output, JSON.stringify(sbom, null, 2));
-    console.log(`Successfully generated CycloneDX SBOM at ${options.output}`);
-  } else if (options.format === 'spdx') {
-    const spdxText = generateSpdx(report);
-    fs.writeFileSync(options.output, spdxText);
-    console.log(`Successfully generated SPDX SBOM at ${options.output}`);
-  } else {
-    console.error(`Error: Unsupported SBOM format '${options.format}'. Use 'cyclonedx' or 'spdx'.`);
+  try {
+    if (options.format === 'cyclonedx') {
+      const sbom = await generateSbom(report, { includeFindings: options.includeFindings });
+      fs.writeFileSync(options.output, JSON.stringify(sbom, null, 2));
+      console.log(`CycloneDX SBOM written to ${options.output} (${report.totalScanned} components)`);
+    } else if (options.format === 'spdx') {
+      const spdxText = generateSpdx(report);
+      fs.writeFileSync(options.output, spdxText);
+      console.log(`SPDX SBOM written to ${options.output} (${report.totalScanned} components)`);
+    } else {
+      console.error(`Error: Unsupported SBOM format '${options.format}'. Supported formats: cyclonedx, spdx`);
+      process.exitCode = 1;
+    }
+  } catch (err: unknown) {
+    console.error(`Error writing SBOM: ${err instanceof Error ? err.message : String(err)}`);
     process.exitCode = 1;
   }
 }
