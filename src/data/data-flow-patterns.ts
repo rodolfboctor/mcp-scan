@@ -189,4 +189,9 @@ export const CREDENTIAL_ENV_PATTERNS: RegExp[] = [
   /access[_-]?key/i,
   /client[_-]?secret/i,
   /[_-]?passphrase/i,
+  /[_-]?bearer[_-]?/i,
+  /[_-]?cert[_-]?/i,
+  /[_-]?pem[_-]?/i,
+  /[_-]?keypair[_-]?/i,
+  /[_-]?signing[_-]?key/i,
 ];
