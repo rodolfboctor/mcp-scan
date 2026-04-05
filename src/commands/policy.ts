@@ -73,8 +73,21 @@ rules:
             if (rule.match) console.log(chalk.dim(`  Match: ${JSON.stringify(rule.match)}`));
             console.log();
         }
+    } else if (action === 'list') {
+        const policy = loadYamlPolicy(file);
+        if (!policy) {
+            console.log(chalk.dim(`No policy file found at ${file}.`));
+            return;
+        }
+        console.log(chalk.bold(`${policy.rules.length} rules in ${file}:\n`));
+        policy.rules.forEach((rule, i) => {
+            const actionColor = rule.action === 'block' ? chalk.red : rule.action === 'warn' ? chalk.yellow : rule.action === 'skip' ? chalk.dim : chalk.cyan;
+            console.log(`  ${i + 1}. ${chalk.white.bold(rule.id)} — ${actionColor(rule.action.toUpperCase())}`);
+            if (rule.description) console.log(chalk.dim(`     ${rule.description}`));
+        });
     } else {
-        console.log(chalk.yellow(`Unknown policy action: ${action}. Use 'validate', 'init', or 'show'.`));
+        const VALID_ACTIONS = ['validate', 'init', 'show', 'list'];
+        console.log(chalk.yellow(`Unknown policy action: '${action}'. Valid actions: ${VALID_ACTIONS.join(', ')}`));
         process.exitCode = 1;
     }
 }
