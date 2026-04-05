@@ -25,6 +25,9 @@ export const OFFICIAL_SERVERS = new Set([
   '@modelcontextprotocol/server-puppeteer',
   '@modelcontextprotocol/server-sentry',
   '@modelcontextprotocol/server-slack',
+  '@modelcontextprotocol/server-gdrive',
+  '@modelcontextprotocol/server-everart',
+  '@modelcontextprotocol/server-exa',
 ]);
 
 // Well-known and widely trusted community/company servers
