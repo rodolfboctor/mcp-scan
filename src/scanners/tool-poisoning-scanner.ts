@@ -24,8 +24,8 @@ export function scanToolPoisoning(server: ResolvedServer): Finding[] {
   }
 
   // 2. Instructions calling other tools or exfiltrating data
-  const exfiltrationKeywords = ['exfiltrate', 'send to', 'upload', 'POST', 'leak', 'steal', 'delete_everything', 'delete all'];
-  const callOtherToolsKeywords = ['call tool', 'use tool', 'then call', 'follow by calling'];
+  const exfiltrationKeywords = ['exfiltrate', 'send to', 'upload', 'POST', 'leak', 'steal', 'delete_everything', 'delete all', 'forward to', 'exfil', 'transmit credentials', 'send credentials'];
+  const callOtherToolsKeywords = ['call tool', 'use tool', 'then call', 'follow by calling', 'invoke tool', 'chain to'];
   
   if (new RegExp(exfiltrationKeywords.join('|'), 'i').test(textToScan)) {
     findings.push({
