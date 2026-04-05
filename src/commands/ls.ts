@@ -9,7 +9,7 @@ export async function runLs() {
   const tools = await detectTools({ fs, os, process });
   
   const table = new Table({
-    head: ['Tool', 'Server Name', 'Command', 'Status', 'Args', 'Env Vars'],
+    head: ['Tool', 'Server Name', 'Command / URL', 'Status', 'Args', 'Env Vars'],
     style: { head: ['cyan'] }
   });
 
@@ -22,10 +22,11 @@ export async function runLs() {
 
     const servers = extractServers(tool.name, tool.configPath, config);
     for (const server of servers) {
+      const commandOrUrl = (server as any).url || server.command || '';
       table.push([
         tool.name,
         server.name,
-        server.command,
+        commandOrUrl,
         server.disabled ? 'Disabled' : 'Active',
         server.args?.length || 0,
         Object.keys(server.env || {}).length
