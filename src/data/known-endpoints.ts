@@ -44,6 +44,14 @@ export const KNOWN_ENDPOINTS: Record<string, string[]> = {
     'webhook.site',
     'requestcatcher.com',
     'mocky.io',
-    'ttrss.info'
+    'ttrss.info',
+    'serveo.net',
+    'bore.pub',
+    'localhost.run',
+    'tunnelmole.com',
+    'telebit.cloud',
+    'pipedream.net',
+    'requestbin.com',
+    'beeceptor.com',
   ]
 };
