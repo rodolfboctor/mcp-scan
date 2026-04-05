@@ -63,6 +63,29 @@ export const FILESYSTEM_SOURCES: DataFlowSource[] = [
     ],
   },
   {
+    name: 'screen-capture',
+    description: 'Captures screenshots or records screen content',
+    patterns: [
+      /screenshot/i,
+      /screen[-_]?capture/i,
+      /screen[-_]?record/i,
+    ],
+    packages: [
+      'mcp-screenshot',
+      'mcp-screen-capture',
+    ],
+  },
+  {
+    name: 'keychain-access',
+    description: 'Accesses system keychain or credential store',
+    patterns: [
+      /keychain/i,
+      /credential[-_]?store/i,
+      /secret[-_]?manager/i,
+    ],
+    packages: [],
+  },
+  {
     name: 'database-read',
     description: 'Reads from a local database',
     patterns: [
