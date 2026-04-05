@@ -35,6 +35,31 @@ const SARIF_RULES: Record<string, { short: string, full: string, helpUri?: strin
      short: 'Known malicious package',
      full: 'The server uses a package that has been flagged as malicious.',
      helpUri: 'https://thynkq.com/docs/mcp-scan/rules/malicious-package'
+  },
+  'tool-poisoning': {
+     short: 'Tool description poisoning',
+     full: 'Tool description contains hidden instructions that could manipulate LLM behavior.',
+     helpUri: 'https://thynkq.com/docs/mcp-scan/rules/tool-poisoning'
+  },
+  'pii-in-config': {
+     short: 'PII found in configuration',
+     full: 'Personally identifiable information was detected in an environment variable or argument.',
+     helpUri: 'https://thynkq.com/docs/mcp-scan/rules/pii-in-config'
+  },
+  'typosquat-risk': {
+     short: 'Potential typosquatting',
+     full: 'Package name closely resembles a well-known package but is not an official variant.',
+     helpUri: 'https://thynkq.com/docs/mcp-scan/rules/typosquat-risk'
+  },
+  'insecure-transport': {
+     short: 'Insecure transport protocol',
+     full: 'Server uses an unencrypted transport (http:// or ws://) without authentication.',
+     helpUri: 'https://thynkq.com/docs/mcp-scan/rules/insecure-transport'
+  },
+  'supply-chain-risk': {
+     short: 'Supply chain risk',
+     full: 'Package has characteristics associated with supply chain attacks (e.g. install scripts, broad permissions).',
+     helpUri: 'https://thynkq.com/docs/mcp-scan/rules/supply-chain-risk'
   }
 };
 
