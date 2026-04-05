@@ -81,11 +81,13 @@ export function evaluateCustomRules(server: ResolvedServer, rules: CustomRule[])
         matchSource = `server name '${server.name}'`;
       }
 
-      if (matchFound) {
+      const triggered = rule.negate ? !matchFound : matchFound;
+      if (triggered) {
+        const source = rule.negate ? `(no match for '${rule.pattern}' in ${rule.target})` : matchSource;
         findings.push({
           id: rule.id,
           severity: rule.severity,
-          description: `Custom rule '${rule.id}' matched in ${matchSource}: ${rule.description}`,
+          description: `Custom rule '${rule.id}' triggered ${source}: ${rule.description}`,
           fixRecommendation: rule.fixRecommendation
         });
       }
