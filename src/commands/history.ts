@@ -59,6 +59,9 @@ export async function showHistoryTrends() {
   const totalScanned = entries.reduce((sum, e) => sum + e.scannedCount, 0);
   const avgFindings = entries.reduce((sum, e) => sum + e.findings.critical + e.findings.high + e.findings.medium, 0) / entries.length;
 
+  const cleanScans = entries.filter(e => e.findings.critical === 0 && e.findings.high === 0 && e.findings.medium === 0).length;
+  const cleanPct = entries.length > 0 ? ((cleanScans / entries.length) * 100).toFixed(0) : '0';
+
   const statsTable = new Table({
     style: { head: ['cyan'] }
   });
@@ -66,6 +69,7 @@ export async function showHistoryTrends() {
   statsTable.push(
     { 'Total Scans': entries.length },
     { 'Total Servers Analyzed': totalScanned },
+    { 'Clean Scans (no findings)': `${cleanScans} (${cleanPct}%)` },
     { 'Avg. Findings per Scan': avgFindings.toFixed(1) },
     { 'Oldest Scan': new Date(entries[entries.length - 1].timestamp).toLocaleString() },
     { 'Latest Scan': new Date(entries[0].timestamp).toLocaleString() }
