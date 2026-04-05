@@ -24,6 +24,18 @@ export function scanConfig(server: ResolvedServer): Finding[] {
         id: 'large-arg-list',
         severity: 'LOW',
         description: `Server has a suspiciously large number of arguments (${server.args.length}).`,
+        fixRecommendation: 'Review all arguments and remove any that are unnecessary or suspicious.',
+      });
+    }
+
+    // Check for absolute Windows-style paths on non-Windows — suspicious on macOS/Linux servers
+    const winPathArg = server.args.find(a => typeof a === 'string' && /^[A-Z]:\\/i.test(a));
+    if (winPathArg) {
+      findings.push({
+        id: 'windows-path-on-unix',
+        severity: 'LOW',
+        description: `Server args contain a Windows-style path: '${winPathArg}'. May indicate misconfiguration or cross-platform issue.`,
+        fixRecommendation: 'Replace Windows-style paths with POSIX paths for Unix/macOS environments.',
       });
     }
   }
