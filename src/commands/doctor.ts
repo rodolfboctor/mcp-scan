@@ -63,9 +63,12 @@ export async function runDoctor() {
   check('Server executables', missingExecutables === 0, `${missingExecutables} servers reference executables not found in system PATH.`);
 
   // 3. Environment Variables
-  const envVars = ['GITHUB_TOKEN', 'UGIG_API_KEY'];
+  const envVars = ['GITHUB_TOKEN', 'UGIG_API_KEY', 'MCP_SCAN_SLACK_WEBHOOK', 'MCP_SCAN_WEBHOOK_URL'];
   const setVars = envVars.filter(v => process.env[v]);
-  check('Environment variables', setVars.length > 0, `${setVars.length}/${envVars.length} recommended variables set.`);
+  const requiredVars = ['GITHUB_TOKEN'];
+  const requiredSet = requiredVars.filter(v => process.env[v]);
+  check('Required env vars', requiredSet.length === requiredVars.length, `GITHUB_TOKEN missing — supply chain scanning will be limited.`);
+  check('Optional env vars', true, `${setVars.length}/${envVars.length} optional variables configured.`);
 
   // 4. External API Access (GitHub)
   let githubOk = false;
