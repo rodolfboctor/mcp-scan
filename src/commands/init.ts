@@ -16,7 +16,10 @@ export function runInit() {
     "allowedDomains": ["localhost", "127.0.0.1"],
     "requiredEnvVarPrefix": "",
     "maxSeverity": "low",
-    "suppressRules": []
+    "suppressRules": [],
+    "ignorePaths": [],
+    "policyFile": ".mcp-scan-policy.yml",
+    "reportFormat": "text"
   };
 
   fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2), 'utf8');
