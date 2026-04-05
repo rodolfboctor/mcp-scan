@@ -49,6 +49,8 @@ export function loadYamlPolicy(customPath?: string): SecurityPolicy | null {
   }
 }
 
+const VALID_ACTIONS = ['block', 'warn', 'skip', 'override-severity'] as const;
+
 export function validatePolicy(policyPath: string): boolean {
   if (!fs.existsSync(policyPath)) {
       console.error(chalk.red(`Policy file not found: ${policyPath}`));
@@ -58,7 +60,7 @@ export function validatePolicy(policyPath: string): boolean {
     const content = fs.readFileSync(policyPath, 'utf8');
     const parsed = parse(content);
     if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.rules)) {
-      console.error(chalk.red('Invalid policy schema. Expected version: 1 and rules array.'));
+      console.error(chalk.red('Invalid policy schema. Expected: { version: 1, rules: [...] }'));
       return false;
     }
     for (const rule of parsed.rules) {
@@ -66,8 +68,16 @@ export function validatePolicy(policyPath: string): boolean {
         console.error(chalk.red(`Rule missing required fields (id, action): ${JSON.stringify(rule)}`));
         return false;
       }
+      if (!VALID_ACTIONS.includes(rule.action)) {
+        console.error(chalk.red(`Rule '${rule.id}' has invalid action '${rule.action}'. Valid: ${VALID_ACTIONS.join(', ')}`));
+        return false;
+      }
+      if (rule.action === 'override-severity' && !rule.severity) {
+        console.error(chalk.red(`Rule '${rule.id}' uses override-severity but is missing the 'severity' field.`));
+        return false;
+      }
     }
-    console.log(chalk.green(`Policy file ${policyPath} is valid.`));
+    console.log(chalk.green(`✓ Policy file valid: ${policyPath} (${parsed.rules.length} rules)`));
     return true;
   } catch (e: any) {
     console.error(chalk.red(`Policy validation failed: ${e.message}`));
