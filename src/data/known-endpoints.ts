@@ -10,6 +10,14 @@ export const KNOWN_ENDPOINTS: Record<string, string[]> = {
     'hotjar.com',
     'datadoghq.com',
     'dynatrace.com',
+    'heap.io',
+    'fullstory.com',
+    'intercom.io',
+    'customer.io',
+    'api.braze.com',
+    'analytics.google.com',
+    'api.rudderstack.com',
+    'us-east-1.aws.data.mongodb-api.com',
     'telemetry'
   ],
   api: [
