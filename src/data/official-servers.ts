@@ -1,5 +1,5 @@
 /**
- * LAST_UPDATED: 2026-03-23
+ * LAST_UPDATED: 2026-04-04
  * 
  * Official reference servers maintained by the Model Context Protocol organization
  * and widely trusted community/company servers.
