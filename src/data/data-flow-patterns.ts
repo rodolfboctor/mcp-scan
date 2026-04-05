@@ -150,6 +150,23 @@ export const NETWORK_SINKS: DataFlowSink[] = [
     ],
     packages: [],
   },
+  {
+    name: 'email-egress',
+    description: 'Sends data via email or SMTP',
+    patterns: [
+      /smtp/i,
+      /sendmail/i,
+      /nodemailer/i,
+      /\bmailer\b/i,
+    ],
+    packages: [
+      'mcp-email',
+      'mcp-server-email',
+      'mcp-gmail',
+      'mcp-server-gmail',
+      'mcp-sendgrid',
+    ],
+  },
 ];
 
 export const TEMP_STORAGE_PATTERNS: RegExp[] = [
