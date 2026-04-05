@@ -54,5 +54,15 @@ export const PII_PATTERNS: PiiPattern[] = [
     name: 'VAT Number',
     regex: /\b[A-Z]{2}[0-9A-Z]{2,12}\b/g,
     mask: '[VAT_MASKED]'
-  }
+  },
+  {
+    name: 'IPv6 Address',
+    regex: /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b/g,
+    mask: '[IPV6_MASKED]'
+  },
+  {
+    name: 'MAC Address',
+    regex: /\b(?:[0-9a-fA-F]{2}[:\-]){5}[0-9a-fA-F]{2}\b/g,
+    mask: '[MAC_MASKED]'
+  },
 ];
