@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- Scan `.env.local`, `.env.production`, `.env.development`, and `.env.staging` variants in env-leak scanner.
+- Screen capture and keychain access classified as sensitive data sources in data-flow analysis.
+- Email egress (SMTP, nodemailer) classified as a network sink in data-flow analysis.
+- 8 additional AI provider API endpoints: together, cohere, perplexity, deepseek, fireworks, voyage, stability, elevenlabs.
+- 8 additional suspicious tunneling/inspection endpoints: serveo.net, bore.pub, localhost.run, tunnelmole, telebit, pipedream, requestbin, beeceptor.
+- 7 additional telemetry endpoints: heap.io, fullstory.com, intercom.io, customer.io, braze, analytics.google.com, rudderstack.
+- IPv6 address and MAC address PII masking patterns.
+- Passport number and US driver license PII detection patterns.
+- GDPR Art.13 (Transparency) and Art.33 (Breach Notification) control mappings.
+- HIPAA 164.308(a)(1) (Security Management) and 164.312(c)(1) (Integrity) control mappings.
+- SOC 2 CC9.1 (Risk Mitigation) and A1.1 (Availability) control mappings.
+- NIST RS.MI-1 (Incident Mitigation) and PR.IP-1 (Baseline Configuration) control mappings.
+- PCI DSS Req 6 (System Protection) and Req 12 (Security Policies) control mappings.
+- `/etc`, `/var`, `/usr` added to dangerous filesystem paths.
+- `.kube`, `.docker`, `.npmrc`, `.netrc`, ssh key files added to sensitive path detection.
+- Bearer, cert, pem, keypair, and signing-key patterns added to credential env var detection.
+- 13 additional trusted community MCP servers: airtable, asana, jira, confluence, linear, notion, twilio, sendgrid, mailchimp.
+
 ## [1.7.0] - 2026-03-24
 
 ### Added
