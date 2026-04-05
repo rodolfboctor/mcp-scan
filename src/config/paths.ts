@@ -22,6 +22,8 @@ export function getConfigPaths(dependencies: { homedir: () => string, platform: 
     'Plandex': '', // New
     'ChatGPT Desktop': '', // New
     'GitHub Copilot': '', // New
+    'Kiro': '', // New
+    'Warp': '', // New
   };
 
   if (platform === 'darwin') {
@@ -38,6 +40,8 @@ export function getConfigPaths(dependencies: { homedir: () => string, platform: 
     paths['Plandex'] = path.join(home, '.plandex', 'config.json');
     paths['ChatGPT Desktop'] = path.join(home, 'Library', 'Application Support', 'com.openai.chat', 'settings.json');
     paths['GitHub Copilot'] = path.join(home, '.config', 'github-copilot', 'apps.json');
+    paths['Kiro'] = path.join(home, 'Library', 'Application Support', 'Kiro', 'User', 'mcp.json');
+    paths['Warp'] = path.join(home, '.warp', 'mcp.json');
   } else if (platform === 'win32') {
     paths['Claude Desktop'] = path.join(appData, 'Claude', 'claude_desktop_config.json');
     paths['Cursor'] = path.join(userProfile, '.cursor', 'mcp.json');
@@ -52,6 +56,8 @@ export function getConfigPaths(dependencies: { homedir: () => string, platform: 
     paths['Plandex'] = path.join(userProfile, '.plandex', 'config.json');
     paths['ChatGPT Desktop'] = path.join(appData, 'com.openai.chat', 'settings.json');
     paths['GitHub Copilot'] = path.join(userProfile, '.config', 'github-copilot', 'apps.json');
+    paths['Kiro'] = path.join(appData, 'Kiro', 'User', 'mcp.json');
+    paths['Warp'] = path.join(userProfile, '.warp', 'mcp.json');
   } else {
     // Linux and others
     paths['Claude Desktop'] = path.join(home, '.config', 'Claude', 'claude_desktop_config.json');
@@ -67,6 +73,8 @@ export function getConfigPaths(dependencies: { homedir: () => string, platform: 
     paths['Plandex'] = path.join(home, '.plandex', 'config.json');
     paths['ChatGPT Desktop'] = path.join(home, '.config', 'com.openai.chat', 'settings.json');
     paths['GitHub Copilot'] = path.join(home, '.config', 'github-copilot', 'apps.json');
+    paths['Kiro'] = path.join(home, '.config', 'Kiro', 'User', 'mcp.json');
+    paths['Warp'] = path.join(home, '.warp', 'mcp.json');
   }
 
   return paths;
