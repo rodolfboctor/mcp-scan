@@ -27,9 +27,12 @@ export function maskString(str: string, options?: PrivacyOptions): string {
 
 /**
  * Recursively masks PII in an object, array, or string.
- * Modifies objects in place for performance, but returns the value as well.
+ * Pass deepClone=true to avoid mutating the original (useful in scan pipelines).
  */
-export function maskPii(data: any, options?: PrivacyOptions): any {
+export function maskPii(data: any, options?: PrivacyOptions, deepClone = false): any {
+  if (deepClone && data != null && typeof data === 'object') {
+    data = JSON.parse(JSON.stringify(data));
+  }
   if (data == null) return data;
 
   if (typeof data === 'string') {
