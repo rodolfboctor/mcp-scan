@@ -49,5 +49,18 @@ export function scanTransport(server: ResolvedServer, allowedDomains: string[] =
     });
   }
 
+  // Check for explicit ws:// (unencrypted WebSocket)
+  const hasInsecureWs = server.args?.some(a => typeof a === 'string' && a.startsWith('ws://'));
+  if (hasInsecureWs || server.url?.startsWith('ws://')) {
+    findings.push({
+      id: 'insecure-transport',
+      severity: 'HIGH',
+      description: `Server uses unencrypted WebSocket (ws://) — data transmitted in plaintext.`,
+      fixRecommendation: `Switch to encrypted WebSocket (wss://).`,
+      fixable: true,
+      remediationConfidence: 95
+    });
+  }
+
   return findings;
 }
