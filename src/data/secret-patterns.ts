@@ -41,4 +41,12 @@ export const SECRET_PATTERNS = [
   { name: 'Neon Database Token', regex: /\bdb_[a-zA-Z0-9]{32}\b/ },
   { name: 'Private Key', regex: /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/ },
   { name: 'Database URL with Credentials', regex: /[a-zA-Z]+:\/\/[^:]+:[^@]+@[^/]+/ },
+  { name: 'xAI / Grok API Key', regex: /xai-[a-zA-Z0-9]{50,}/ },
+  { name: 'Cerebras API Key', regex: /csk-[a-zA-Z0-9]{50,}/ },
+  { name: 'Fireworks AI API Key', regex: /fw_[a-zA-Z0-9]{40,}/ },
+  { name: 'ElevenLabs API Key', regex: /\bxi-api-key-[a-zA-Z0-9]{32}\b/ },
+  { name: 'Tavily API Key', regex: /tvly-[a-zA-Z0-9]{32}/ },
+  { name: 'Resend API Key', regex: /\bre_[a-zA-Z0-9]{32}\b/ },
+  { name: 'Linear API Key', regex: /lin_api_[a-zA-Z0-9]{40}/ },
+  { name: 'Notion Integration Token', regex: /secret_[a-zA-Z0-9]{43}/ },
 ];
