@@ -52,7 +52,12 @@ export type FindingId =
   | 'data-controls-sharing'
   | 'data-controls-old-temp-files'
   | 'data-controls-minimization-risk'
-  | 'data-controls-stale-temp-files';
+  | 'data-controls-stale-temp-files'
+  | 'known-vulnerability-medium'
+  | 'insecure-transport'
+  | 'http-transport-no-auth'
+  | 'outdated-transport'
+  | 'stale-server';
 
 export const FINDING_IDS: FindingId[] = [
   'no-malicious-package',
@@ -107,6 +112,11 @@ export const FINDING_IDS: FindingId[] = [
   'data-controls-old-temp-files',
   'data-controls-minimization-risk',
   'data-controls-stale-temp-files',
+  'known-vulnerability-medium',
+  'insecure-transport',
+  'http-transport-no-auth',
+  'outdated-transport',
+  'stale-server',
 ];
 
 export interface Finding {
