@@ -1,10 +1,40 @@
 import { ScanReport } from '../types/scan-result.js';
 import { v4 as uuidv4 } from 'uuid';
 
-/**
- * Generates a CycloneDX v1.5 SBOM from the scan report.
- */
-export async function generateSbom(report: ScanReport, options: { includeFindings?: boolean } = {}): Promise<any> {
+interface CycloneDXComponent {
+  type: string;
+  name: string;
+  version: string;
+  bomRef: string;
+  purl: string;
+  description: string;
+  licenses?: Array<{ license: { id: string } }>;
+  author?: string;
+  externalReferences?: Array<{ type: string; url: string }>;
+  hashes?: Array<{ alg: string; content: string }>;
+}
+
+interface CycloneDXVulnerability {
+  id: string;
+  source: { name: string; url: string };
+  description: string;
+  recommendation?: string;
+  ratings: Array<{ score: number; severity: string; method: string }>;
+  analysis: { state: string; detail: string };
+  affects: Array<{ ref: string }>;
+}
+
+interface CycloneDXBom {
+  bomFormat: string;
+  specVersion: string;
+  serialNumber: string;
+  version: number;
+  metadata: { timestamp: string; tools: Array<{ vendor: string; name: string; version: string }> };
+  components: CycloneDXComponent[];
+  vulnerabilities?: CycloneDXVulnerability[];
+}
+
+export async function generateSbom(report: ScanReport, options: { includeFindings?: boolean } = {}): Promise<CycloneDXBom> {
   const version = report.version || '2.0.0';
   const timestamp = new Date().toISOString();
   
@@ -13,7 +43,7 @@ export async function generateSbom(report: ScanReport, options: { includeFinding
     const name = meta?.packageName || result.serverName;
     const componentVersion = meta?.version || '0.0.0';
     
-    const component: any = {
+    const component: CycloneDXComponent = {
       type: 'application',
       name: name,
       version: componentVersion,
@@ -39,7 +69,7 @@ export async function generateSbom(report: ScanReport, options: { includeFinding
     return component;
   });
 
-  const vulnerabilities: any[] = [];
+  const vulnerabilities: CycloneDXVulnerability[] = [];
   if (options.includeFindings) {
       for (const result of report.results) {
           const componentRef = `pkg:npm/${result.metadata?.packageName || result.serverName}@${result.metadata?.version || '0.0.0'}`;
@@ -64,7 +94,7 @@ export async function generateSbom(report: ScanReport, options: { includeFinding
       }
   }
 
-  const sbom: any = {
+  const sbom: CycloneDXBom = {
     bomFormat: 'CycloneDX',
     specVersion: '1.5',
     serialNumber: `urn:uuid:${uuidv4()}`,

@@ -111,7 +111,19 @@ function generateFingerprint(result: ServerScanResult): string {
   return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
 }
 
-export function readAuditLog(count: number = 20): any[] {
+interface AuditLogEntry {
+  timestamp: string;
+  user: string;
+  hostname: string;
+  version?: string;
+  durationMs: number;
+  scannedCount: number;
+  findings: { critical: number; high: number; medium: number; low: number; info: number };
+  clients: string[];
+  servers: string[];
+}
+
+export function readAuditLog(count: number = 20): AuditLogEntry[] {
   try {
     if (!fs.existsSync(AUDIT_LOG_FILE)) return [];
     const content = fs.readFileSync(AUDIT_LOG_FILE, 'utf8');

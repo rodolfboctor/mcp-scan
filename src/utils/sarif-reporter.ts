@@ -2,9 +2,23 @@ import { ScanReport } from '../types/scan-result.js';
 import fs from 'fs';
 import path from 'path';
 
-/**
- * Common security rules metadata for SARIF reporting.
- */
+interface SarifRule {
+  id: string;
+  name: string;
+  shortDescription: { text: string };
+  fullDescription: { text: string };
+  helpUri: string;
+  properties: { precision: string; problem: { severity: string } };
+}
+
+interface SarifResult {
+  ruleId: string;
+  level: string;
+  message: { text: string };
+  locations: Array<{ physicalLocation: { artifactLocation: { uri: string; uriBaseId: string }; region: { startLine: number } } }>;
+}
+
+
 const SARIF_RULES: Record<string, { short: string, full: string, helpUri?: string }> = {
   'exposed-secret': {
      short: 'Exposed secret detected',
@@ -75,15 +89,15 @@ export function generateSarif(report: ScanReport) {
             fullName: 'MCP Security Scanner',
             version: report.version || '2.0.0',
             informationUri: 'https://github.com/rodolfboctor/mcp-scan',
-            rules: [] as any[],
+            rules: [] as SarifRule[],
           },
         },
-        results: [] as any[],
+        results: [] as SarifResult[],
       },
     ],
   };
 
-  const rulesMap = new Map<string, any>();
+  const rulesMap = new Map<string, SarifRule>();
 
   for (const result of report.results) {
     for (const finding of result.findings) {
