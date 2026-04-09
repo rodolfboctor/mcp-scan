@@ -71,7 +71,7 @@ export function evaluateCustomRules(server: ResolvedServer, rules: CustomRule[])
            matchSource = `environment variable '${matchingKey}'`;
         }
       } else if (rule.target === 'url') {
-        const url = (server as any).url || '';
+        const url = server.url || '';
         if (url && regex.test(url)) {
           matchFound = true;
           matchSource = `url '${url}'`;
