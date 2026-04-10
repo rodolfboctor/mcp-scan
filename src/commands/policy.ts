@@ -82,7 +82,7 @@ rules:
         console.log(chalk.bold(`${policy.rules.length} rules in ${file}:\n`));
         policy.rules.forEach((rule, i) => {
             const actionColor = rule.action === 'block' ? chalk.red : rule.action === 'warn' ? chalk.yellow : rule.action === 'skip' ? chalk.dim : chalk.cyan;
-            console.log(`  ${i + 1}. ${chalk.white.bold(rule.id)} — ${actionColor(rule.action.toUpperCase())}`);
+            console.log(`  ${i + 1}. ${chalk.white.bold(rule.id)}: ${actionColor(rule.action.toUpperCase())}`);
             if (rule.description) console.log(chalk.dim(`     ${rule.description}`));
         });
     } else {

@@ -49,7 +49,7 @@ export function scanRegistry(server: ResolvedServer): Finding[] {
       severity: isScoped ? 'MEDIUM' : 'HIGH',
       description: isScoped
         ? `Server '${packageName}' is a scoped package from an unverified publisher.`
-        : `Server '${packageName}' is an unscoped package from an unverified source — higher typosquatting risk.`,
+        : `Server '${packageName}' is an unscoped package from an unverified source (higher typosquatting risk).`,
       fixRecommendation: `Verify the publisher of '${packageName}' on npmjs.com before trusting this server.`,
     });
   }

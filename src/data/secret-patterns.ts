@@ -1,7 +1,7 @@
 export const SECRET_PATTERNS = [
   { name: 'GitHub Token', regex: /gh[pousr]_[A-Za-z0-9_]{36,}/ },
   { name: 'AWS Access Key ID', regex: /(?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}/ },
-  // AWS Secret Access Key requires high entropy — handled by entropy scanner, not regex alone
+  // AWS Secret Access Key requires high entropy - handled by entropy scanner, not regex alone
   { name: 'Stripe Secret Key', regex: /sk_(?:live|test)_[0-9a-zA-Z]{24}/ },
   { name: 'Stripe Publishable Key', regex: /pk_(?:live|test)_[0-9a-zA-Z]{24}/ },
   { name: 'Anthropic API Key', regex: /sk-ant-[a-zA-Z0-9_-]{20,}/ },
@@ -13,7 +13,7 @@ export const SECRET_PATTERNS = [
   { name: 'Google OAuth Client Secret', regex: /GOCSPX-[a-zA-Z0-9-_]{28}/ },
   { name: 'Supabase API Key', regex: /sbp_[a-zA-Z0-9]{34}/ },
   { name: 'Supabase JWT (Anon/Service Role)', regex: /eyJ[A-Za-z0-9-_=]+\.eyJ[A-Za-z0-9-_=]+\.[A-Za-z0-9-_.+/=]+/ },
-  // Firebase uses same AIza prefix as Google Cloud — deduplicated intentionally
+  // Firebase uses same AIza prefix as Google Cloud - deduplicated intentionally
   { name: 'Vercel API Token', regex: /\bv1\.[a-zA-Z0-9]{24}\b/ },
   { name: 'Azure Connection String', regex: /AccountName=[a-zA-Z0-9]+;AccountKey=[a-zA-Z0-9/+=]{88}/ },
   { name: 'Twilio Account SID', regex: /AC[a-f0-9]{32}/ },

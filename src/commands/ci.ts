@@ -19,7 +19,7 @@ export async function runCi(options: { maxSeverity?: string, json?: boolean }) {
 
   // Print summary to stderr so CI systems can capture it separately from JSON stdout
   const totalFindings = report.criticalCount + report.highCount + report.mediumCount + report.lowCount;
-  process.stderr.write(`mcp-scan: ${totalFindings} finding(s) — exit code ${exitCode}\n`);
+  process.stderr.write(`mcp-scan: ${totalFindings} finding(s), exit code ${exitCode}\n`);
 
   process.exit(exitCode);
 }

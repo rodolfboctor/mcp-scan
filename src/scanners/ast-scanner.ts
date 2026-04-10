@@ -26,7 +26,7 @@ export function scanAst(server: ResolvedServer, allowedDomains: string[] = []): 
     findings.push({
       id: 'data-exfiltration-risk',
       severity: 'CRITICAL',
-      description: `Command pipes data to or from a network transfer tool (curl, wget, nc, netcat, socat) — high exfiltration risk.`,
+      description: `Command pipes data to or from a network transfer tool (curl, wget, nc, netcat, socat). High exfiltration risk.`,
       fixRecommendation: 'Never pipe sensitive data to network tools. Use authenticated HTTPS APIs instead.',
     });
   }

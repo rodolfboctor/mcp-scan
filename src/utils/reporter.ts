@@ -117,7 +117,7 @@ export function printReport(report: ScanReport, options: { ugig?: boolean } = {}
   const isAllClear = report.criticalCount === 0 && report.highCount === 0 && report.mediumCount === 0 && report.lowCount === 0;
 
   if (isAllClear) {
-    logger.log(passGreen(`   ✓ All clear`) + dim(` — ${total} server${total !== 1 ? 's' : ''} scanned in ${ms}ms`));
+    logger.log(passGreen(`   ✓ All clear`) + dim(` (${total} server${total !== 1 ? 's' : ''} scanned in ${ms}ms)`));
   } else {
     logger.log(chalk.white(`   Scanned ${chalk.bold(total)} server${total !== 1 ? 's' : ''} across ${chalk.bold(uniqueClients)} client${uniqueClients !== 1 ? 's' : ''} in ${ms}ms`));
     logger.emptyLine();

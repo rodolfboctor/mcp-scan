@@ -10,7 +10,7 @@ import { execSync } from 'child_process';
  * Runs a system diagnostic check.
  */
 export async function runDoctor() {
-  logger.brand('mcp-scan DOCTOR — System Diagnostic');
+  logger.brand('mcp-scan DOCTOR: System Diagnostic');
   logger.divider();
 
   let allPassed = true;
@@ -67,7 +67,7 @@ export async function runDoctor() {
   const setVars = envVars.filter(v => process.env[v]);
   const requiredVars = ['GITHUB_TOKEN'];
   const requiredSet = requiredVars.filter(v => process.env[v]);
-  check('Required env vars', requiredSet.length === requiredVars.length, `GITHUB_TOKEN missing — supply chain scanning will be limited.`);
+  check('Required env vars', requiredSet.length === requiredVars.length, `GITHUB_TOKEN missing, supply chain scanning will be limited.`);
   check('Optional env vars', true, `${setVars.length}/${envVars.length} optional variables configured.`);
 
   // 4. External API Access (GitHub)

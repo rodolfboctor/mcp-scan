@@ -218,7 +218,7 @@ export async function submitToUgig(
             logger.log(red(`  ✗ Rate Limited (429): Too many requests`));
             logger.log(dim(`    Fix: Please wait a moment and try again.`));
           } else {
-            logger.log(red(`  ✗ Failed: ${server.serverName} — HTTP ${response.status}`));
+            logger.log(red(`  ✗ Failed: ${server.serverName} (HTTP ${response.status})`));
             if (errText) logger.log(dim(`    Error: ${errText.substring(0, 200)}`));
           }
         }
@@ -228,7 +228,7 @@ export async function submitToUgig(
       const errMsg = err instanceof Error ? err.message : String(err);
       result.listings.push({ serverName: server.serverName, error: errMsg });
       if (!options.silent) {
-        logger.log(red(`  ✗ Failed: ${server.serverName} — ${errMsg}`));
+        logger.log(red(`  ✗ Failed: ${server.serverName}: ${errMsg}`));
       }
     }
   }

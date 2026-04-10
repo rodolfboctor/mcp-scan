@@ -290,7 +290,7 @@ export function generateHtmlReport(report: ScanReport): string {
         </header>
 
         ${isAllClear 
-          ? `<div class="status-banner clear">✓ All Clear — No security issues found</div>`
+          ? `<div class="status-banner clear">✓ All Clear. No security issues found</div>`
           : `<div class="status-banner vulnerable">⚠ ${totalFindings} findings detected</div>`
         }
 

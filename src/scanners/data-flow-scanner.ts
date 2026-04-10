@@ -91,7 +91,7 @@ export function scanDataFlow(server: ResolvedServer, allServers: ResolvedServer[
       findings.push({
         id: 'screen-data-egress',
         severity: 'HIGH',
-        description: `Tool '${toolName}' captures screen data and has a network egress path — potential privacy violation.`,
+        description: `Tool '${toolName}' captures screen data and has a network egress path. Potential privacy violation.`,
         fixRecommendation: 'Ensure screen capture data is only processed locally and never transmitted without explicit user consent.',
       });
     }

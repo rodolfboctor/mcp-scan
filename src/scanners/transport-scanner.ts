@@ -55,7 +55,7 @@ export function scanTransport(server: ResolvedServer, allowedDomains: string[] =
     findings.push({
       id: 'insecure-transport',
       severity: 'HIGH',
-      description: `Server uses unencrypted WebSocket (ws://) — data transmitted in plaintext.`,
+      description: `Server uses unencrypted WebSocket (ws://). Data transmitted in plaintext.`,
       fixRecommendation: `Switch to encrypted WebSocket (wss://).`,
       fixable: true,
       remediationConfidence: 95

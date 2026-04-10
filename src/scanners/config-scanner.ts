@@ -28,7 +28,7 @@ export function scanConfig(server: ResolvedServer): Finding[] {
       });
     }
 
-    // Check for absolute Windows-style paths on non-Windows — suspicious on macOS/Linux servers
+    // Check for absolute Windows-style paths on non-Windows (suspicious on macOS/Linux)
     const winPathArg = server.args.find(a => typeof a === 'string' && /^[A-Z]:\\/i.test(a));
     if (winPathArg) {
       findings.push({
