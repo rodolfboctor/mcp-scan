@@ -4,7 +4,7 @@ import path from 'path';
 import { runScan } from './scan.js';
 import { logger } from '../utils/logger.js';
 import { detectTools } from '../config/detector.js';
-import { ScanReport } from '../types/scan-result.js';
+import { ScanReport, Finding } from '../types/scan-result.js';
 import chalk from 'chalk';
 import { sendWebhook, sendSlackWebhook } from '../utils/webhook.js';
 
@@ -109,8 +109,8 @@ function diffReports(oldReport: ScanReport, newReport: ScanReport) {
     oldFindingsMap.set(`${res.toolName}:${res.serverName}`, res.findings.map(f => `${f.id}:${f.severity}`));
   }
 
-  const newFindings: { server: string, finding: any }[] = [];
-  const resolvedFindings: { server: string, finding: any }[] = [];
+  const newFindings: { server: string, finding: Finding }[] = [];
+  const resolvedFindings: { server: string, finding: Finding }[] = [];
 
   for (const res of newReport.results) {
     const serverKey = `${res.toolName}:${res.serverName}`;
