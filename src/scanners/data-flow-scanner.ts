@@ -86,6 +86,10 @@ export function scanDataFlow(server: ResolvedServer, allServers: ResolvedServer[
       }
     }
 
+    // 4. Build edges and generate findings based on source/sink pairs
+    const sources = nodes.filter(n => n.type === 'source');
+    const sinks = nodes.filter(n => n.type === 'sink');
+
     // 3b. Screen capture data flowing to network sink
     if (/screenshot|screen.?capture/i.test(combinedStr) && sinks.some(s => s.category === 'network')) {
       findings.push({
@@ -95,10 +99,6 @@ export function scanDataFlow(server: ResolvedServer, allServers: ResolvedServer[
         fixRecommendation: 'Ensure screen capture data is only processed locally and never transmitted without explicit user consent.',
       });
     }
-
-    // 4. Build edges and generate findings based on source/sink pairs
-    const sources = nodes.filter(n => n.type === 'source');
-    const sinks = nodes.filter(n => n.type === 'sink');
     
     for (const src of sources) {
       for (const sink of sinks) {
