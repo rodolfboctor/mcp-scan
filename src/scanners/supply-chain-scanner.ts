@@ -8,6 +8,23 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SNAPSHOT_PATH = path.join(__dirname, '../data/cve-snapshot.json');
 
+interface NpmPackageData {
+  'dist-tags'?: { latest?: string };
+  license?: string;
+  licenses?: Array<{ type?: string }>;
+  author?: { name?: string } | string;
+  repository?: { url?: string } | string;
+  maintainers?: Array<{ name: string }>;
+}
+
+interface GitHubRepoData {
+  stargazers_count: number;
+  forks_count: number;
+  updated_at: string;
+  pushed_at: string;
+  owner: { login: string };
+}
+
 interface RepoMetadata {
   stars: number;
   forks: number;
@@ -62,12 +79,12 @@ export async function scanSupplyChain(server: ResolvedServer, offline: boolean =
       return scanSupplyChainOffline(packageName);
     }
 
-    const npmData = await npmRes.json() as any;
+    const npmData = await npmRes.json() as NpmPackageData;
     const repoUrl = extractRepoUrl(npmData);
     
     metadata.version = npmData['dist-tags']?.latest;
-    metadata.license = npmData.license || npmData.licenses?.[0]?.type || npmData.licenses?.[0];
-    metadata.author = npmData.author?.name || npmData.author;
+    metadata.license = npmData.license || npmData.licenses?.[0]?.type;
+    metadata.author = typeof npmData.author === 'object' ? npmData.author?.name : npmData.author;
     metadata.repositoryUrl = repoUrl || undefined;
 
     if (!repoUrl) {
@@ -100,7 +117,7 @@ export async function scanSupplyChain(server: ResolvedServer, offline: boolean =
     // Check for rug pull (very basic check: compare owner in registry vs owner in current repo if we had history)
     // For now, just a placeholder for more advanced logic
     const currentOwner = githubMeta.owner;
-    if (npmData.maintainers && !npmData.maintainers.some((m: any) => currentOwner.toLowerCase().includes(m.name.toLowerCase()))) {
+    if (npmData.maintainers && !npmData.maintainers.some((m) => currentOwner.toLowerCase().includes(m.name.toLowerCase()))) {
         // This is a weak signal but could indicate a disconnect
         logger.detail(`Supply Chain: Owner mismatch detected between npm maintainers and GitHub owner for ${packageName}.`);
     }
@@ -133,7 +150,7 @@ function scanSupplyChainOffline(packageName: string): SupplyChainResult {
   return result;
 }
 
-function extractRepoUrl(npmData: any): string | null {
+function extractRepoUrl(npmData: NpmPackageData): string | null {
   const repo = npmData.repository;
   if (!repo) return null;
   
@@ -171,13 +188,13 @@ async function fetchGitHubMetadata(repoUrl: string): Promise<RepoMetadata | null
     
     if (!res.ok) return null;
 
-    const data = await res.json() as any;
+    const data = await res.json() as GitHubRepoData;
     return {
       stars: data.stargazers_count,
       forks: data.forks_count,
       updatedAt: data.updated_at,
       pushedAt: data.pushed_at,
-      contributorCount: 0, // Requires another API call, skipping for now to save rate limit
+      contributorCount: 0,
       owner: data.owner.login
     };
   } catch (_error) {
