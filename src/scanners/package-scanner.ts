@@ -10,6 +10,24 @@ import semver from 'semver';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SNAPSHOT_PATH = path.join(__dirname, '../data/cve-snapshot.json');
 
+interface NpmRegistryResponse {
+  'dist-tags'?: { latest?: string };
+  time?: Record<string, string>;
+}
+
+interface OsvResponse {
+  vulns?: OsvVuln[];
+}
+
+interface OsvVuln {
+  id: string;
+  summary?: string;
+  details?: string;
+  severity?: Array<{ type: string; score: string }>;
+  affected?: Array<{ ranges?: Array<{ type: string; events?: Array<{ fixed?: string }> }> }>;
+  fixed_in?: string[];
+}
+
 /**
  * Deep audit of a package, either online or using a bundled snapshot.
  */
@@ -44,7 +62,7 @@ export async function scanPackageDeep(server: ResolvedServer, offline: boolean =
     if (!res.ok) {
       logger.warn(`Failed to fetch package info for ${packageName} from npm registry.`);
     } else {
-      const data = await res.json() as any;
+      const data = await res.json() as NpmRegistryResponse;
       latestVersion = data['dist-tags']?.latest || '';
       if (data && typeof data === 'object' && data.time && typeof data.time.modified === 'string') {
         const lastModified = new Date(data.time.modified);
@@ -87,8 +105,8 @@ export async function scanPackageDeep(server: ResolvedServer, offline: boolean =
       return findings;
     }
 
-    const osvData = await osvRes.json() as any;
-    const vulns = osvData.vulns || [];
+    const osvData = await osvRes.json() as OsvResponse;
+    const vulns: OsvVuln[] = osvData.vulns || [];
 
     if (vulns.length > 0) {
       for (const vuln of vulns) {
@@ -137,9 +155,9 @@ export async function scanPackageDeep(server: ResolvedServer, offline: boolean =
 
     // Upgrade Advisor Logic
     if (latestVersion) {
-        const currentVersion = (server as any).metadata?.version;
+        const currentVersion = (server as ResolvedServer & { metadata?: { version?: string } }).metadata?.version;
         if (currentVersion && semver.valid(currentVersion) && semver.valid(latestVersion) && semver.gt(latestVersion, currentVersion)) {
-            const resolvesVulns = vulns.some((v: any) => v.fixed_in?.includes(latestVersion) || !v.affected?.some((a: any) => a.ranges?.some((r: any) => r.type === 'SEMVER' && r.events?.some((e: any) => e.fixed === latestVersion))));
+            const resolvesVulns = vulns.some(v => v.fixed_in?.includes(latestVersion) || !v.affected?.some(a => a.ranges?.some(r => r.type === 'SEMVER' && r.events?.some(e => e.fixed === latestVersion))));
             
             findings.push({
                 id: 'upgrade-available',
