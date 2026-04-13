@@ -19,7 +19,7 @@ export function scanToolPoisoning(server: ResolvedServer): Finding[] {
       id: 'hidden-instruction-risk',
       severity: 'HIGH',
       description: 'Hidden instructions detected in description via excessive whitespace padding.',
-      fixRecommendation: 'Remove excessive whitespace and ensure instructions are clear and non-conflicting.'
+      fixRecommendation: 'Remove excessive whitespace. Instructions should be clear and non-conflicting.'
     });
   }
 

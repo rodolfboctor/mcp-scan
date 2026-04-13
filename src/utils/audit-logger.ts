@@ -74,7 +74,7 @@ export function checkFingerprints(results: ServerScanResult[]): Record<string, F
           id: 'server-mutation',
           severity: 'MEDIUM',
           description: `Server '${result.serverName}' configuration has changed since the last scan. This may indicate unauthorized modification.`,
-          fixRecommendation: 'Review the changes to ensure they are intentional and secure.'
+          fixRecommendation: 'Review the changes. Confirm they are intentional and not introduced by a third party.'
         }];
       }
     }

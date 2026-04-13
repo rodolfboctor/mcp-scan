@@ -94,7 +94,7 @@ export function scanSecrets(server: ResolvedServer): Finding[] {
           id: 'high-entropy-value',
           severity: 'MEDIUM',
           description: `High-entropy string (${entropy.toFixed(2)} bits/char) detected in ${source}${key ? ` '${key}'` : ''}. This might be an undocumented secret.`,
-          fixRecommendation: 'Review this value to ensure it is not a sensitive credential. If it is, move it to an environment variable.'
+          fixRecommendation: 'Check whether this value is a sensitive credential. If so, move it to an environment variable.'
         });
       }
     }

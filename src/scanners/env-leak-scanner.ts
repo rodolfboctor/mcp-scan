@@ -46,7 +46,7 @@ export function scanEnvLeak(server: ResolvedServer, serverFilePath: string): Fin
               id: 'env-secret-exposed' as FindingId,
               severity: 'HIGH',
               description: `Potentially exposed secret in '${envFileName}': key '${key}' has a real-looking value.`,
-              fixRecommendation: `Review key '${key}' in ${envFileName}. If it's a real secret, ensure the file is in .gitignore and consider using a secrets manager.`,
+              fixRecommendation: `Review key '${key}' in ${envFileName}. If it's a real secret, add the file to .gitignore and consider a secrets manager.`,
             });
           }
         }

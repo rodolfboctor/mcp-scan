@@ -40,7 +40,7 @@ export function scanLicense(metadata: SupplyChainResult['metadata']): Finding[] 
       id: 'license-risk',
       severity: 'LOW',
       description: `Package '${metadata.packageName}' uses a non-standard or unknown license: ${metadata.license}.`,
-      fixRecommendation: 'Review the license terms to ensure compatibility with your project.'
+      fixRecommendation: 'Review the license terms for compatibility with your project.'
     });
   }
 
