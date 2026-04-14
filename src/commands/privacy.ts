@@ -8,7 +8,15 @@ import os from 'os';
 
 export async function runPrivacy(options: { format?: string, output?: string, retention?: boolean }) {
   const tools = await detectTools({ fs, os, process });
-  const report: any = {
+  interface ServerEntry {
+    name: string; tool: string; pii: string; retention: string;
+    encryption: string; sharing: string; promptLogging: string; gaps: number; risk: string;
+  }
+  const report: {
+    assessment: string; generatedAt: string;
+    summary: { totalServers: number; piiServers: number; totalGaps: number; riskScore: number };
+    servers: ServerEntry[];
+  } = {
       assessment: 'Privacy Impact Assessment',
       generatedAt: new Date().toISOString(),
       summary: {
