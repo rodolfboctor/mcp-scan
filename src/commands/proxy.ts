@@ -3,7 +3,7 @@ import { logger } from '../utils/logger.js';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { Transform } from 'stream';
+import { Transform, TransformCallback } from 'stream';
 import { loadPolicy } from '../config/parser.js';
 import { maskPii, PrivacyOptions } from '../utils/privacy-engine.js';
 
@@ -22,7 +22,7 @@ class JsonRpcInterceptor extends Transform {
     this.dashboardCallback = dashboardCallback;
   }
 
-  _transform(chunk: any, encoding: string, callback: any) {
+  _transform(chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback) {
     this.buffer += chunk.toString();
     
     const lines = this.buffer.split('\n');
@@ -58,7 +58,7 @@ class JsonRpcInterceptor extends Transform {
     callback();
   }
 
-  _flush(callback: any) {
+  _flush(callback: TransformCallback) {
     if (this.buffer.trim()) {
       this.push(this.buffer);
     }
