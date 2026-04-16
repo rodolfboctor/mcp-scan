@@ -13,7 +13,7 @@ import { scanAst } from '../scanners/ast-scanner.js';
 import { scanPromptInjection } from '../scanners/prompt-injection-scanner.js';
 import { scanToolPoisoning } from '../scanners/tool-poisoning-scanner.js';
 import { scanEnvLeak } from '../scanners/env-leak-scanner.js';
-import { scanSupplyChain } from '../scanners/supply-chain-scanner.js';
+import { scanSupplyChain, SupplyChainResult } from '../scanners/supply-chain-scanner.js';
 import { scanPackageDeep } from '../scanners/package-scanner.js';
 import { scanLicense } from '../scanners/license-scanner.js';
 import { scanDataFlow } from '../scanners/data-flow-scanner.js';
@@ -170,7 +170,7 @@ export async function runScan(options: { silent?: boolean, json?: boolean, verbo
       }
 
       let trustScore: number | undefined;
-      let metadata: any;
+      let metadata: SupplyChainResult['metadata'];
       if (options.verbose || options.sbom || options.ci || options.submit) {
         const packageFindings = await scanPackageDeep(server, options.offline);
         allFindings.push(...packageFindings);
