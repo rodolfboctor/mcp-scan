@@ -106,7 +106,7 @@ export async function runDoctor() {
     try {
       const res = await fetch('https://registry.npmjs.org/mcp-scan/latest', { signal: controller.signal });
       if (res.ok) {
-          const data = await res.json() as any;
+          const data = await res.json() as { version: string };
           const latest = data.version;
           updateOk = true;
           updateDetail = `Latest version available on npm: ${latest}`;

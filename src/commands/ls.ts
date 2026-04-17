@@ -22,7 +22,7 @@ export async function runLs() {
 
     const servers = extractServers(tool.name, tool.configPath, config);
     for (const server of servers) {
-      const commandOrUrl = (server as any).url || server.command || '';
+      const commandOrUrl = server.url || server.command || '';
       table.push([
         tool.name,
         server.name,
