@@ -3,6 +3,7 @@ import path from 'path';
 import os from 'os';
 import { parse } from 'yaml';
 import { Finding, ServerScanResult } from '../types/scan-result.js';
+import { Severity } from '../types/severity.js';
 import chalk from 'chalk';
 
 export interface PolicyRule {
@@ -126,7 +127,7 @@ export function applyPolicy(results: ServerScanResult[], policy: SecurityPolicy 
               break;
            }
            if (rule.action === 'override-severity' && rule.severity) {
-              finding.severity = rule.severity.toUpperCase() as any;
+              finding.severity = rule.severity.toUpperCase() as Severity;
            }
            if (rule.action === 'warn') {
                finding.severity = 'MEDIUM'; 

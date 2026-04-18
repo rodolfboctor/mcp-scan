@@ -14,7 +14,7 @@ import { submitToUgig } from './commands/submit.js';
 import { runProxy } from './commands/proxy.js';
 
 const pkgUrl = new URL('../package.json', import.meta.url);
-let pkg: any = { version: 'unknown' };
+let pkg: { version: string } = { version: 'unknown' };
 try {
   pkg = JSON.parse(readFileSync(pkgUrl, 'utf8'));
 } catch (e) {
