@@ -28,7 +28,6 @@ export function createDashboard() {
     style: { fg: '#8B949E', bg: 'black' }
   });
 
-  // --- HISTORY VIEW COMPONENTS ---
   const historyDonut = grid.set(1, 0, 5, 4, contrib.donut, {
     label: ' Overall Severity Breakdown ',
     radius: 8,
@@ -58,7 +57,6 @@ export function createDashboard() {
     columnWidth: [22, 10, 20, 15]
   });
 
-  // --- PROXY VIEW COMPONENTS ---
   const proxyLog = grid.set(1, 0, 10, 8, contrib.log, {
     fg: 'green',
     selectedFg: 'green',
@@ -76,7 +74,6 @@ export function createDashboard() {
   proxyLog.hide();
   proxyStats.hide();
 
-  // --- LOGIC ---
   function updateHistoryView() {
     if (currentView !== 'HISTORY') return;
     
@@ -149,7 +146,6 @@ export function createDashboard() {
     if (currentView === 'PROXY') screen.render();
   }
 
-  // --- BINDINGS ---
   screen.key(['escape', 'q', 'C-c'], function() {
     screen.destroy();
     return process.exit(0);
