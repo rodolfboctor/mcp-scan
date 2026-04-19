@@ -121,7 +121,7 @@ export async function runDoctor() {
   if (allPassed) {
     logger.pass('System is healthy! mcp-scan is ready to use.');
   } else {
-    logger.error('Some diagnostic checks failed. Please review the findings above.');
+    logger.error('some checks failed, see above');
     process.exitCode = 1;
   }
 }

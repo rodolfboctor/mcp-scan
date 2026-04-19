@@ -216,7 +216,7 @@ export async function submitToUgig(
             logger.log(dim(`    Fix: Check your key at https://ugig.net/settings/api-keys`));
           } else if (response.status === 429) {
             logger.log(red(`  ✗ Rate Limited (429): Too many requests`));
-            logger.log(dim(`    Fix: Please wait a moment and try again.`));
+            logger.log(dim(`    Fix: wait a moment and retry`));
           } else {
             logger.log(red(`  ✗ Failed: ${server.serverName} (HTTP ${response.status})`));
             if (errText) logger.log(dim(`    Error: ${errText.substring(0, 200)}`));
